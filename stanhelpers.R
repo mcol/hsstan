@@ -1,4 +1,4 @@
-library(parallel)
+library(doMC)
 require(rstan)
 require(coda)
 library(ggplot2)
@@ -54,8 +54,7 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
     model <- stan_model(file=stan.file)
 
     ## cross-validation
-    cv <- list()
-    for (fold in 1:num.folds) {
+    cv <- foreach(fold=1:num.folds) %dopar% {
         test <- 1:N %in% folds[[fold]]
         train <- !test
         y_train <- y[train]
@@ -86,7 +85,7 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
                           init="random", algorithm="meanfield")
         }
         betas <- get.coefficients(samples, covariates, biomarkers)
-        cv[[fold]] <- list(samples=samples, betas=betas, train=train, test=test)
+        list(samples=samples, betas=betas, train=train, test=test)
     }
 
     return(list(cv=cv, data=X, y=y))
