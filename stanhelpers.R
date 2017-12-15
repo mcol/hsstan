@@ -351,6 +351,7 @@ plot.fprojsel <- function(sel, title, filename=NULL, max.labels=NULL,
         ## disable clipping of the text labels
         p <- ggplot_gtable(ggplot_build(p))
         p$layout$clip[p$layout$name == "panel"] <- "off"
+        p
     }
 }
 
