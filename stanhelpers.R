@@ -430,8 +430,8 @@ get.cv.performance <- function(cv.samples, baseline.model, out.csv=NULL) {
     ## on the full vector of withdrawn observations
     set <- c(set, "Baseline")
     llk <- c(llk, sum(sapply(baseline.model, function(z) z$test.llk)))
-    base.obs <- unlist(sapply(baseline.model, function(z) z$obs))
-    base.pred <- unlist(sapply(baseline.model, function(z) z$fit))
+    base.obs <- as.numeric(unlist(sapply(baseline.model, function(z) z$obs)))
+    base.pred <- as.numeric(unlist(sapply(baseline.model, function(z) z$fit)))
     perf <- c(perf, ifelse(is.na(sigma),
                            auc(base.pred, base.obs),
                            r2(base.pred, base.obs)))
