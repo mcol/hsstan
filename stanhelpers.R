@@ -122,28 +122,20 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
     stopifnot(all(biomarkers %in% colnames(x)))
     model.type <- match.arg(model.type)
 
-    ## use all available data
-    N <- nrow(x)
-    train <- test <- rep(TRUE, N)
-    y_train <- y
-    y_test <- y
-
-    ## standardize continuous outcome
-    if (length(unique(y_train)) > 2) {
-        train.mean <- mean(y_train, na.rm=TRUE)
-        train.sd <- sd(y_train, na.rm=TRUE)
-        y_train <- (y_train - train.mean) / train.sd
-        y_test <- (y_test - train.mean) / train.sd
-    }
-
     ## create the design matrix
     model <- paste("~", paste(c(covariates, biomarkers), collapse=" + "))
     X <- model.matrix(as.formula(model), data=x)
+    N <- nrow(X)
     P <- ncol(X)
     U <- P - length(biomarkers)
     which.unpenalized <- 1:U
     which.penalized <- setdiff(1:P, which.unpenalized)
     X <- X[, c(which.unpenalized, which.penalized)]
+
+    ## standardize continuous outcome
+    if (length(unique(y)) > 2) {
+        y <- as.numeric(scale(y))
+    }
 
     ## standardize all columns corresponding to numerical variables: this
     ## excludes those generated from factor/character variables as well as
@@ -154,9 +146,12 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
         X[, stand.idx] <- scale(X[, stand.idx])
     }
 
+    ## use all available data for both training and testing: this effectively
+    ## computes the fit of the model (y_pred) for all observations
+    train <- test <- rep(TRUE, N)
     data.input <- list(N_train=N, N_test=N,
-                       y_train=y_train, y_test=y_test,
-                       X_train=X[train, ], X_test=X[test, ],
+                       y_train=y, y_test=y,
+                       X_train=X, X_test=X,
                        P=P, U=U, nu=nu)
 
     ## compile the model
