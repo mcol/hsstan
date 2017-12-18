@@ -319,7 +319,9 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 plot.fprojsel <- function(sel, title, filename=NULL, max.labels=NULL,
                           font.size=12, width=800, height=800) {
 
-    labs <- getfullname(as.character(sel$var), lab=FALSE)
+    ## get full variable names if possible
+    labs <- tryCatch(getfullname(as.character(sel$var)),
+                     error=function(e) as.character(sel$var))
     labs <- gsub(" \\(.*\\)$", "", labs)
     if (!is.null(max.labels)) {
         labs[-c(1:max.labels)] <- ""
