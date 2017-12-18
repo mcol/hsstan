@@ -106,10 +106,12 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
                           init="random", algorithm="meanfield")
         }
         betas <- get.coefficients(samples, covariates, biomarkers)
-        list(samples=samples, betas=betas, train=train, test=test)
+        list(samples=samples, betas=betas,
+             X_train=X_train, X_test=X_test,
+             y_train=y_train, y_test=y_test, train=train, test=test)
     }
 
-    return(list(cv=cv, data=X, y=y))
+    return(cv)
 }
 
 ## runs a stan model (either with hamiltonian montecarlo or variational bayes)
@@ -402,17 +404,15 @@ get.cv.performance <- function(cv.samples, baseline.model, out.csv=NULL) {
         (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
         (2 * y.obs - 1) * (log(prop.cases) - log(1 - prop.cases))
 
-    y <- cv.samples$y
-    x <- cv.samples$data
     y.obs.all <- y.pred.all <- sigma.all <- NULL
-    num.folds <- length(cv.samples$cv)
+    num.folds <- length(cv.samples)
     llk <- perf <- rep(NA, num.folds)
     llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
 
     ## loop over the folds
     for (fold in 1:num.folds) {
-        cv <- cv.samples$cv[[fold]]
-        y.obs <- y[cv$test]
+        cv <- cv.samples[[fold]]
+        y.obs <- cv$y_test
         y.pred <- posterior.means(cv$samples, "y_pred")
         sigma <- tryCatch(summary(As.mcmc.list(cv$samples,
                                                pars="sigma"))$statistics[1],
