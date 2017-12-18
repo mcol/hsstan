@@ -20,11 +20,13 @@ posterior.means <- function(samples, varnames) { # returns posterior means
 }
 
 ## returns the posterior means of the coefficients
-get.coefficients <- function(samples, u.names, p.names) {
+get.coefficients <- function(samples, coeff.names) {
     beta.u <- posterior.means(samples, "beta_u")
     beta.p <- posterior.means(samples, "beta_p")
-    names(beta.u) <- c("(Intercept)", u.names)
-    names(beta.p) <- p.names
+    stopifnot(length(c(beta.u, beta.p)) == length(coeff.names))
+    u.idx <- 1:length(beta.u)
+    names(beta.u) <- coeff.names[u.idx]
+    names(beta.p) <- coeff.names[-u.idx]
 
     return(list(unpenalized=beta.u, penalized=beta.p))
 }
@@ -105,7 +107,7 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
                           iter=50000, output_samples=2000,
                           init="random", algorithm="meanfield")
         }
-        betas <- get.coefficients(samples, covariates, biomarkers)
+        betas <- get.coefficients(samples, colnames(X))
         list(samples=samples, betas=betas,
              X_train=X_train, X_test=X_test,
              y_train=y_train, y_test=y_test, train=train, test=test)
@@ -167,7 +169,7 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
         samples <- vb(model, data=data.input, iter=50000, output_samples=2000,
                       init="random", algorithm="meanfield")
     }
-    betas <- get.coefficients(samples, covariates, biomarkers)
+    betas <- get.coefficients(samples, colnames(X))
 
     return(list(samples=samples, betas=betas, train=train, test=test,
                 data=X, y=y))
