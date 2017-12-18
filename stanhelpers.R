@@ -32,6 +32,7 @@ get.coefficients <- function(samples, u.names, p.names) {
 ## runs a stan model (either with hamiltonian montecarlo or variational bayes)
 ## over the cross-validation folds
 sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
+                           standardize=TRUE,
                            nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -50,6 +51,9 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
     N <- nrow(X)
     num.folds <- length(folds)
 
+    ## names of variables to be standardized
+    stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
+
     ## compile the model
     model <- stan_model(file=stan.file)
 
@@ -57,8 +61,12 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
     cv <- foreach(fold=1:num.folds) %dopar% {
         test <- 1:N %in% folds[[fold]]
         train <- !test
+        X_train <- X[train, ]
         y_train <- y[train]
+        N_train <- nrow(X_train)
+        X_test <- X[test, ]
         y_test <- y[test]
+        N_test <- nrow(X_test)
 
         ## standardize continuous outcome
         if (length(unique(y_train)) > 2) {
@@ -68,10 +76,23 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
             y_test <- (y_test - train.mean) / train.sd
         }
 
-        data.input <- list(N_train=length(which(train)),
-                           N_test=length(which(test)),
+        ## standardize all columns corresponding to numerical variables: this
+        ## excludes those generated from factor/character variables and the
+        ## intercept column
+        if (standardize) {
+            train.mean <- colMeans(X_train, na.rm=TRUE)
+            train.sd <- apply(X_train, 2, sd, na.rm=TRUE)
+            train.mean[!colnames(X_train) %in% stand.cols] <- 0
+            train.sd[!colnames(X_train) %in% stand.cols] <- 1
+            X_train <- ((X_train - rep(train.mean, each=N_train))
+                         %*% diag(1 / train.sd))
+            X_test <- ((X_test - rep(train.mean, each=N_test))
+                        %*% diag(1 / train.sd))
+        }
+
+        data.input <- list(N_train=N_train, N_test=N_test,
                            y_train=y_train, y_test=y_test,
-                           X_train=X[train, ], X_test=X[test, ],
+                           X_train=X_train, X_test=X_test,
                            P=P, U=U, nu=nu)
 
         if (model.type == "mc") {
@@ -93,6 +114,7 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
 
 ## runs a stan model (either with hamiltonian montecarlo or variational bayes)
 sample.stan <- function(stan.file, x, y, covariates, biomarkers,
+                        standardize=TRUE,
                         nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -122,6 +144,15 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
     which.unpenalized <- 1:U
     which.penalized <- setdiff(1:P, which.unpenalized)
     X <- X[, c(which.unpenalized, which.penalized)]
+
+    ## standardize all columns corresponding to numerical variables: this
+    ## excludes those generated from factor/character variables as well as
+    ## the intercept column
+    if (standardize) {
+        stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
+        stand.idx <- which(colnames(X) %in% stand.cols)
+        X[, stand.idx] <- scale(X[, stand.idx])
+    }
 
     data.input <- list(N_train=N, N_test=N,
                        y_train=y_train, y_test=y_test,
