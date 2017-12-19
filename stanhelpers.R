@@ -425,7 +425,7 @@ get.cv.performance <- function(cv.samples, baseline.model, out.csv=NULL) {
             y.pred <- to.prob(y.pred)
             llk[fold] <- binomial.llk(y.pred, y.obs)
             perf[fold] <- auc(y.pred, y.obs)
-            prop.cases <- sum(y[cv$train]) / sum(cv$train)
+            prop.cases <- sum(y.obs) / sum(cv$train)
             llkr <- loglik.ratio(y.pred, y.obs, prop.cases)
             llk.ratio[fold] <- mean(llkr)
             llk.ratio.var[fold] <- var(llkr)
@@ -467,7 +467,7 @@ get.cv.performance <- function(cv.samples, baseline.model, out.csv=NULL) {
     res <- data.frame(set=set, test.llk=llk, perf=perf)
     colnames(res)[3] <- ifelse(is.na(sigma), "auc", "r2")
     if (is.na(sigma)) {
-        prop.cases <- sum(y == 1) / length(y)
+        prop.cases <- sum(y.obs.all == 1) / length(y.obs.all)
         llkr <- loglik.ratio(y.pred.all, y.obs.all, prop.cases)
         llkr.base <- loglik.ratio(base.pred, base.obs, prop.cases)
         res$llk.ratio <- c(llk.ratio, mean(llkr), mean(llkr.base))
