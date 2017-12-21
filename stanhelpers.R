@@ -15,9 +15,8 @@ summarize.params <- function(samples, pars, varnames) { # returns posterior mean
 }
 
 posterior.means <- function(samples, varnames) { # returns posterior means
-    x.summary <- summary(As.mcmc.list(object=samples, pars=varnames))$statistics
-    x.summary <- matrix(x.summary, ncol=4, dimnames=dimnames(x.summary))
-    return(x.summary[, 1])
+    means <- unlist(lapply(extract(samples, pars=varnames), colMeans))
+    return(means)
 }
 
 ## returns the posterior means of the coefficients
