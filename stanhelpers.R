@@ -462,10 +462,13 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
 
         ## logistic regression
         if (is.logistic) {
+
+            ## proportion of cases in the training fold (prior probability)
+            prop.cases <- sum(hs.cv[[fold]]$y_train) / sum(hs.cv[[fold]]$train)
+
             y.pred.hs <- to.prob(y.pred.hs)
             llk[fold] <- binomial.llk(y.pred.hs, y.obs)
             perf[fold] <- auc(y.pred.hs, y.obs)
-            prop.cases <- sum(y.obs) / sum(hs.cv[[fold]]$train)
             llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
             llk.ratio[fold] <- mean(llkr)
             llk.ratio.var[fold] <- var(llkr)
