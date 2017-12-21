@@ -445,6 +445,7 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
         sigma.hs <- tryCatch(summary(As.mcmc.list(hs.cv[[fold]]$samples,
                                                   pars="sigma"))$statistics[1],
                              error=function(e) return(NA))
+        is.logistic <- is.na(sigma.hs)
 
         y.pred.base <- posterior.means(base.cv[[fold]]$samples, "y_pred")
         sigma.base <- tryCatch(summary(As.mcmc.list(base.cv[[fold]]$samples,
@@ -452,7 +453,7 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
                                error=function(e) return(NA))
 
         ## logistic regression
-        if (is.na(sigma.hs)) {
+        if (is.logistic) {
             y.pred.hs <- to.prob(y.pred.hs)
             llk[fold] <- binomial.llk(y.pred.hs, y.obs)
             perf[fold] <- auc(y.pred.hs, y.obs)
@@ -491,29 +492,29 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
     ## compute log-likelihood and performance measure of the full model
     ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
-    llk <- c(llk, ifelse(is.na(sigma.hs),
+    llk <- c(llk, ifelse(is.logistic,
                          binomial.llk(y.pred.hs.all, y.obs.all),
                          gaussian.llk(y.pred.hs.all, y.obs.all,
                                       mean(sigma.hs.all))))
-    perf <- c(perf, ifelse(is.na(sigma.hs),
+    perf <- c(perf, ifelse(is.logistic,
                            auc(y.pred.hs.all, y.obs.all),
                            r2(y.pred.hs.all, y.obs.all)))
 
     ## compute log-likelihood and performance measure of the baseline model
     ## on the full vector of withdrawn observations
-    llk.base <- c(llk.base, ifelse(is.na(sigma.base),
+    llk.base <- c(llk.base, ifelse(is.logistic,
                                    binomial.llk(y.pred.base.all, y.obs.all),
                                    gaussian.llk(y.pred.base.all, y.obs.all,
                                                 mean(sigma.base.all))))
-    perf.base <- c(perf.base, ifelse(is.na(sigma.base),
+    perf.base <- c(perf.base, ifelse(is.logistic,
                                      auc(y.pred.base.all, y.obs.all),
                                      r2(y.pred.base.all, y.obs.all)))
 
     res <- data.frame(set=set, test.llk=llk, perf=perf,
                       test.llk.base=llk.base, perf.base=perf.base)
-    colnames(res)[c(3, 5)] <- gsub("perf", ifelse(is.na(sigma.hs), "auc", "r2"),
+    colnames(res)[c(3, 5)] <- gsub("perf", ifelse(is.logistic, "auc", "r2"),
                                    colnames(res)[c(3, 5)])
-    if (is.na(sigma.hs)) {
+    if (is.logistic) {
         prop.cases <- sum(y.obs.all == 1) / length(y.obs.all)
         llkr <- loglik.ratio(y.pred.hs.all, y.obs.all, prop.cases)
         llkr.base <- loglik.ratio(y.pred.base.all, y.obs.all, prop.cases)
