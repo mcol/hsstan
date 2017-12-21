@@ -423,7 +423,7 @@ plot.fprojsel <- function(sel, title, filename=NULL, max.labels=NULL,
 }
 
 ## extract measures of performance from the cross-validation results
-get.cv.performance <- function(cv.samples, baseline.model, out.csv=NULL) {
+get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
 
     gaussian.llk <- function(y.pred, y.obs, disp)
         -0.5 * sum(log(disp) + (y.pred - y.obs)^2 / disp)
@@ -441,72 +441,98 @@ get.cv.performance <- function(cv.samples, baseline.model, out.csv=NULL) {
         (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
         (2 * y.obs - 1) * (log(prop.cases) - log(1 - prop.cases))
 
-    y.obs.all <- y.pred.all <- sigma.all <- NULL
-    num.folds <- length(cv.samples)
+    y.obs.all <- y.pred.hs.all <- y.pred.base.all <- NULL
+    sigma.hs.all <- sigma.base.all <- NULL
+    num.folds <- length(hs.cv)
     llk <- perf <- rep(NA, num.folds)
     llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
+    llk.base <- perf.base <- rep(NA, num.folds)
+    llk.ratio.base <- llk.ratio.var.base <- rep(NA, num.folds)
 
     ## loop over the folds
     for (fold in 1:num.folds) {
-        cv <- cv.samples[[fold]]
-        y.obs <- cv$y_test
-        y.pred <- posterior.means(cv$samples, "y_pred")
-        sigma <- tryCatch(summary(As.mcmc.list(cv$samples,
-                                               pars="sigma"))$statistics[1],
-                          error=function(e) return(NA))
+        y.obs <- hs.cv[[fold]]$y_test
+
+        y.pred.hs <- posterior.means(hs.cv[[fold]]$samples, "y_pred")
+        sigma.hs <- tryCatch(summary(As.mcmc.list(hs.cv[[fold]]$samples,
+                                                  pars="sigma"))$statistics[1],
+                             error=function(e) return(NA))
+
+        y.pred.base <- posterior.means(base.cv[[fold]]$samples, "y_pred")
+        sigma.base <- tryCatch(summary(As.mcmc.list(base.cv[[fold]]$samples,
+                                                    pars="sigma"))$statistics[1],
+                               error=function(e) return(NA))
 
         ## logistic regression
-        if (is.na(sigma)) {
-            y.pred <- to.prob(y.pred)
-            llk[fold] <- binomial.llk(y.pred, y.obs)
-            perf[fold] <- auc(y.pred, y.obs)
-            prop.cases <- sum(y.obs) / sum(cv$train)
-            llkr <- loglik.ratio(y.pred, y.obs, prop.cases)
+        if (is.na(sigma.hs)) {
+            y.pred.hs <- to.prob(y.pred.hs)
+            llk[fold] <- binomial.llk(y.pred.hs, y.obs)
+            perf[fold] <- auc(y.pred.hs, y.obs)
+            prop.cases <- sum(y.obs) / sum(hs.cv[[fold]]$train)
+            llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
             llk.ratio[fold] <- mean(llkr)
             llk.ratio.var[fold] <- var(llkr)
+
+            y.pred.base <- to.prob(y.pred.base)
+            llk.base[fold] <- binomial.llk(y.pred.base, y.obs)
+            perf.base[fold] <- auc(y.pred.base, y.obs)
+            llkr.base <- loglik.ratio(y.pred.base, y.obs, prop.cases)
+            llk.ratio.base[fold] <- mean(llkr.base)
+            llk.ratio.var.base[fold] <- var(llkr.base)
         }
 
         ## linear regression
         else {
-            llk[fold] <- gaussian.llk(y.pred, y.obs, sigma)
-            perf[fold] <- r2(y.pred, y.obs)
+            llk[fold] <- gaussian.llk(y.pred.hs, y.obs, sigma.hs)
+            perf[fold] <- r2(y.pred.hs, y.obs)
+
+            llk.base[fold] <- gaussian.llk(y.pred.base, y.obs, sigma.base)
+            perf.base[fold] <- r2(y.pred.base, y.obs)
         }
-        sigma.all <- c(sigma.all, sigma)
+
+        sigma.hs.all <- c(sigma.hs.all, sigma.hs)
         y.obs.all <- c(y.obs.all, y.obs)
-        y.pred.all <- c(y.pred.all, y.pred)
+        y.pred.hs.all <- c(y.pred.hs.all, y.pred.hs)
+        sigma.base.all <- c(sigma.base.all, sigma.base)
+        y.pred.base.all <- c(y.pred.base.all, y.pred.base)
         cat(".")
     }
     cat("\n")
     set <- paste("Fold", 1:num.folds)
 
-    ## compute log-likelihood and performance measure on the full vector
-    ## of withdrawn observations
+    ## compute log-likelihood and performance measure of the full model
+    ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
-    llk <- c(llk, ifelse(is.na(sigma),
-                         binomial.llk(y.pred.all, y.obs.all),
-                         gaussian.llk(y.pred.all, y.obs.all, mean(sigma.all))))
-    perf <- c(perf, ifelse(is.na(sigma),
-                           auc(y.pred.all, y.obs.all),
-                           r2(y.pred.all, y.obs.all)))
+    llk <- c(llk, ifelse(is.na(sigma.hs),
+                         binomial.llk(y.pred.hs.all, y.obs.all),
+                         gaussian.llk(y.pred.hs.all, y.obs.all,
+                                      mean(sigma.hs.all))))
+    perf <- c(perf, ifelse(is.na(sigma.hs),
+                           auc(y.pred.hs.all, y.obs.all),
+                           r2(y.pred.hs.all, y.obs.all)))
 
     ## compute log-likelihood and performance measure of the baseline model
     ## on the full vector of withdrawn observations
-    set <- c(set, "Baseline")
-    llk <- c(llk, sum(sapply(baseline.model, function(z) z$test.llk)))
-    base.obs <- as.numeric(unlist(sapply(baseline.model, function(z) z$obs)))
-    base.pred <- as.numeric(unlist(sapply(baseline.model, function(z) z$fit)))
-    perf <- c(perf, ifelse(is.na(sigma),
-                           auc(base.pred, base.obs),
-                           r2(base.pred, base.obs)))
+    llk.base <- c(llk.base, ifelse(is.na(sigma.base),
+                                   binomial.llk(y.pred.base.all, y.obs.all),
+                                   gaussian.llk(y.pred.base.all, y.obs.all,
+                                                mean(sigma.base.all))))
+    perf.base <- c(perf.base, ifelse(is.na(sigma.base),
+                                     auc(y.pred.base.all, y.obs.all),
+                                     r2(y.pred.base.all, y.obs.all)))
 
-    res <- data.frame(set=set, test.llk=llk, perf=perf)
-    colnames(res)[3] <- ifelse(is.na(sigma), "auc", "r2")
-    if (is.na(sigma)) {
+    res <- data.frame(set=set, test.llk=llk, perf=perf,
+                      test.llk.base=llk.base, perf.base=perf.base)
+    colnames(res)[c(3, 5)] <- gsub("perf", ifelse(is.na(sigma.hs), "auc", "r2"),
+                                   colnames(res)[c(3, 5)])
+    if (is.na(sigma.hs)) {
         prop.cases <- sum(y.obs.all == 1) / length(y.obs.all)
-        llkr <- loglik.ratio(y.pred.all, y.obs.all, prop.cases)
-        llkr.base <- loglik.ratio(base.pred, base.obs, prop.cases)
-        res$llk.ratio <- c(llk.ratio, mean(llkr), mean(llkr.base))
-        res$llk.ratio.var <- c(llk.ratio.var, var(llkr), var(llkr.base))
+        llkr <- loglik.ratio(y.pred.hs.all, y.obs.all, prop.cases)
+        llkr.base <- loglik.ratio(y.pred.base.all, y.obs.all, prop.cases)
+        res$llk.ratio <- c(llk.ratio, mean(llkr))
+        res$llk.ratio.var <- c(llk.ratio.var, var(llkr))
+        res$llk.ratio.base <- c(llk.ratio.base, mean(llkr.base))
+        res$llk.ratio.var.base <- c(llk.ratio.var.base, var(llkr.base))
     }
 
     if (!is.null(out.csv))
