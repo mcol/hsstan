@@ -15,8 +15,8 @@ summarize.params <- function(samples, pars, varnames) { # returns posterior mean
 }
 
 posterior.means <- function(samples, varnames) { # returns posterior means
-    means <- unlist(lapply(extract(samples, pars=varnames), colMeans))
-    return(means)
+    unlist(lapply(extract(samples, pars=varnames),
+                  function(z) if (is.matrix(z)) colMeans(z) else mean(z)))
 }
 
 ## returns the posterior means of the coefficients
