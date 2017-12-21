@@ -124,7 +124,13 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
             betas <- get.coefficients(samples, colnames(X))
         }
 
+        ## linear predictor of test data and residual standard deviation
+        y_pred <- posterior.means(samples, "y_pred")
+        sigma <- tryCatch(posterior.means(samples, "sigma"),
+                          error=function(e) return(1))
+
         list(samples=samples, betas=betas,
+             y_pred=y_pred, sigma=sigma,
              X_train=X_train, X_test=X_test,
              y_train=y_train, y_test=y_test, train=train, test=test)
     }
@@ -194,7 +200,13 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
         betas <- get.coefficients(samples, colnames(X))
     }
 
+    ## linear predictor of test data and residual standard deviation
+    y_pred <- posterior.means(samples, "y_pred")
+    sigma <- tryCatch(posterior.means(samples, "sigma"),
+                      error=function(e) return(1))
+
     return(list(samples=samples, betas=betas, train=train, test=test,
+                y_pred=y_pred, sigma=sigma,
                 data=X, y=y))
 }
 
@@ -441,16 +453,12 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
     for (fold in 1:num.folds) {
         y.obs <- hs.cv[[fold]]$y_test
 
-        y.pred.hs <- posterior.means(hs.cv[[fold]]$samples, "y_pred")
-        sigma.hs <- tryCatch(summary(As.mcmc.list(hs.cv[[fold]]$samples,
-                                                  pars="sigma"))$statistics[1],
-                             error=function(e) return(NA))
-        is.logistic <- is.na(sigma.hs)
+        y.pred.hs <- hs.cv[[fold]]$y_pred
+        sigma.hs <- hs.cv[[fold]]$sigma
+        is.logistic <- length(sigma.hs) == 1 && sigma.hs == 1
 
-        y.pred.base <- posterior.means(base.cv[[fold]]$samples, "y_pred")
-        sigma.base <- tryCatch(summary(As.mcmc.list(base.cv[[fold]]$samples,
-                                                    pars="sigma"))$statistics[1],
-                               error=function(e) return(NA))
+        y.pred.base <- base.cv[[fold]]$y_pred
+        sigma.base <- base.cv[[fold]]$sigma
 
         ## logistic regression
         if (is.logistic) {
