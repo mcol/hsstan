@@ -101,17 +101,11 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
                         %*% diag(1 / train.sd))
         }
 
-        if (P == U) {
-            data.input <- list(N_train=N_train, N_test=N_test,
-                               y_train=y_train, y_test=y_test,
-                               X_train=X_train, X_test=X_test,
-                               U=U)
-        } else {
-            data.input <- list(N_train=N_train, N_test=N_test,
-                               y_train=y_train, y_test=y_test,
-                               X_train=X_train, X_test=X_test,
-                               P=P, U=U, nu=nu)
-        }
+        ## parameters not used by a model are ignored
+        data.input <- list(N_train=N_train, N_test=N_test,
+                           y_train=y_train, y_test=y_test,
+                           X_train=X_train, X_test=X_test,
+                           P=P, U=U, nu=nu)
 
         if (model.type == "mc") {
             samples <- sampling(model, data=data.input,
@@ -175,17 +169,12 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
     ## use all available data for both training and testing: this effectively
     ## computes the fit of the model (y_pred) for all observations
     train <- test <- rep(TRUE, N)
-    if (P == U) {
-        data.input <- list(N_train=N, N_test=N,
-                           y_train=y, y_test=y,
-                           X_train=X, X_test=X,
-                           U=U)
-    } else {
-        data.input <- list(N_train=N, N_test=N,
-                           y_train=y, y_test=y,
-                           X_train=X, X_test=X,
-                           P=P, U=U, nu=nu)
-    }
+
+    ## parameters not used by a model are ignored
+    data.input <- list(N_train=N, N_test=N,
+                       y_train=y, y_test=y,
+                       X_train=X, X_test=X,
+                       P=P, U=U, nu=nu)
 
     ## compile the model
     cat("Compiling STAN model", stan.file, "...")
