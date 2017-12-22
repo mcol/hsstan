@@ -1,0 +1,22 @@
+Package: hs.stan
+Type: Package
+Title: Regression models with hierarchical shrinkage priors
+Version: 0.0.0.9999
+Date: 2017-12-22
+Authors@R: c(person("Marco", "Colombo",
+                    email="m.colombo@ed.ac.uk", role=c("aut", "cre")),
+             person("Paul", "McKeigue",
+                    email="paul.mckeigue@ed.ac.uk", role="aut"),
+             person("Athina", "Spiliopoulou",
+                    email="A.Spiliopoulou@ed.ac.uk", role="ctb"))
+Description: Run Bayesian analyses with hierarchical shrinkage priors.
+License: GPL-3
+LazyLoad: yes
+Imports:
+    doMC,
+    foreach,
+    ggplot2,
+    pROC,
+    rstan (>= 2.16.2)
+ByteCompile: TRUE
+RoxygenNote: 6.0.1
