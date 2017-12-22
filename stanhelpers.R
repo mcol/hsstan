@@ -43,7 +43,7 @@ get.unpenalized.coefficients <- function(samples, coeff.names) {
 ## runs a stan model (either with hamiltonian montecarlo or variational bayes)
 ## over the cross-validation folds
 sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
-                           standardize=TRUE,
+                           standardize=TRUE, store.samples=TRUE,
                            nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -129,6 +129,7 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
         sigma <- tryCatch(posterior.means(samples, "sigma"),
                           error=function(e) return(1))
 
+        if (!store.samples) samples <- NA
         list(samples=samples, betas=betas,
              y_pred=y_pred, sigma=sigma,
              X_train=X_train, X_test=X_test,
