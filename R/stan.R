@@ -50,27 +50,22 @@ posterior.means <- function(samples, varnames) {
 #'
 #' @param samples An object of class \code{stanfit}.
 #' @param coeff.names Vector of names for the coefficients.
+#'
+#' @return
+#' A list with two named elements: \var{unpenalized} for the posterior means
+#' of the unpenalized covariates, and \var{penalized} for the posterior means
+#' of the penalized predictors (which can be \code{NULL} for baseline models).
 get.coefficients <- function(samples, coeff.names) {
     beta.u <- posterior.means(samples, "beta_u")
-    beta.p <- posterior.means(samples, "beta_p")
+    beta.p <- tryCatch(posterior.means(samples, "beta_p"),
+                       error=function(e) return(NULL))
     stopifnot(length(c(beta.u, beta.p)) == length(coeff.names))
     u.idx <- 1:length(beta.u)
     names(beta.u) <- coeff.names[u.idx]
-    names(beta.p) <- coeff.names[-u.idx]
+    if (!is.null(beta.p))
+        names(beta.p) <- coeff.names[-u.idx]
 
     return(list(unpenalized=beta.u, penalized=beta.p))
-}
-
-#' Returns the posterior means of the unpenalized regression coefficients
-#'
-#' @param samples An object of class \code{stanfit}.
-#' @param coeff.names Vector of names for the coefficients.
-get.unpenalized.coefficients <- function(samples, coeff.names) {
-    beta.u <- posterior.means(samples, "beta_u")
-    stopifnot(length(beta.u) == length(coeff.names))
-    names(beta.u) <- coeff.names
-
-    return(list(unpenalized=beta.u))
 }
 
 #' Runs a cross-validated Stan model
@@ -176,14 +171,10 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
                           init="random", algorithm="meanfield")
         }
 
-        if (P == U) {
-            betas <- get.unpenalized.coefficients(samples, colnames(X))
-        } else {
-            betas <- get.coefficients(samples, colnames(X))
-        }
-
-        ## linear predictor of test data and residual standard deviation
+        ## linear predictor of test data, regression coefficients and
+        ## residual standard deviation
         y_pred <- posterior.means(samples, "y_pred")
+        betas <- get.coefficients(samples, colnames(X))
         sigma <- tryCatch(posterior.means(samples, "sigma"),
                           error=function(e) return(1))
 
@@ -271,14 +262,10 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
                       init="random", algorithm="meanfield")
     }
 
-    if (P == U) {
-        betas <- get.unpenalized.coefficients(samples, colnames(X))
-    } else {
-        betas <- get.coefficients(samples, colnames(X))
-    }
-
-    ## linear predictor of test data and residual standard deviation
+    ## linear predictor of test data, regression coefficients and
+    ## residual standard deviation
     y_pred <- posterior.means(samples, "y_pred")
+    betas <- get.coefficients(samples, colnames(X))
     sigma <- tryCatch(posterior.means(samples, "sigma"),
                       error=function(e) return(1))
 
