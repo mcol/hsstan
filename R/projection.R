@@ -118,7 +118,7 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 
 #' Forward selection minimizing KL-divergence in projection
 #'
-#' @param samples Object of class \code{stanfit}.
+#' @param samples Object produced by \code{\link{sample.stan}}.
 #' @param max.num.pred Maximum number of predictors after which the selection
 #'        procedure should stop.
 #' @param out.csv If not \code{NULL}, the name of a CSV file to save the
@@ -146,6 +146,11 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         mlpd <- mean(log(rowMeans(pd)))
 
         return(list(fit=submodel$fit, kl=submodel$kl, mlpd=mlpd))
+    }
+
+    ## check that the model contains penalized predictors
+    if (is.null(samples$betas$penalized)) {
+        stop("Model doesn't contain penalized predictors.")
     }
 
     x <- samples$data[samples$train, ]
