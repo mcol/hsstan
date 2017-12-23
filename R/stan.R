@@ -290,13 +290,12 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
 #' Extract measures of performance from the cross-validation results
 #'
 #' @param hs.cv Cross-validated Stan model.
-#' @param base.cv Cross-validated baseline model.
 #' @param out.csv Optional name of a file where the output can be saved in
 #'        CSV format.
 #'
 #' @importFrom pROC roc
 #' @export
-get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
+get.cv.performance <- function(hs.cv, out.csv=NULL) {
 
     gaussian.llk <- function(y.pred, y.obs, disp)
         -0.5 * sum(log(disp) + (y.pred - y.obs)^2 / disp)
@@ -314,13 +313,11 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
         (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
         (2 * y.obs - 1) * (log(prop.cases) - log(1 - prop.cases))
 
-    y.obs.all <- y.pred.hs.all <- y.pred.base.all <- NULL
-    sigma.hs.all <- sigma.base.all <- NULL
+    y.obs.all <- y.pred.hs.all <- NULL
+    sigma.hs.all <- NULL
     num.folds <- length(hs.cv)
     llk <- perf <- rep(NA, num.folds)
     llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
-    llk.base <- perf.base <- rep(NA, num.folds)
-    llk.ratio.base <- llk.ratio.var.base <- rep(NA, num.folds)
 
     ## loop over the folds
     for (fold in 1:num.folds) {
@@ -329,9 +326,6 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
         y.pred.hs <- hs.cv[[fold]]$y_pred
         sigma.hs <- hs.cv[[fold]]$sigma
         is.logistic <- length(sigma.hs) == 1 && sigma.hs == 1
-
-        y.pred.base <- base.cv[[fold]]$y_pred
-        sigma.base <- base.cv[[fold]]$sigma
 
         ## logistic regression
         if (is.logistic) {
@@ -345,32 +339,18 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
             llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
             llk.ratio[fold] <- mean(llkr)
             llk.ratio.var[fold] <- var(llkr)
-
-            y.pred.base <- to.prob(y.pred.base)
-            llk.base[fold] <- binomial.llk(y.pred.base, y.obs)
-            perf.base[fold] <- auc(y.pred.base, y.obs)
-            llkr.base <- loglik.ratio(y.pred.base, y.obs, prop.cases)
-            llk.ratio.base[fold] <- mean(llkr.base)
-            llk.ratio.var.base[fold] <- var(llkr.base)
         }
 
         ## linear regression
         else {
             llk[fold] <- gaussian.llk(y.pred.hs, y.obs, sigma.hs)
             perf[fold] <- r2(y.pred.hs, y.obs)
-
-            llk.base[fold] <- gaussian.llk(y.pred.base, y.obs, sigma.base)
-            perf.base[fold] <- r2(y.pred.base, y.obs)
         }
 
         sigma.hs.all <- c(sigma.hs.all, sigma.hs)
         y.obs.all <- c(y.obs.all, y.obs)
         y.pred.hs.all <- c(y.pred.hs.all, y.pred.hs)
-        sigma.base.all <- c(sigma.base.all, sigma.base)
-        y.pred.base.all <- c(y.pred.base.all, y.pred.base)
-        cat(".")
     }
-    cat("\n")
     set <- paste("Fold", 1:num.folds)
 
     ## compute log-likelihood and performance measure of the full model
@@ -384,28 +364,14 @@ get.cv.performance <- function(hs.cv, base.cv, out.csv=NULL) {
                            auc(y.pred.hs.all, y.obs.all),
                            r2(y.pred.hs.all, y.obs.all)))
 
-    ## compute log-likelihood and performance measure of the baseline model
-    ## on the full vector of withdrawn observations
-    llk.base <- c(llk.base, ifelse(is.logistic,
-                                   binomial.llk(y.pred.base.all, y.obs.all),
-                                   gaussian.llk(y.pred.base.all, y.obs.all,
-                                                mean(sigma.base.all))))
-    perf.base <- c(perf.base, ifelse(is.logistic,
-                                     auc(y.pred.base.all, y.obs.all),
-                                     r2(y.pred.base.all, y.obs.all)))
-
-    res <- data.frame(set=set, test.llk=llk, perf=perf,
-                      test.llk.base=llk.base, perf.base=perf.base)
-    colnames(res)[c(3, 5)] <- gsub("perf", ifelse(is.logistic, "auc", "r2"),
-                                   colnames(res)[c(3, 5)])
+    res <- data.frame(set=set, test.llk=llk, perf=perf)
+    colnames(res)[3] <- gsub("perf", ifelse(is.logistic, "auc", "r2"),
+                             colnames(res)[3])
     if (is.logistic) {
         prop.cases <- sum(y.obs.all == 1) / length(y.obs.all)
         llkr <- loglik.ratio(y.pred.hs.all, y.obs.all, prop.cases)
-        llkr.base <- loglik.ratio(y.pred.base.all, y.obs.all, prop.cases)
         res$llk.ratio <- c(llk.ratio, mean(llkr))
         res$llk.ratio.var <- c(llk.ratio.var, var(llkr))
-        res$llk.ratio.base <- c(llk.ratio.base, mean(llkr.base))
-        res$llk.ratio.var.base <- c(llk.ratio.var.base, var(llkr.base))
     }
 
     if (!is.null(out.csv))
