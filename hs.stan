@@ -85,6 +85,7 @@ model {
   // noninformative gamma priors on scale parameter are not advised
   sigma ~ inv_gamma(1, 1);
 
+  // likelihood
   y_train ~ normal(theta_train, sigma);
 }
 

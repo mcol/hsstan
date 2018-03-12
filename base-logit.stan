@@ -42,6 +42,7 @@ model {
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, 1000);
 
+  // likelihood
   y_train ~ bernoulli_logit(theta_train);
 }
 
