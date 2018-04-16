@@ -216,6 +216,8 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
                       kl=kl, mlpd=mlpd, delta.mlpd=delta.mlpd)
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)
+
+    class(res) <- c("projsel", "data.frame")
     return(res)
 }
 
@@ -237,7 +239,7 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #'
 #' @import ggplot2
 #' @export
-plot_fprojsel <- function(sel, title, filename=NULL, max.labels=NULL,
+plot.projsel <- function(sel, title, filename=NULL, max.labels=NULL,
                           font.size=12, width=800, height=800) {
 
     ## get full variable names if possible

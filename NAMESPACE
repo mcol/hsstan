@@ -2,7 +2,7 @@
 
 export(get.cv.performance)
 export(lm_fprojsel)
-export(plot_fprojsel)
+export(plot.projsel)
 export(sample.stan)
 export(sample.stan.cv)
 import(Rcpp)
