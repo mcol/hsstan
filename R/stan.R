@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2017 Marco Colombo and Paul McKeigue
+## Copyright (c) 2017-2018 Marco Colombo and Paul McKeigue
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -73,7 +73,6 @@ get.coefficients <- function(samples, coeff.names) {
 #' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
 #' cross-validation folds.
 #'
-#' @param stan.file Path to a Stan model file.
 #' @param x Data.frame of predictors.
 #' @param y Vector of outcomes. For a logistic regression model, this is
 #'        expected to contain only \code{0-1} entries.
@@ -84,6 +83,8 @@ get.coefficients <- function(samples, coeff.names) {
 #'        covariates is used.
 #' @param folds List of cross-validation folds, where each element contains
 #'        the indices of the test observations.
+#' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
+#'        logistic regression.
 #' @param standardize Whether the design matrix should be standardized
 #'        (\code{TRUE} by default).
 #' @param store.samples Whether the posterior samples should be saved
@@ -95,8 +96,9 @@ get.coefficients <- function(samples, coeff.names) {
 #' @importFrom rstan stan_model
 #' @importMethodsFrom rstan sampling vb
 #' @export
-sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
-                           standardize=TRUE, store.samples=TRUE,
+sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
+                           logit=FALSE, standardize=TRUE,
+                           store.samples=TRUE,
                            nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -118,8 +120,9 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
     ## names of variables to be standardized
     stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
 
-    ## compile the model
-    model <- stan_model(file=stan.file)
+    ## choose the model to be fitted
+    model <- ifelse(length(biomarkers) == 0, "base", "hs")
+    if (logit) model <- paste0(model, "_logit")
 
     ## cross-validation
     cv <- foreach(fold=1:num.folds) %dopar% {
@@ -161,12 +164,12 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
                            P=P, U=U, nu=nu)
 
         if (model.type == "mc") {
-            samples <- sampling(model, data=data.input,
+            samples <- sampling(stanmodels[[model]], data=data.input,
                                 chains=4, iter=1000, warmup=500,
                                 seed=123, control=list(adapt_delta=0.8))
         }
         else {
-            samples <- vb(model, data=data.input,
+            samples <- vb(stanmodels[[model]], data=data.input,
                           iter=50000, output_samples=2000,
                           init="random", algorithm="meanfield")
         }
@@ -190,7 +193,6 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
 
 #' Runs a Stan model on all available data.
 #'
-#' @param stan.file Path to a Stan model file.
 #' @param x Data.frame of predictors.
 #' @param y Vector of outcomes. For a logistic regression model, this is
 #'        expected to contain only \code{0-1} entries.
@@ -199,6 +201,8 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
 #' @param biomarkers Names of the variables to be used as penalized predictors.
 #'        If it is specified as an empty vector, a model with only unpenalized
 #'        covariates is used.
+#' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
+#'        logistic regression.
 #' @param standardize Whether the design matrix should be standardized.
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
@@ -207,8 +211,8 @@ sample.stan.cv <- function(stan.file, x, y, covariates, biomarkers, folds,
 #' @importFrom rstan stan_model
 #' @importMethodsFrom rstan sampling vb
 #' @export
-sample.stan <- function(stan.file, x, y, covariates, biomarkers,
-                        standardize=TRUE,
+sample.stan <- function(x, y, covariates, biomarkers=NULL,
+                        logit=FALSE, standardize=TRUE,
                         nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -250,15 +254,18 @@ sample.stan <- function(stan.file, x, y, covariates, biomarkers,
                        X_train=X, X_test=X,
                        P=P, U=U, nu=nu)
 
-    ## compile the model
-    cat("Compiling STAN model", stan.file, "...")
-    model <- stan_model(file=stan.file)
+    ## choose the model to be fitted
+    model <- ifelse(length(biomarkers) == 0, "base", "hs")
+    if (logit) model <- paste0(model, "_logit")
+
     if (model.type == "mc") {
-        samples <- sampling(model, data=data.input, iter=1000, warmup=500,
+        samples <- sampling(stanmodels[[model]], data=data.input,
+                            iter=1000, warmup=500,
                             chains=4, seed=123, control=list(adapt_delta=0.8))
     }
     else {
-        samples <- vb(model, data=data.input, iter=50000, output_samples=2000,
+        samples <- vb(stanmodels[[model]], data=data.input,
+                      iter=50000, output_samples=2000,
                       init="random", algorithm="meanfield")
     }
 
