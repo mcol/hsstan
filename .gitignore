@@ -1,0 +1,3 @@
+*.o
+*.so
+src/stan_files/*.hpp
