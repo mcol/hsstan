@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2017 Marco Colombo and Paul McKeigue
+## Copyright (c) 2017-2018 Marco Colombo and Paul McKeigue
 ##
 ## Parts of the code are based on https://github.com/jpiironen/rstan-varsel
 ##
@@ -223,7 +223,7 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
 #' Plot of the incremental contribution of each predictor
 #'
-#' A function of name \code{"getfullname"} to match variable names to full
+#' A function of name \code{getfullname} to match variable names to full
 #' names is searched on the current workspace, and if found it is used to
 #' transform the labels before creating the plot.
 #'
@@ -236,11 +236,13 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @param font.size Font size used to scale all text in the plot.
 #' @param width Width of the png file in pixels.
 #' @param height Height of the png file in pixels.
+#' @param ... Other options to plot() (currently ignored).
 #'
 #' @import ggplot2
+#' @method plot projsel
 #' @export
 plot.projsel <- function(sel, title, filename=NULL, max.labels=NULL,
-                          font.size=12, width=800, height=800) {
+                         font.size=12, width=800, height=800, ...) {
 
     ## get full variable names if possible
     labs <- tryCatch(get("getfullname")(as.character(sel$var)),
