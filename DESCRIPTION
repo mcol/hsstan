@@ -12,12 +12,15 @@ Authors@R: c(person("Marco", "Colombo",
 Description: Run Bayesian analyses with hierarchical shrinkage priors.
 License: GPL-3
 LazyLoad: yes
+Depends:
+    R (>= 3.2)
 Imports:
     doMC,
     foreach,
     ggplot2,
     pROC,
     Rcpp,
+    methods,
     rstan (>= 2.16.2)
 LinkingTo:
     BH (>= 1.66.0.1),

@@ -25,6 +25,7 @@
 #' @name hsstan-package
 #' @aliases hsstan
 #' @import Rcpp
+#' @import methods
 #' @useDynLib hsstan, .registration = TRUE
 #'
 #' @references
