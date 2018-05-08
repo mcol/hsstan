@@ -228,7 +228,7 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' transform the labels before creating the plot.
 #'
 #' @param sel A data.frame created by \code{\link{lm_fprojsel}}.
-#' @param title Title of the plot.
+#' @param title Title of the plot. If \code{NULL}, no title is displayed.
 #' @param filename Optional name of a file where the plot is saved in png
 #'        format. If \code{NULL}, no png file is produced.
 #' @param max.labels Maximum number of points to be labelled. If \code{NULL},
@@ -241,7 +241,7 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @import ggplot2
 #' @method plot projsel
 #' @export
-plot.projsel <- function(sel, title, filename=NULL, max.labels=NULL,
+plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
                          font.size=12, width=800, height=800, ...) {
 
     ## get full variable names if possible
@@ -264,10 +264,12 @@ plot.projsel <- function(sel, title, filename=NULL, max.labels=NULL,
       geom_text(aes(x=x + ifelse(x < mean(x), 0.3, -0.3)),
                 size=geom.text.size,
                 hjust=ifelse(x < mean(x), "left", "right")) +
-      ggtitle(title) +
       xlab("Number of biomarkers") +
       ylab("KL divergence (nats)") +
       theme(text=element_text(size=font.size))
+
+    if (!is.null(title))
+        p <- p + ggtitle(title)
 
     if (!is.null(filename)) {
         png(filename, width=width, height=height)
