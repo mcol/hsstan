@@ -36,3 +36,25 @@ NULL
   modules <- paste0("stan_fit4", names(stanmodels), "_mod")
   for (m in modules) loadModule(m, what = TRUE)
 }
+
+#' @importFrom doMC registerDoMC
+#' @importFrom parallel detectCores
+#' @importFrom foreach getDoParWorkers
+#' @importFrom utils packageVersion
+.onAttach <- function(libname, pkgname) {
+
+    ## number of cores used by default for sampling from the chains
+    options(mc.cores=ceiling(parallel::detectCores() / 2))
+
+    ## number of cores used by default for cross-validation and projection
+    registerDoMC()
+    if (getDoParWorkers() > 10)
+        registerDoMC(cores=10)
+
+    packageStartupMessage("hsstan ", packageVersion("hsstan"), ":")
+    packageStartupMessage("  ", options("mc.cores"),
+                          " cores for sampling -> 'options(mc.cores=<n.cores>)'")
+    packageStartupMessage("  ", getDoParWorkers(),
+                          " cores for cross-validation and projection ->",
+                          " 'options(cores=<n.cores>)'\n")
+}
