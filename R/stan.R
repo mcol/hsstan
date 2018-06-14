@@ -383,6 +383,14 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     return(res)
 }
 
+#' Logistic transformation
+#'
+#' @param lin.pred Linear predictor.
+#'
+#' @return
+#' A probability.
+#'
+#' @noRd
 to.prob <- function(lin.pred) {
     1 / (1 + exp(-lin.pred))
 }
