@@ -166,7 +166,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
         if (model.type == "mc") {
             samples <- sampling(stanmodels[[model]], data=data.input,
                                 chains=4, iter=1000, warmup=500,
-                                seed=123, control=list(adapt_delta=0.8))
+                                seed=123, control=list(adapt_delta=0.95))
         }
         else {
             samples <- vb(stanmodels[[model]], data=data.input,
@@ -263,8 +263,8 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 
     if (model.type == "mc") {
         samples <- sampling(stanmodels[[model]], data=data.input,
-                            iter=1000, warmup=500,
-                            chains=4, seed=123, control=list(adapt_delta=0.8))
+                            iter=2000, warmup=1000,
+                            chains=4, seed=123, control=list(adapt_delta=0.95))
     }
     else {
         samples <- vb(stanmodels[[model]], data=data.input,
