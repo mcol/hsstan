@@ -177,13 +177,16 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
         y_pred <- posterior.means(samples, "y_pred")
+        fitted <- if(logit) to.prob(y_pred) else y_pred
         betas <- get.coefficients(samples, colnames(X))
+        coefs <- c(betas$unpenalized, betas$penalized)
         sigma <- tryCatch(posterior.means(samples, "sigma"),
                           error=function(e) return(1))
 
         if (!store.samples) samples <- NA
-        list(samples=samples, betas=betas,
-             y_pred=y_pred, sigma=sigma,
+        list(stanfit=samples, betas=betas, coefficients=coefs,
+             linear.predictors=y_pred, fitted.values=fitted,
+             sigma=sigma,
              X_train=X_train, X_test=X_test,
              y_train=y_train, y_test=y_test, train=train, test=test)
     }
@@ -269,15 +272,22 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
                       init="random", algorithm="meanfield")
     }
 
+    ## assign proper names
+    samples@sim$fnames_oi[1:ncol(X)] <- colnames(X)
+
     ## linear predictor of test data, regression coefficients and
     ## residual standard deviation
     y_pred <- posterior.means(samples, "y_pred")
+    fitted <- if(logit) to.prob(y_pred) else y_pred
     betas <- get.coefficients(samples, colnames(X))
+    coefs <- c(betas$unpenalized, betas$penalized)
     sigma <- tryCatch(posterior.means(samples, "sigma"),
                       error=function(e) return(1))
 
-    return(list(samples=samples, betas=betas, train=train, test=test,
-                y_pred=y_pred, sigma=sigma,
+    return(list(stanfit=samples, betas=betas, coefficients=coefs,
+                linear.predictors=y_pred, fitted.values=fitted,
+                sigma=sigma,
+                train=train, test=test,
                 data=X, y=y))
 }
 
@@ -301,7 +311,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             return(0)
         return(corr^2)
     }
-    to.prob <- function(lin.pred) 1 / (1 + exp(-lin.pred))
     auc <- function(y.pred, y.obs) as.numeric(roc(y.obs, y.pred)$auc)
     loglik.ratio <- function(y.pred, y.obs, prop.cases)
         (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
@@ -317,7 +326,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     for (fold in 1:num.folds) {
         y.obs <- hs.cv[[fold]]$y_test
 
-        y.pred.hs <- hs.cv[[fold]]$y_pred
+        y.pred.hs <- hs.cv[[fold]]$fitted.values
         sigma.hs <- hs.cv[[fold]]$sigma
         is.logistic <- length(sigma.hs) == 1 && sigma.hs == 1
 
@@ -327,7 +336,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             ## proportion of cases in the training fold (prior probability)
             prop.cases <- sum(hs.cv[[fold]]$y_train) / sum(hs.cv[[fold]]$train)
 
-            y.pred.hs <- to.prob(y.pred.hs)
             llk[fold] <- binomial.llk(y.pred.hs, y.obs)
             perf[fold] <- auc(y.pred.hs, y.obs)
             llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
@@ -371,4 +379,8 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)
     return(res)
+}
+
+to.prob <- function(lin.pred) {
+    1 / (1 + exp(-lin.pred))
 }

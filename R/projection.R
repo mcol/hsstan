@@ -156,11 +156,11 @@ lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     x <- samples$data[samples$train, ]
     xt <- samples$data[samples$test, ]
     yt <- samples$y[samples$test]
-    samples <- samples$samples
+    stanfit <- samples$stanfit
 
-    beta.samples <- extract(samples, pars=c("beta_u", "beta_p"))
+    beta.samples <- extract(stanfit, pars=c("beta_u", "beta_p"))
     w <- t(cbind(beta.samples$beta_u, beta.samples$beta_p)) # P x S
-    sigma2 <- tryCatch(unlist(extract(samples, pars=c("sigma")))^2,
+    sigma2 <- tryCatch(unlist(extract(stanfit, pars=c("sigma")))^2,
                        error=function(e) return(1))
     is.logistic <- length(sigma2) == 1 && sigma2 == 1
 
