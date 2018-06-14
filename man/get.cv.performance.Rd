@@ -4,12 +4,10 @@
 \alias{get.cv.performance}
 \title{Extract measures of performance from the cross-validation results}
 \usage{
-get.cv.performance(hs.cv, base.cv, out.csv = NULL)
+get.cv.performance(hs.cv, out.csv = NULL)
 }
 \arguments{
 \item{hs.cv}{Cross-validated Stan model.}
-
-\item{base.cv}{Cross-validated baseline model.}
 
 \item{out.csv}{Optional name of a file where the output can be saved in
 CSV format.}

@@ -4,12 +4,10 @@
 \alias{sample.stan}
 \title{Runs a Stan model on all available data.}
 \usage{
-sample.stan(stan.file, x, y, covariates, biomarkers, standardize = TRUE,
-  nu = 3, model.type = c("mc", "vb"))
+sample.stan(x, y, covariates, biomarkers = NULL, logit = FALSE,
+  standardize = TRUE, nu = 3, model.type = c("mc", "vb"))
 }
 \arguments{
-\item{stan.file}{Path to a Stan model file.}
-
 \item{x}{Data.frame of predictors.}
 
 \item{y}{Vector of outcomes. For a logistic regression model, this is
@@ -21,6 +19,9 @@ predictors.}
 \item{biomarkers}{Names of the variables to be used as penalized predictors.
 If it is specified as an empty vector, a model with only unpenalized
 covariates is used.}
+
+\item{logit}{\code{FALSE} for linear regression (default), \code{TRUE} for
+logistic regression.}
 
 \item{standardize}{Whether the design matrix should be standardized.}
 

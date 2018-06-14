@@ -4,13 +4,13 @@
 \alias{plot.projsel}
 \title{Plot of the incremental contribution of each predictor}
 \usage{
-plot.projsel(sel, title, filename = NULL, max.labels = NULL,
-  font.size = 12, width = 800, height = 800)
+\method{plot}{projsel}(sel, title = NULL, filename = NULL,
+  max.labels = NULL, font.size = 12, width = 800, height = 800, ...)
 }
 \arguments{
 \item{sel}{A data.frame created by \code{\link{lm_fprojsel}}.}
 
-\item{title}{Title of the plot.}
+\item{title}{Title of the plot. If \code{NULL}, no title is displayed.}
 
 \item{filename}{Optional name of a file where the plot is saved in png
 format. If \code{NULL}, no png file is produced.}
@@ -23,9 +23,11 @@ all those present in the \var{sel} file are displayed.}
 \item{width}{Width of the png file in pixels.}
 
 \item{height}{Height of the png file in pixels.}
+
+\item{...}{Other options to plot() (currently ignored).}
 }
 \description{
-A function of name \code{"getfullname"} to match variable names to full
+A function of name \code{getfullname} to match variable names to full
 names is searched on the current workspace, and if found it is used to
 transform the labels before creating the plot.
 }

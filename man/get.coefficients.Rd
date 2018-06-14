@@ -11,6 +11,11 @@ get.coefficients(samples, coeff.names)
 
 \item{coeff.names}{Vector of names for the coefficients.}
 }
+\value{
+A list with two named elements: \var{unpenalized} for the posterior means
+of the unpenalized covariates, and \var{penalized} for the posterior means
+of the penalized predictors (which can be \code{NULL} for baseline models).
+}
 \description{
 Returns the posterior means of the regression coefficients
 }

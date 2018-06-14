@@ -4,13 +4,11 @@
 \alias{sample.stan.cv}
 \title{Runs a cross-validated Stan model}
 \usage{
-sample.stan.cv(stan.file, x, y, covariates, biomarkers, folds,
+sample.stan.cv(x, y, covariates, biomarkers, folds, logit = FALSE,
   standardize = TRUE, store.samples = TRUE, nu = 3, model.type = c("mc",
   "vb"))
 }
 \arguments{
-\item{stan.file}{Path to a Stan model file.}
-
 \item{x}{Data.frame of predictors.}
 
 \item{y}{Vector of outcomes. For a logistic regression model, this is
@@ -25,6 +23,9 @@ covariates is used.}
 
 \item{folds}{List of cross-validation folds, where each element contains
 the indices of the test observations.}
+
+\item{logit}{\code{FALSE} for linear regression (default), \code{TRUE} for
+logistic regression.}
 
 \item{standardize}{Whether the design matrix should be standardized
 (\code{TRUE} by default).}
