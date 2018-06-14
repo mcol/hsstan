@@ -126,7 +126,7 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 #'
 #' @importMethodsFrom rstan extract
 #' @export
-lm_fprojsel <- function(samples, max.num.pred=30, out.csv=NULL) {
+projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
     fit.submodel <- function(x, w, sigma2, fit, chosen, xt, yt, is.logistic) {
 
