@@ -249,23 +249,21 @@ plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
                      error=function(e) as.character(sel$var))
     labs <- gsub(" \\(.*\\)$", "", labs)
     if (!is.null(max.labels)) {
-        labs[-c(1:max.labels)] <- ""
+        labs[-c(1:(max.labels + 1))] <- ""
     }
 
     geom.text.size <- font.size * 5 / 14
 
+    sel$rel <- 1 - sel$kl / sel$kl[1]
     x <- seq(nrow(sel)) - 1
-    p <- ggplot(data=sel, aes(x=x, y=kl, label=labs)) +
-      coord_cartesian(ylim=range(c(0, sel$kl))) +
-      scale_y_continuous(sec.axis=sec_axis(~ 1 - . / sel$kl[1],
-                                           name="Relative explanatory power")) +
-      geom_hline(yintercept=0, linetype=2) +
+    p <- ggplot(data=sel, aes(x=x, y=rel, label=labs)) +
+      coord_cartesian(ylim=range(c(0, 1))) +
       geom_line() + geom_point(size=geom.text.size / 3) +
       geom_text(aes(x=x + ifelse(x < mean(x), 0.3, -0.3)),
                 size=geom.text.size,
                 hjust=ifelse(x < mean(x), "left", "right")) +
       xlab("Number of biomarkers") +
-      ylab("KL divergence (nats)") +
+      ylab("Relative explanatory power") +
       theme(text=element_text(size=font.size))
 
     if (!is.null(title))
