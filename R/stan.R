@@ -284,11 +284,13 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     sigma <- tryCatch(posterior.means(samples, "sigma"),
                       error=function(e) return(1))
 
-    return(list(stanfit=samples, betas=betas, coefficients=coefs,
+    obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
                 linear.predictors=y_pred, fitted.values=fitted,
                 sigma=sigma,
                 train=train, test=test,
-                data=X, y=y))
+                data=X, y=y)
+    class(obj) <- "hsstan"
+    return(obj)
 }
 
 #' Extract measures of performance from the cross-validation results
@@ -383,4 +385,20 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
 
 to.prob <- function(lin.pred) {
     1 / (1 + exp(-lin.pred))
+}
+
+#' Validate hsstan object
+#'
+#' Checks that the object has been created by \code{\link{sample.stan}}.
+#'
+#' @param obj An object to be checked.
+#'
+#' @return
+#' Throws an error if the object is not an \code{hsstan} object.
+#'
+#' @noRd
+validate.hsstan <- function(obj) {
+    if (class(obj) != "hsstan") {
+        stop("Not an object of class 'hsstan'.")
+    }
 }

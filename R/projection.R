@@ -148,6 +148,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         return(list(fit=submodel$fit, kl=submodel$kl, mlpd=mlpd))
     }
 
+    validate.hsstan(samples)
+
     ## check that the model contains penalized predictors
     if (is.null(samples$betas$penalized)) {
         stop("Model doesn't contain penalized predictors.")
