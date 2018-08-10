@@ -229,7 +229,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' names is searched on the current workspace, and if found it is used to
 #' transform the labels before creating the plot.
 #'
-#' @param sel A data.frame created by \code{\link{lm_fprojsel}}.
+#' @param sel A data.frame created by \code{\link{projsel}}.
 #' @param title Title of the plot. If \code{NULL}, no title is displayed.
 #' @param filename Optional name of a file where the plot is saved in png
 #'        format. If \code{NULL}, no png file is produced.
