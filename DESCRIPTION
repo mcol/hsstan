@@ -15,7 +15,7 @@ LazyLoad: yes
 Depends:
     R (>= 3.2)
 Imports:
-    doMC,
+    doParallel,
     foreach,
     ggplot2,
     pROC,

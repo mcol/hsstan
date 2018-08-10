@@ -37,7 +37,7 @@ NULL
   for (m in modules) loadModule(m, what = TRUE)
 }
 
-#' @importFrom doMC registerDoMC
+#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores
 #' @importFrom foreach getDoParWorkers
 #' @importFrom utils packageVersion
@@ -47,9 +47,9 @@ NULL
     options(mc.cores=ceiling(parallel::detectCores() / 2))
 
     ## number of cores used by default for cross-validation and projection
-    registerDoMC()
+    registerDoParallel()
     if (getDoParWorkers() > 10)
-        registerDoMC(cores=10)
+        registerDoParallel(cores=10)
 
     packageStartupMessage("hsstan ", packageVersion("hsstan"), ":")
     packageStartupMessage("  ", options("mc.cores"),
