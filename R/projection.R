@@ -44,6 +44,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     if (is.logistic) {
 
         ## compute the projection for each sample
+        s <- NULL   # silence a note raised by R CMD check
         wp <- foreach(s=1:S, .combine=cbind) %dopar% {
             ## XXX: what about the intercept?
             glm.fit(xp, fit[, s], family=quasibinomial())$coefficients
@@ -98,6 +99,7 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
         dinv.link <- t(fitp * (1 - fitp))
     }
     else {
+        i <- NULL   # silence a note raised by R CMD check
         kl <- foreach(i=1:length(notchosen), .combine=c) %dopar% {
             ind <- sort(c(chosen, notchosen[i]))
             lm_proj(x, fit, sigma2, ind, FALSE)$kl

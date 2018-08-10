@@ -125,6 +125,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
     if (logit) model <- paste0(model, "_logit")
 
     ## cross-validation
+    fold <- NULL   # silence a note raised by R CMD check
     cv <- foreach(fold=1:num.folds) %dopar% {
         test <- 1:N %in% folds[[fold]]
         train <- !test
