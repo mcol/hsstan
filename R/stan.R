@@ -228,6 +228,10 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     model <- paste("~", paste(c(covariates, biomarkers), collapse=" + "))
     X <- model.matrix(as.formula(model), data=x)
     N <- nrow(X)
+    if (N != length(y)) {
+        stop("Missing values present in the design matrix")
+    }
+
     P <- ncol(X)
     U <- P - length(biomarkers)
     which.unpenalized <- 1:U
