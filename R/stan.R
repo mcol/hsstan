@@ -318,7 +318,8 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             return(0)
         return(corr^2)
     }
-    auc <- function(y.pred, y.obs) as.numeric(roc(y.obs, y.pred)$auc)
+    auc <- function(y.pred, y.obs)
+        as.numeric(roc(y.obs, y.pred, direction="<")$auc)
     loglik.ratio <- function(y.pred, y.obs, prop.cases)
         (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
         (2 * y.obs - 1) * (log(prop.cases) - log(1 - prop.cases))
