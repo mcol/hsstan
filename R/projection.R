@@ -242,6 +242,10 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @param height Height of the png file in pixels.
 #' @param ... Other options to plot() (currently ignored).
 #'
+#' @return
+#' A \pkg{ggplot2} object showing the relative incremental contribution of each
+#' predictor starting from the initial set of unpenalized covariates.
+#'
 #' @import ggplot2
 #' @method plot projsel
 #' @export
@@ -279,9 +283,6 @@ plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
         dev.off()
     }
     else {
-        ## disable clipping of the text labels
-        p <- ggplot_gtable(ggplot_build(p))
-        p$layout$clip[p$layout$name == "panel"] <- "off"
-        p
+        return(p)
     }
 }
