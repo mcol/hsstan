@@ -5,8 +5,8 @@
 \title{Runs a cross-validated Stan model}
 \usage{
 sample.stan.cv(x, y, covariates, biomarkers, folds, logit = FALSE,
-  standardize = TRUE, store.samples = TRUE, nu = 3, model.type = c("mc",
-  "vb"))
+  standardize = TRUE, store.samples = TRUE, nu = 3,
+  model.type = c("mc", "vb"))
 }
 \arguments{
 \item{x}{Data.frame of predictors.}

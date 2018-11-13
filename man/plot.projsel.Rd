@@ -5,7 +5,8 @@
 \title{Plot of the incremental contribution of each predictor}
 \usage{
 \method{plot}{projsel}(sel, title = NULL, filename = NULL,
-  max.labels = NULL, font.size = 12, width = 800, height = 800, ...)
+  max.labels = NULL, font.size = 12, width = 800, height = 800,
+  ...)
 }
 \arguments{
 \item{sel}{A data.frame created by \code{\link{projsel}}.}
@@ -25,6 +26,10 @@ all those present in the \var{sel} file are displayed.}
 \item{height}{Height of the png file in pixels.}
 
 \item{...}{Other options to plot() (currently ignored).}
+}
+\value{
+A \pkg{ggplot2} object showing the relative incremental contribution of each
+predictor starting from the initial set of unpenalized covariates.
 }
 \description{
 A function of name \code{getfullname} to match variable names to full
