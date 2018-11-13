@@ -8,7 +8,7 @@
   max.labels = NULL, font.size = 12, width = 800, height = 800, ...)
 }
 \arguments{
-\item{sel}{A data.frame created by \code{\link{lm_fprojsel}}.}
+\item{sel}{A data.frame created by \code{\link{projsel}}.}
 
 \item{title}{Title of the plot. If \code{NULL}, no title is displayed.}
 
