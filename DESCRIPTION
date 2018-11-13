@@ -1,7 +1,7 @@
 Package: hsstan
 Type: Package
 Title: Regression models with hierarchical shrinkage priors
-Version: 0.2
+Version: 0.2.0.9000
 Date: 2018-11-13
 Authors@R: c(person("Marco", "Colombo",
                     email="m.colombo@ed.ac.uk", role=c("aut", "cre")),
