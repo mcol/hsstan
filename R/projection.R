@@ -264,12 +264,14 @@ plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
 
     sel$rel <- 1 - sel$kl / sel$kl[1]
     x <- seq(nrow(sel)) - 1
+    text_idx <- x < mean(x) | x - floor(x / 2) * 2 == 1
     p <- ggplot(data=sel, aes(x=x, y=rel, label=labs)) +
       coord_cartesian(ylim=range(c(0, 1))) +
       geom_line() + geom_point(size=geom.text.size / 3) +
-      geom_text(aes(x=x + ifelse(x < mean(x), 0.3, -0.3)),
+      geom_text(aes(x=x + ifelse(text_idx, 0.05, -0.05),
+                    y=rel + ifelse(text_idx, -0.02, 0.02)),
                 size=geom.text.size,
-                hjust=ifelse(x < mean(x), "left", "right")) +
+                hjust=ifelse(text_idx, "left", "right")) +
       xlab("Number of biomarkers") +
       ylab("Relative explanatory power") +
       theme(text=element_text(size=font.size))
