@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2017-2018 Marco Colombo and Paul McKeigue
+## Copyright (c) 2017-2019 Marco Colombo and Paul McKeigue
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ get.coefficients <- function(samples, coeff.names) {
     return(list(unpenalized=beta.u, penalized=beta.p))
 }
 
+
 #' Runs a cross-validated Stan model
 #'
 #' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
@@ -89,6 +90,8 @@ get.coefficients <- function(samples, coeff.names) {
 #'        (\code{TRUE} by default).
 #' @param store.samples Whether the posterior samples should be saved
 #'        (\code{TRUE} by default).
+#' @param adapt.delta Target average proposal acceptance probability for
+#'        adaptation (0.99 by default).
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
 #'        \code{"vb"} for variational Bayes.
@@ -98,7 +101,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                            logit=FALSE, standardize=TRUE,
-                           store.samples=TRUE,
+                           store.samples=TRUE, adapt.delta=0.99,
                            nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -167,7 +170,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
         if (model.type == "mc") {
             samples <- sampling(stanmodels[[model]], data=data.input,
                                 chains=4, iter=1000, warmup=500,
-                                seed=123, control=list(adapt_delta=0.95))
+                                seed=123, control=list(adapt_delta=adapt.delta))
         }
         else {
             samples <- vb(stanmodels[[model]], data=data.input,
@@ -208,6 +211,8 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
 #'        logistic regression.
 #' @param standardize Whether the design matrix should be standardized.
+#' @param adapt.delta Target average proposal acceptance probability for
+#'        adaptation (0.99 by default).
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
 #'        \code{"vb"} for variational Bayes.
@@ -216,7 +221,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #' @importMethodsFrom rstan sampling vb
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
-                        logit=FALSE, standardize=TRUE,
+                        logit=FALSE, standardize=TRUE, adapt.delta=0.99,
                         nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -269,7 +274,8 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     if (model.type == "mc") {
         samples <- sampling(stanmodels[[model]], data=data.input,
                             iter=2000, warmup=1000,
-                            chains=4, seed=123, control=list(adapt_delta=0.95))
+                            chains=4, seed=123,
+                            control=list(adapt_delta=adapt.delta))
     }
     else {
         samples <- vb(stanmodels[[model]], data=data.input,
