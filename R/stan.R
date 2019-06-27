@@ -102,6 +102,7 @@ get.coefficients <- function(samples, coeff.names) {
 sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                            logit=FALSE, standardize=TRUE,
                            store.samples=TRUE, adapt.delta=0.99,
+                           iter=1000, warmup=iter / 2,
                            nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -169,7 +170,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 
         if (model.type == "mc") {
             samples <- sampling(stanmodels[[model]], data=data.input,
-                                chains=4, iter=1000, warmup=500,
+                                chains=4, iter=iter, warmup=warmup,
                                 seed=123, control=list(adapt_delta=adapt.delta))
         }
         else {
@@ -222,6 +223,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
                         logit=FALSE, standardize=TRUE, adapt.delta=0.99,
+                        iter=2000, warmup=iter / 2,
                         nu=3, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -273,7 +275,7 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 
     if (model.type == "mc") {
         samples <- sampling(stanmodels[[model]], data=data.input,
-                            iter=2000, warmup=1000,
+                            iter=iter, warmup=warmup,
                             chains=4, seed=123,
                             control=list(adapt_delta=adapt.delta))
     }
