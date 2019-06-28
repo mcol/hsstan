@@ -111,8 +111,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
     model.type <- match.arg(model.type)
 
     ## create the design matrix
-    model <- paste("~", paste(c(covariates, biomarkers), collapse=" + "))
-    X <- model.matrix(as.formula(model), data=x)
+    X <- model.matrix(reformulate(c(covariates, biomarkers)), data=x)
     P <- ncol(X)
     U <- P - length(biomarkers)
     which.unpenalized <- 1:U
@@ -232,8 +231,7 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     model.type <- match.arg(model.type)
 
     ## create the design matrix
-    model <- paste("~", paste(c(covariates, biomarkers), collapse=" + "))
-    X <- model.matrix(as.formula(model), data=x)
+    X <- model.matrix(reformulate(c(covariates, biomarkers)), data=x)
     N <- nrow(X)
     if (N != length(y)) {
         stop("Missing values present in the design matrix")
