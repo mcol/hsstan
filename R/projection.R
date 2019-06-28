@@ -145,9 +145,9 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         else {
             pd <- dnorm(yt, xt %*% wp, sqrt(sigma2p))
         }
-        mlpd <- mean(log(rowMeans(pd)))
+        elpd <- sum(log(rowMeans(pd)))
 
-        return(list(fit=submodel$fit, kl=submodel$kl, mlpd=mlpd))
+        return(list(fit=submodel$fit, kl=submodel$kl, elpd=elpd))
     }
 
     validate.hsstan(samples)
@@ -176,8 +176,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     ## U is number of unpenalized variables (always chosen) including intercept
     P <- ncol(x)
     U <- ncol(beta.samples$beta_u)
-    kl <- mlpd <- rep(0, P - U + 1)
-    cat(sprintf("%58s  %8s %9s\n", "Model", "KL", "MLPD"))
+    kl <- elpd <- rep(0, P - U + 1)
+    cat(sprintf("%58s  %8s %9s\n", "Model", "KL", "ELPD"))
 
     ## start from the model having only unpenalized variables
     chosen <- 1:U
@@ -185,9 +185,9 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     sub <- fit.submodel(x, w, sigma2, fit, chosen, xt, yt, is.logistic)
     fitp <- sub$fit
     kl[1] <- sub$kl
-    mlpd[1] <- sub$mlpd
+    elpd[1] <- sub$elpd
     cat(sprintf("%58s  %8.5f  %8.5f\n",
-                "Initial set of covariates", kl[1], mlpd[1]))
+                "Initial set of covariates", kl[1], elpd[1]))
 
     ## add variables one at a time
     for (k in 2:(P - U + 1)) {
@@ -198,9 +198,9 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         sub <- fit.submodel(x, w, sigma2, fit, chosen, xt, yt, is.logistic)
         fitp <- sub$fit
         kl[k] <- sub$kl
-        mlpd[k] <- sub$mlpd
+        elpd[k] <- sub$elpd
         cat(sprintf(" + %55s  %8.5f  %8.5f\n",
-                    colnames(x)[chosen[U + k - 1]], kl[k], mlpd[k]))
+                    colnames(x)[chosen[U + k - 1]], kl[k], elpd[k]))
 
         if (length(chosen) - U == max.num.pred)
             break
@@ -212,12 +212,12 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     ## remove trailing zeros
     len <- length(chosen) - U + 1
     kl <- kl[1:len]
-    mlpd <- mlpd[1:len]
-    delta.mlpd <- mlpd - full$mlpd
+    elpd <- elpd[1:len]
+    delta.elpd <- elpd - full$elpd
 
     res <- data.frame(var=c("Initial set of covariates",
                             colnames(x)[setdiff(chosen, 1:U)]),
-                      kl=kl, mlpd=mlpd, delta.mlpd=delta.mlpd)
+                      kl=kl, elpd=elpd, delta.elpd=delta.elpd)
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)
 
