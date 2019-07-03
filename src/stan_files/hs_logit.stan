@@ -50,15 +50,18 @@ transformed parameters {
   // penalized regression parameters
   vector[P-U] beta_p;
 
-  // global penalty parameter
-  real <lower=0> tau;
+  // nested block to declare local variables
+  {
+    // global penalty parameter
+    real tau;
 
-  // local penalty parameters
-  vector <lower=0>[P-U] lambda;
+    // local penalty parameters
+    vector[P-U] lambda;
 
-  tau = r1_global * sqrt(r2_global);
-  lambda = r1_local .* sqrt(r2_local);
-  beta_p = z .* lambda * tau;
+    tau = r1_global * sqrt(r2_global);
+    lambda = r1_local .* sqrt(r2_local);
+    beta_p = z .* lambda * tau;
+  }
 }
 
 model {
