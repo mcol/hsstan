@@ -108,6 +108,9 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
     stopifnot(nrow(x) == length(y))
     stopifnot(all(covariates %in% colnames(x)))
     stopifnot(all(biomarkers %in% colnames(x)))
+    if (!is.numeric(y)) {
+        stop("Outcome variable must be numeric")
+    }
     model.type <- match.arg(model.type)
 
     ## create the design matrix
@@ -228,6 +231,9 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     stopifnot(nrow(x) == length(y))
     stopifnot(all(covariates %in% colnames(x)))
     stopifnot(all(biomarkers %in% colnames(x)))
+    if (!is.numeric(y)) {
+        stop("Outcome variable must be numeric")
+    }
     model.type <- match.arg(model.type)
 
     ## create the design matrix
