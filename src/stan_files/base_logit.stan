@@ -29,21 +29,17 @@ parameters {
   vector[U] beta_u;
 }
 
-transformed parameters {
+model {
 
   // linear predictor
-  vector[N_train] theta_train;
-
-  theta_train = X_train[, 1:U] * beta_u;
-}
-
-model {
+  vector[N_train] mu;
+  mu = X_train[, 1:U] * beta_u;
 
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, 1000);
 
   // likelihood
-  y_train ~ bernoulli_logit(theta_train);
+  y_train ~ bernoulli_logit(mu);
 }
 
 generated quantities {

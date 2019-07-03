@@ -56,16 +56,16 @@ transformed parameters {
   // local penalty parameters
   vector <lower=0>[P-U] lambda;
 
-  // linear predictor
-  vector[N_train] theta_train;
-
   tau = r1_global * sqrt(r2_global);
   lambda = r1_local .* sqrt(r2_local);
   beta_p = z .* lambda * tau;
-  theta_train = X_train[, 1:U] * beta_u + X_train[, (U+1):P] * beta_p;
 }
 
 model {
+
+  // linear predictor
+  vector[N_train] mu;
+  mu = X_train[, 1:U] * beta_u + X_train[, (U+1):P] * beta_p;
 
   // half t-priors for lambdas (nu = 1 corresponds to horseshoe)
   z ~ normal(0, 1);
@@ -80,7 +80,7 @@ model {
   beta_u ~ normal(0, 1000);
 
   // likelihood
-  y_train ~ bernoulli_logit(theta_train);
+  y_train ~ bernoulli_logit(mu);
 }
 
 generated quantities {

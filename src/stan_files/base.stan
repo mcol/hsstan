@@ -32,15 +32,11 @@ parameters {
   real <lower=0> sigma;
 }
 
-transformed parameters {
+model {
 
   // linear predictor
-  vector[N_train] theta_train;
-
-  theta_train = X_train[, 1:U] * beta_u;
-}
-
-model {
+  vector[N_train] mu;
+  mu = X_train[, 1:U] * beta_u;
 
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, 1000);
@@ -49,7 +45,7 @@ model {
   sigma ~ inv_gamma(1, 1);
 
   // likelihood
-  y_train ~ normal(theta_train, sigma);
+  y_train ~ normal(mu, sigma);
 }
 
 generated quantities {
