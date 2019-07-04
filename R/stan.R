@@ -296,10 +296,9 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     }
 
     ## assign proper names
-    par.idx <- unlist(lapply(c("beta_u", "beta_p"),
-                             function(z) grep(z, samples@sim$fnames_oi)))
+    par.idx <- grep("^beta_[up]", names(samples))
     stopifnot(length(par.idx) == ncol(X))
-    samples@sim$fnames_oi[par.idx] <- colnames(X)
+    names(samples)[par.idx] <- colnames(X)
 
     ## linear predictor of test data, regression coefficients and
     ## residual standard deviation
