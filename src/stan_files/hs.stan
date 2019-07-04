@@ -17,7 +17,7 @@ data {
   int N_test;
 
   // prior standard deviation for the unpenalised variables
-  int <lower=0> scale_u;
+  real <lower=0> scale_u;
 
   // degrees of freedom of t distribution
   real <lower=1> nu;
