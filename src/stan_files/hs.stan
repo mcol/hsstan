@@ -94,9 +94,3 @@ model {
   // likelihood
   y_train ~ normal(mu, sigma);
 }
-
-generated quantities {
-
-  // predicted outcome on widthdrawn data
-  vector[N_test] y_pred = X_test[, 1:U] * beta_u + X_test[, (U+1):P] * beta_p;
-}

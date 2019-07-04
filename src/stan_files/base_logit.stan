@@ -44,9 +44,3 @@ model {
   // likelihood
   y_train ~ bernoulli_logit(mu);
 }
-
-generated quantities {
-
-  // predicted outcome on widthdrawn data
-  vector[N_test] y_pred = X_test[, 1:U] * beta_u;
-}

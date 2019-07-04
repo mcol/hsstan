@@ -186,7 +186,8 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
-        y_pred <- posterior.means(samples, "y_pred")
+        par.idx <- grep("^beta_[up]", names(samples))
+        y_pred <- colMeans(as.matrix(samples)[, par.idx] %*% t(X_test))
         fitted <- if(logit) to.prob(y_pred) else y_pred
         betas <- get.coefficients(samples, colnames(X))
         coefs <- c(betas$unpenalized, betas$penalized)
@@ -302,7 +303,7 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 
     ## linear predictor of test data, regression coefficients and
     ## residual standard deviation
-    y_pred <- posterior.means(samples, "y_pred")
+    y_pred <- colMeans(as.matrix(samples)[, par.idx] %*% t(X))
     fitted <- if(logit) to.prob(y_pred) else y_pred
     betas <- get.coefficients(samples, colnames(X))
     coefs <- c(betas$unpenalized, betas$penalized)
