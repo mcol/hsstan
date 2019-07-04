@@ -92,6 +92,9 @@ get.coefficients <- function(samples, coeff.names) {
 #'        (\code{TRUE} by default).
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation (0.99 by default).
+#' @param iter Number of iterations in each chain (including warmup).
+#' @param warmup Number of warmup iterations per chain (by default, half the
+#'        total number of iterations).
 #' @param scale.u Prior scale (standard deviation) for the unpenalised
 #'        covariates.
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
@@ -220,6 +223,9 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #' @param standardize Whether the design matrix should be standardized.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation (0.99 by default).
+#' @param iter Number of iterations in each chain (including warmup).
+#' @param warmup Number of warmup iterations per chain (by default, half the
+#'        total number of iterations).
 #' @param scale.u Prior scale (standard deviation) for the unpenalised
 #'        covariates.
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
