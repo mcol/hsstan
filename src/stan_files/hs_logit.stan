@@ -37,11 +37,8 @@ parameters {
   // unpenalized regression parameters
   vector[U] beta_u;
 
-  // auxiliary variable
+  // auxiliary variables
   vector[P-U] z;
-
-  // t priors are specified as mixtures: normal scaled by sqrt(~ inv_gamma)
-  // gives better sampler than specifying t priors directly
   real<lower=0> r1_global;
   real<lower=0> r2_global;
   vector<lower=0>[P-U] r1_local;
@@ -55,14 +52,12 @@ transformed parameters {
 
   // nested block to declare local variables
   {
-    // global penalty parameter
-    real tau;
+    // global shrinkage parameter
+    real tau = r1_global * sqrt(r2_global);
 
-    // local penalty parameters
-    vector[P-U] lambda;
+    // local shrinkage parameters
+    vector[P-U] lambda = r1_local .* sqrt(r2_local);
 
-    tau = r1_global * sqrt(r2_global);
-    lambda = r1_local .* sqrt(r2_local);
     beta_p = z .* lambda * tau;
   }
 }
@@ -70,8 +65,7 @@ transformed parameters {
 model {
 
   // linear predictor
-  vector[N_train] mu;
-  mu = X_train[, 1:U] * beta_u + X_train[, (U+1):P] * beta_p;
+  vector[N_train] mu = X_train[, 1:U] * beta_u + X_train[, (U+1):P] * beta_p;
 
   // half t-priors for lambdas (nu = 1 corresponds to horseshoe)
   z ~ normal(0, 1);
