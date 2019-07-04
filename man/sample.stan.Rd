@@ -5,7 +5,9 @@
 \title{Runs a Stan model on all available data.}
 \usage{
 sample.stan(x, y, covariates, biomarkers = NULL, logit = FALSE,
-  standardize = TRUE, nu = 3, model.type = c("mc", "vb"))
+  standardize = TRUE, adapt.delta = 0.99, iter = 2000,
+  warmup = iter/2, scale.u = 20, nu = 3, model.type = c("mc",
+  "vb"))
 }
 \arguments{
 \item{x}{Data.frame of predictors.}
@@ -24,6 +26,17 @@ covariates is used.}
 logistic regression.}
 
 \item{standardize}{Whether the design matrix should be standardized.}
+
+\item{adapt.delta}{Target average proposal acceptance probability for
+adaptation (0.99 by default).}
+
+\item{iter}{Number of iterations in each chain (including warmup).}
+
+\item{warmup}{Number of warmup iterations per chain (by default, half the
+total number of iterations).}
+
+\item{scale.u}{Prior scale (standard deviation) for the unpenalised
+covariates.}
 
 \item{nu}{Number of degrees of freedom for the half-Student-t priors.}
 
