@@ -92,6 +92,8 @@ get.coefficients <- function(samples, coeff.names) {
 #'        (\code{TRUE} by default).
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation (0.99 by default).
+#' @param scale.u Prior scale (standard deviation) for the unpenalised
+#'        covariates.
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
 #'        \code{"vb"} for variational Bayes.
@@ -103,7 +105,8 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                            logit=FALSE, standardize=TRUE,
                            store.samples=TRUE, adapt.delta=0.99,
                            iter=1000, warmup=iter / 2,
-                           nu=3, model.type=c("mc", "vb")) {
+                           scale.u=20, nu=3,
+                           model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
     stopifnot(all(covariates %in% colnames(x)))
@@ -168,7 +171,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
         data.input <- list(N_train=N_train, N_test=N_test,
                            y_train=y_train, y_test=y_test,
                            X_train=X_train, X_test=X_test,
-                           P=P, U=U, nu=nu)
+                           P=P, U=U, scale_u=scale.u, nu=nu)
 
         if (model.type == "mc") {
             samples <- sampling(stanmodels[[model]], data=data.input,
@@ -216,6 +219,8 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #' @param standardize Whether the design matrix should be standardized.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation (0.99 by default).
+#' @param scale.u Prior scale (standard deviation) for the unpenalised
+#'        covariates.
 #' @param nu Number of degrees of freedom for the half-Student-t priors.
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
 #'        \code{"vb"} for variational Bayes.
@@ -226,7 +231,8 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
                         logit=FALSE, standardize=TRUE, adapt.delta=0.99,
                         iter=2000, warmup=iter / 2,
-                        nu=3, model.type=c("mc", "vb")) {
+                        scale.u=20, nu=3,
+                        model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
     stopifnot(all(covariates %in% colnames(x)))
@@ -271,7 +277,7 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     data.input <- list(N_train=N, N_test=N,
                        y_train=y, y_test=y,
                        X_train=X, X_test=X,
-                       P=P, U=U, nu=nu)
+                       P=P, U=U, scale_u=scale.u, nu=nu)
 
     ## choose the model to be fitted
     model <- ifelse(length(biomarkers) == 0, "base", "hs")

@@ -10,14 +10,17 @@ data {
   // number of unpenalized columns in model matrix
   int U;
 
-  // degrees of freedom of t distribution
-  real <lower=1> nu;
-
   // number of training observations
   int N_train;
 
   // number of test observations
   int N_test;
+
+  // prior standard deviation for the unpenalised variables
+  int <lower=0> scale_u;
+
+  // degrees of freedom of t distribution
+  real <lower=1> nu;
 
   // X matrix for training data
   matrix[N_train, P] X_train;
@@ -83,7 +86,7 @@ model {
   r2_global ~ inv_gamma(0.5, 0.5);
 
   // unpenalized coefficients including intercept
-  beta_u ~ normal(0, 1000);
+  beta_u ~ normal(0, scale_u);
 
   // noninformative gamma priors on scale parameter are not advised
   sigma ~ inv_gamma(1, 1);

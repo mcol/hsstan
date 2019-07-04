@@ -13,6 +13,9 @@ data {
   // number of test observations
   int N_test;
 
+  // prior standard deviation for the unpenalised variables
+  int <lower=0> scale_u;
+
   // X matrix for training data
   matrix[N_train, U] X_train;
 
@@ -39,7 +42,7 @@ model {
   mu = X_train[, 1:U] * beta_u;
 
   // unpenalized coefficients including intercept
-  beta_u ~ normal(0, 1000);
+  beta_u ~ normal(0, scale_u);
 
   // noninformative gamma priors on scale parameter are not advised
   sigma ~ inv_gamma(1, 1);
