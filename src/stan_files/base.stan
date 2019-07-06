@@ -13,9 +13,6 @@ data {
   // number of test observations
   int N_test;
 
-  // prior standard deviation for the unpenalised variables
-  real <lower=0> scale_u;
-
   // X matrix for training data
   matrix[N_train, U] X_train;
 
@@ -23,10 +20,13 @@ data {
   matrix[N_test, U] X_test;
 
   // continuous response variable
-  real y_train[N_train];
+  vector[N_train] y_train;
 
   // continuous response variable for test data
-  real y_test[N_test];
+  vector[N_test] y_test;
+
+  // prior standard deviation for the unpenalised variables
+  real<lower=0> scale_u;
 }
 
 parameters {

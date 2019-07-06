@@ -16,12 +16,6 @@ data {
   // number of test observations
   int N_test;
 
-  // prior standard deviation for the unpenalised variables
-  real <lower=0> scale_u;
-
-  // degrees of freedom of t distribution
-  real <lower=1> nu;
-
   // X matrix for training data
   matrix[N_train, P] X_train;
 
@@ -29,10 +23,16 @@ data {
   matrix[N_test, P] X_test;
 
   // continuous response variable
-  real y_train[N_train];
+  vector[N_train] y_train;
 
   // continuous response variable for test data
-  real y_test[N_test];
+  vector[N_test] y_test;
+
+  // prior standard deviation for the unpenalised variables
+  real<lower=0> scale_u;
+
+  // degrees of freedom of t distribution
+  real<lower=1> nu;
 }
 
 parameters {
