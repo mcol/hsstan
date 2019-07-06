@@ -24,6 +24,9 @@ data {
 
   // binary response variable
   int<lower=0, upper=1> y_train[N_train];
+
+  // binary response variable for test data
+  int<lower=0, upper=1> y_test[N_test];
 }
 
 parameters {
@@ -35,12 +38,20 @@ parameters {
 model {
 
   // linear predictor
-  vector[N_train] mu;
-  mu = X_train[, 1:U] * beta_u;
+  vector[N_train] mu = X_train * beta_u;
 
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, scale_u);
 
   // likelihood
   y_train ~ bernoulli_logit(mu);
+}
+
+generated quantities {
+
+  // test log-likelihood
+  vector[N_test] log_lik;
+  for (n in 1:N_test) {
+    log_lik[n] = bernoulli_logit_lpmf(y_test[n] | X_test[n] * beta_u);
+  }
 }

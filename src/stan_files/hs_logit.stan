@@ -30,6 +30,9 @@ data {
 
   // binary response variable
   int<lower=0, upper=1> y_train[N_train];
+
+  // binary response variable for test data
+  int<lower=0, upper=1> y_test[N_test];
 }
 
 parameters {
@@ -81,4 +84,14 @@ model {
 
   // likelihood
   y_train ~ bernoulli_logit(mu);
+}
+
+generated quantities {
+
+  // test log-likelihood
+  vector[N_test] log_lik;
+  for (n in 1:N_test) {
+    log_lik[n] = bernoulli_logit_lpmf(y_test[n] | X_test[n, 1:U] * beta_u +
+                                                  X_test[n, (U+1):P] * beta_p);
+  }
 }

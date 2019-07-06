@@ -30,6 +30,9 @@ data {
 
   // continuous response variable
   real y_train[N_train];
+
+  // continuous response variable for test data
+  real y_test[N_test];
 }
 
 parameters {
@@ -87,4 +90,14 @@ model {
 
   // likelihood
   y_train ~ normal(mu, sigma);
+}
+
+generated quantities {
+
+  // test log-likelihood
+  vector[N_test] log_lik;
+  for (n in 1:N_test) {
+    log_lik[n] = normal_lpdf(y_test[n] | X_test[n, 1:U] * beta_u +
+                                         X_test[n, (U+1):P] * beta_p, sigma);
+  }
 }

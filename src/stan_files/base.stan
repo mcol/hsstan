@@ -24,6 +24,9 @@ data {
 
   // continuous response variable
   real y_train[N_train];
+
+  // continuous response variable for test data
+  real y_test[N_test];
 }
 
 parameters {
@@ -38,8 +41,7 @@ parameters {
 model {
 
   // linear predictor
-  vector[N_train] mu;
-  mu = X_train[, 1:U] * beta_u;
+  vector[N_train] mu = X_train[, 1:U] * beta_u;
 
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, scale_u);
@@ -49,4 +51,13 @@ model {
 
   // likelihood
   y_train ~ normal(mu, sigma);
+}
+
+generated quantities {
+
+  // test log-likelihood
+  vector[N_test] log_lik;
+  for (n in 1:N_test) {
+    log_lik[n] = normal_lpdf(y_test[n] | X_test[n] * beta_u, sigma);
+  }
 }
