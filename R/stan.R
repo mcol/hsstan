@@ -102,6 +102,7 @@ get.coefficients <- function(samples, coeff.names) {
 #'        \code{"vb"} for variational Bayes.
 #'
 #' @importFrom rstan stan_model
+#' @importFrom stats model.matrix reformulate sd
 #' @importMethodsFrom rstan sampling vb
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
@@ -233,6 +234,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #'        \code{"vb"} for variational Bayes.
 #'
 #' @importFrom rstan stan_model
+#' @importFrom stats model.matrix reformulate
 #' @importMethodsFrom rstan sampling vb
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
@@ -332,6 +334,8 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 #'        CSV format.
 #'
 #' @importFrom pROC roc
+#' @importFrom stats cor var
+#' @importFrom utils write.csv
 #' @export
 get.cv.performance <- function(hs.cv, out.csv=NULL) {
 

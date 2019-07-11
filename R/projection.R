@@ -29,6 +29,7 @@
 #'        projection subspace.
 #' @param is.logistic Set to \code{TRUE} for a logistic regression model.
 #'
+#' @importFrom stats binomial glm.fit quasibinomial
 #' @keywords internal
 lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 
@@ -126,6 +127,8 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 #' @param out.csv If not \code{NULL}, the name of a CSV file to save the
 #'        output to.
 #'
+#' @importFrom stats dbinom dnorm
+#' @importFrom utils write.csv
 #' @importMethodsFrom rstan extract
 #' @export
 projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
@@ -247,6 +250,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' predictor starting from the initial set of unpenalized covariates.
 #'
 #' @import ggplot2
+#' @importFrom grDevices dev.off png
 #' @method plot projsel
 #' @export
 plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
