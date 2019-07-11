@@ -439,7 +439,7 @@ to.prob <- function(lin.pred) {
 #'
 #' @noRd
 validate.hsstan <- function(obj) {
-    if (class(obj) != "hsstan") {
+    if (!inherits(obj, "hsstan")) {
         stop("Not an object of class 'hsstan'.")
     }
 }
