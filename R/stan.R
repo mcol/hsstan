@@ -207,11 +207,13 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                           error=function(e) return(1))
 
         if (!store.samples) samples <- NA
-        list(stanfit=samples, betas=betas, coefficients=coefs,
-             linear.predictors=y_pred, fitted.values=fitted,
-             sigma=sigma,
-             X_train=X_train, X_test=X_test,
-             y_train=y_train, y_test=y_test, train=train, test=test)
+        obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
+                    linear.predictors=y_pred, fitted.values=fitted,
+                    sigma=sigma, train=train, test=test,
+                    X_train=X_train, X_test=X_test,
+                    y_train=y_train, y_test=y_test)
+        class(obj) <- "hsstan"
+        return(obj)
     }
 
     return(cv)
