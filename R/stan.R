@@ -89,7 +89,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param standardize Whether the design matrix should be standardized
 #'        (\code{TRUE} by default).
 #' @param store.samples Whether the posterior samples should be saved
-#'        (\code{TRUE} by default).
+#'        (\code{FALSE} by default).
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
@@ -109,7 +109,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                            logit=FALSE, standardize=TRUE,
-                           store.samples=TRUE, adapt.delta=NULL,
+                           store.samples=FALSE, adapt.delta=NULL,
                            iter=1000, warmup=iter / 2,
                            scale.u=20, nu=3,
                            model.type=c("mc", "vb")) {
