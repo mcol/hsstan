@@ -91,7 +91,9 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param store.samples Whether the posterior samples should be saved
 #'        (\code{TRUE} by default).
 #' @param adapt.delta Target average proposal acceptance probability for
-#'        adaptation (0.99 by default).
+#'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
+#'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
+#'        base models.
 #' @param iter Number of iterations in each chain (including warmup).
 #' @param warmup Number of warmup iterations per chain (by default, half the
 #'        total number of iterations).
@@ -107,7 +109,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                            logit=FALSE, standardize=TRUE,
-                           store.samples=TRUE, adapt.delta=0.99,
+                           store.samples=TRUE, adapt.delta=NULL,
                            iter=1000, warmup=iter / 2,
                            scale.u=20, nu=3,
                            model.type=c("mc", "vb")) {
@@ -119,6 +121,17 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
         stop("Outcome variable must be numeric")
     }
     model.type <- match.arg(model.type)
+
+    ## choose the model to be fitted
+    model <- ifelse(length(biomarkers) == 0, "base", "hs")
+    if (logit) model <- paste0(model, "_logit")
+
+    ## set or check adapt.delta
+    if (is.null(adapt.delta)) {
+        adapt.delta <- ifelse(grepl("hs", model), 0.99, 0.95)
+    } else {
+        validate.adapt.delta(adapt.delta)
+    }
 
     ## create the design matrix
     X <- model.matrix(reformulate(c(covariates, biomarkers)), data=x)
@@ -132,10 +145,6 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 
     ## names of variables to be standardized
     stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
-
-    ## choose the model to be fitted
-    model <- ifelse(length(biomarkers) == 0, "base", "hs")
-    if (logit) model <- paste0(model, "_logit")
 
     ## cross-validation
     fold <- NULL   # silence a note raised by R CMD check
@@ -223,7 +232,9 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #'        logistic regression.
 #' @param standardize Whether the design matrix should be standardized.
 #' @param adapt.delta Target average proposal acceptance probability for
-#'        adaptation (0.99 by default).
+#'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
+#'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
+#'        base models.
 #' @param iter Number of iterations in each chain (including warmup).
 #' @param warmup Number of warmup iterations per chain (by default, half the
 #'        total number of iterations).
@@ -238,7 +249,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 #' @importMethodsFrom rstan sampling vb
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
-                        logit=FALSE, standardize=TRUE, adapt.delta=0.99,
+                        logit=FALSE, standardize=TRUE, adapt.delta=NULL,
                         iter=2000, warmup=iter / 2,
                         scale.u=20, nu=3,
                         model.type=c("mc", "vb")) {
@@ -250,6 +261,17 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
         stop("Outcome variable must be numeric")
     }
     model.type <- match.arg(model.type)
+
+    ## choose the model to be fitted
+    model <- ifelse(length(biomarkers) == 0, "base", "hs")
+    if (logit) model <- paste0(model, "_logit")
+
+    ## set or check adapt.delta
+    if (is.null(adapt.delta)) {
+        adapt.delta <- ifelse(grepl("hs", model), 0.99, 0.95)
+    } else {
+        validate.adapt.delta(adapt.delta)
+    }
 
     ## create the design matrix
     X <- model.matrix(reformulate(c(covariates, biomarkers)), data=x)
@@ -287,10 +309,6 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
                        y_train=y, y_test=y,
                        X_train=X, X_test=X,
                        P=P, U=U, scale_u=scale.u, nu=nu)
-
-    ## choose the model to be fitted
-    model <- ifelse(length(biomarkers) == 0, "base", "hs")
-    if (logit) model <- paste0(model, "_logit")
 
     if (model.type == "mc") {
         samples <- sampling(stanmodels[[model]], data=data.input,
@@ -468,5 +486,29 @@ to.prob <- function(lin.pred) {
 validate.hsstan <- function(obj) {
     if (!inherits(obj, "hsstan")) {
         stop("Not an object of class 'hsstan'.")
+    }
+}
+
+#' Validate adapt.delta
+#'
+#' Checks that the \code{adapt.delta} value is valid.
+#'
+#' @param adapt.delta Value to be checked.
+#'
+#' @return
+#' A valid acceptance probability for adaptation.
+#' Throws an error if the value passed it not a valid acceptance probability
+#' for adaptation.
+#'
+#' @noRd
+validate.adapt.delta <- function(adapt.delta) {
+    if (!is.numeric(adapt.delta) || length(adapt.delta) != 1) {
+        stop("'adapt.delta' must be a single numeric value.")
+    }
+    if (adapt.delta < 0.8) {
+        stop("'adapt.delta' must be at least 0.8.")
+    }
+    if (adapt.delta >= 1) {
+        stop("'adapt.delta' must be below 1.")
     }
 }
