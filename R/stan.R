@@ -145,6 +145,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 
     ## names of variables to be standardized
     stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
+    stand.idx <- which(colnames(X) %in% stand.cols)
 
     ## cross-validation
     fold <- NULL   # silence a note raised by R CMD check
@@ -160,24 +161,22 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
 
         ## standardize continuous outcome
         if (length(unique(y_train)) > 2) {
-            train.mean <- mean(y_train, na.rm=TRUE)
-            train.sd <- sd(y_train, na.rm=TRUE)
-            y_train <- (y_train - train.mean) / train.sd
-            y_test <- (y_test - train.mean) / train.sd
+            y_train <- scale(y_train)
+            train.mu <- attr(y_train, "scaled:center")
+            train.sd <- attr(y_train, "scaled:scale")
+            y_train <- as.numeric(y_train)
+            y_test <- as.numeric(scale(y_test, train.mu, train.sd))
         }
 
         ## standardize all columns corresponding to numerical variables: this
         ## excludes those generated from factor/character variables and the
         ## intercept column
         if (standardize) {
-            train.mean <- colMeans(X_train, na.rm=TRUE)
-            train.sd <- apply(X_train, 2, sd, na.rm=TRUE)
-            train.mean[!colnames(X_train) %in% stand.cols] <- 0
-            train.sd[!colnames(X_train) %in% stand.cols] <- 1
-            X_train <- ((X_train - rep(train.mean, each=N_train))
-                         %*% diag(1 / train.sd))
-            X_test <- ((X_test - rep(train.mean, each=N_test))
-                        %*% diag(1 / train.sd))
+            X_train.stand.idx <- scale(X_train[, stand.idx])
+            train.mu <- attr(X_train.stand.idx, "scaled:center")
+            train.sd <- attr(X_train.stand.idx, "scaled:scale")
+            X_train[, stand.idx] <- X_train.stand.idx
+            X_test[, stand.idx] <- scale(X_test[, stand.idx], train.mu, train.sd)
         }
 
         ## parameters not used by a model are ignored
