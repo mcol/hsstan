@@ -68,11 +68,10 @@ get.coefficients <- function(samples, coeff.names) {
     return(list(unpenalized=beta.u, penalized=beta.p))
 }
 
-
-#' Runs a cross-validated Stan model
+#' Runs a plain or cross-validated Stan model
 #'
 #' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
-#' cross-validation folds.
+#' cross-validation folds (if specified) or over all the data.
 #'
 #' @param x Data.frame of predictors.
 #' @param y Vector of outcomes. For a logistic regression model, this is
@@ -83,18 +82,21 @@ get.coefficients <- function(samples, coeff.names) {
 #'        If it is specified as an empty vector, a model with only unpenalized
 #'        covariates is used.
 #' @param folds List of cross-validation folds, where each element contains
-#'        the indices of the test observations.
+#'        the indices of the test observations. If \code{NULL} (default), no
+#'        cross-validation is performed.
 #' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
 #'        logistic regression.
 #' @param standardize Whether the design matrix should be standardized
 #'        (\code{TRUE} by default).
 #' @param store.samples Whether the posterior samples should be saved
-#'        (\code{FALSE} by default).
+#'        (by default, \code{FALSE} for cross-validation and \code{TRUE}
+#'        otherwise).
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
 #'        base models.
-#' @param iter Number of iterations in each chain (including warmup).
+#' @param iter Total number of iterations in each chain, including warmup
+#'        (by default, 1000 iterations for cross-validation and 2000 otherwise).
 #' @param warmup Number of warmup iterations per chain (by default, half the
 #'        total number of iterations).
 #' @param scale.u Prior scale (standard deviation) for the unpenalised
@@ -104,15 +106,14 @@ get.coefficients <- function(samples, coeff.names) {
 #'        \code{"vb"} for variational Bayes.
 #'
 #' @importFrom rstan stan_model
-#' @importFrom stats model.matrix reformulate sd
+#' @importFrom stats model.matrix reformulate
 #' @importMethodsFrom rstan sampling vb
 #' @export
-sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
-                           logit=FALSE, standardize=TRUE,
-                           store.samples=FALSE, adapt.delta=NULL,
-                           iter=1000, warmup=iter / 2,
-                           scale.u=20, nu=3,
-                           model.type=c("mc", "vb")) {
+hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
+                   iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
+                   scale.u=20, nu=3, store.samples=is.null(folds),
+                   standardize=TRUE,
+                   adapt.delta=NULL, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
     stopifnot(all(covariates %in% colnames(x)))
@@ -143,15 +144,30 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
     N <- nrow(X)
     num.folds <- length(folds)
 
+    ## whether it's a proper cross-validation
+    is.cross.validation <- num.folds > 1
+
     ## names of variables to be standardized
     stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
     stand.idx <- which(colnames(X) %in% stand.cols)
 
-    ## cross-validation
+    ## loop over the cross-validation folds
     fold <- NULL   # silence a note raised by R CMD check
     cv <- foreach(fold=1:num.folds) %dopar% {
-        test <- 1:N %in% folds[[fold]]
-        train <- !test
+
+        ## create a proper training/test split
+        if (is.cross.validation) {
+            test <- 1:N %in% folds[[fold]]
+            train <- !test
+        }
+
+        ## use all available data for both training and testing: this
+        ## effectively computes the fit of the model (y_pred) for all
+        ## observations
+        else {
+            train <- test <- rep(TRUE, N)
+        }
+
         X_train <- X[train, ]
         y_train <- y[train]
         N_train <- nrow(X_train)
@@ -196,9 +212,13 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
                           init="random", algorithm="meanfield")
         }
 
+        ## assign proper names
+        par.idx <- grep("^beta_[up]", names(samples))
+        stopifnot(length(par.idx) == ncol(X))
+        names(samples)[par.idx] <- colnames(X)
+
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
-        par.idx <- grep("^beta_[up]", names(samples))
         y_pred <- colMeans(as.matrix(samples)[, par.idx] %*% t(X_test))
         fitted <- if(logit) to.prob(y_pred) else y_pred
         betas <- get.coefficients(samples, colnames(X))
@@ -210,140 +230,46 @@ sample.stan.cv <- function(x, y, covariates, biomarkers, folds,
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
                     linear.predictors=y_pred, fitted.values=fitted,
                     sigma=sigma, train=train, test=test,
-                    X_train=X_train, X_test=X_test,
+                    data=X_train,
                     y_train=y_train, y_test=y_test)
+        if (is.cross.validation)
+            obj <- c(obj, list(withdrawn.data=X_test))
         class(obj) <- "hsstan"
         return(obj)
     }
 
-    return(cv)
+    return(if(is.cross.validation) cv else cv[[1]])
 }
 
-#' Runs a Stan model on all available data.
+#' @section Note:
+#' \code{sample.stan} and \code{sample.stan.cv} are thin wrappers around
+#' \code{hsstan} provided for backward compatibility. They are considered
+#' deprecated.
 #'
-#' @param x Data.frame of predictors.
-#' @param y Vector of outcomes. For a logistic regression model, this is
-#'        expected to contain only \code{0-1} entries.
-#' @param covariates Names of the variables to be used as (unpenalized)
-#'        predictors.
-#' @param biomarkers Names of the variables to be used as penalized predictors.
-#'        If it is specified as an empty vector, a model with only unpenalized
-#'        covariates is used.
-#' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
-#'        logistic regression.
-#' @param standardize Whether the design matrix should be standardized.
-#' @param adapt.delta Target average proposal acceptance probability for
-#'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
-#'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
-#'        base models.
-#' @param iter Number of iterations in each chain (including warmup).
-#' @param warmup Number of warmup iterations per chain (by default, half the
-#'        total number of iterations).
-#' @param scale.u Prior scale (standard deviation) for the unpenalised
-#'        covariates.
-#' @param nu Number of degrees of freedom for the half-Student-t priors.
-#' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
-#'        \code{"vb"} for variational Bayes.
+#' @param ... Further options passed to \code{hsstan}.
 #'
-#' @importFrom rstan stan_model
-#' @importFrom stats model.matrix reformulate
-#' @importMethodsFrom rstan sampling vb
+#' @rdname hsstan
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
-                        logit=FALSE, standardize=TRUE, adapt.delta=NULL,
-                        iter=2000, warmup=iter / 2,
-                        scale.u=20, nu=3,
-                        model.type=c("mc", "vb")) {
+                        logit=FALSE, ...) {
+    default.args <- list(x=x, y=y, covariates=covariates, biomarkers=biomarkers,
+                         folds=NULL, logit=logit, iter=2000)
+    input.args <- list(...)
+    default.args[names(input.args)] <- input.args
+    input.args[names(default.args)] <- NULL
+    do.call(hsstan, c(default.args, input.args))
+}
 
-    stopifnot(nrow(x) == length(y))
-    stopifnot(all(covariates %in% colnames(x)))
-    stopifnot(all(biomarkers %in% colnames(x)))
-    if (!is.numeric(y)) {
-        stop("Outcome variable must be numeric")
-    }
-    model.type <- match.arg(model.type)
-
-    ## choose the model to be fitted
-    model <- ifelse(length(biomarkers) == 0, "base", "hs")
-    if (logit) model <- paste0(model, "_logit")
-
-    ## set or check adapt.delta
-    if (is.null(adapt.delta)) {
-        adapt.delta <- ifelse(grepl("hs", model), 0.99, 0.95)
-    } else {
-        validate.adapt.delta(adapt.delta)
-    }
-
-    ## create the design matrix
-    X <- model.matrix(reformulate(c(covariates, biomarkers)), data=x)
-    N <- nrow(X)
-    if (N != length(y)) {
-        stop("Missing values present in the design matrix")
-    }
-
-    P <- ncol(X)
-    U <- P - length(biomarkers)
-    which.unpenalized <- 1:U
-    which.penalized <- setdiff(1:P, which.unpenalized)
-    X <- X[, c(which.unpenalized, which.penalized)]
-
-    ## standardize continuous outcome
-    if (length(unique(y)) > 2) {
-        y <- as.numeric(scale(y))
-    }
-
-    ## standardize all columns corresponding to numerical variables: this
-    ## excludes those generated from factor/character variables as well as
-    ## the intercept column
-    if (standardize) {
-        stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
-        stand.idx <- which(colnames(X) %in% stand.cols)
-        X[, stand.idx] <- scale(X[, stand.idx])
-    }
-
-    ## use all available data for both training and testing: this effectively
-    ## computes the fit of the model (y_pred) for all observations
-    train <- test <- rep(TRUE, N)
-
-    ## parameters not used by a model are ignored
-    data.input <- list(N_train=N, N_test=N,
-                       y_train=y, y_test=y,
-                       X_train=X, X_test=X,
-                       P=P, U=U, scale_u=scale.u, nu=nu)
-
-    if (model.type == "mc") {
-        samples <- sampling(stanmodels[[model]], data=data.input,
-                            iter=iter, warmup=warmup,
-                            chains=4, seed=123,
-                            control=list(adapt_delta=adapt.delta))
-    }
-    else {
-        samples <- vb(stanmodels[[model]], data=data.input,
-                      iter=50000, output_samples=2000,
-                      init="random", algorithm="meanfield")
-    }
-
-    ## assign proper names
-    par.idx <- grep("^beta_[up]", names(samples))
-    stopifnot(length(par.idx) == ncol(X))
-    names(samples)[par.idx] <- colnames(X)
-
-    ## linear predictor of test data, regression coefficients and
-    ## residual standard deviation
-    y_pred <- colMeans(as.matrix(samples)[, par.idx] %*% t(X))
-    fitted <- if(logit) to.prob(y_pred) else y_pred
-    betas <- get.coefficients(samples, colnames(X))
-    coefs <- c(betas$unpenalized, betas$penalized)
-    sigma <- tryCatch(posterior.means(samples, "sigma"),
-                      error=function(e) return(1))
-
-    obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
-                linear.predictors=y_pred, fitted.values=fitted,
-                sigma=sigma,
-                train=train, test=test,
-                data=X, y=y)
-    class(obj) <- "hsstan"
-    return(obj)
+#' @rdname hsstan
+#' @export
+sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
+                           logit=FALSE, ...) {
+    default.args <- list(x=x, y=y, covariates=covariates, biomarkers=biomarkers,
+                         folds=folds, logit=logit, iter=1000)
+    input.args <- list(...)
+    default.args[names(input.args)] <- input.args
+    input.args[names(default.args)] <- NULL
+    do.call(hsstan, c(default.args, input.args))
 }
 
 #' Extract measures of performance from the cross-validation results
