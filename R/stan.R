@@ -73,6 +73,11 @@ get.coefficients <- function(samples, coeff.names) {
 #' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
 #' cross-validation folds (if specified) or over all the data.
 #'
+#' The continuous predictors and outcome variable are standardized before
+#' fitting the models. In case of cross-validation, the test fold is
+#' standardized according to mean and standard deviation of the corresponding
+#' training fold.
+#'
 #' @param x Data.frame of predictors.
 #' @param y Vector of outcomes. For a logistic regression model, this is
 #'        expected to contain only \code{0-1} entries.
@@ -86,8 +91,6 @@ get.coefficients <- function(samples, coeff.names) {
 #'        cross-validation is performed.
 #' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
 #'        logistic regression.
-#' @param standardize Whether the design matrix should be standardized
-#'        (\code{TRUE} by default).
 #' @param store.samples Whether the posterior samples should be saved
 #'        (by default, \code{FALSE} for cross-validation and \code{TRUE}
 #'        otherwise).
@@ -112,7 +115,6 @@ get.coefficients <- function(samples, coeff.names) {
 hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=20, nu=3, store.samples=is.null(folds),
-                   standardize=TRUE,
                    adapt.delta=NULL, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -187,13 +189,11 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
         ## standardize all columns corresponding to numerical variables: this
         ## excludes those generated from factor/character variables and the
         ## intercept column
-        if (standardize) {
-            X_train.stand.idx <- scale(X_train[, stand.idx])
-            train.mu <- attr(X_train.stand.idx, "scaled:center")
-            train.sd <- attr(X_train.stand.idx, "scaled:scale")
-            X_train[, stand.idx] <- X_train.stand.idx
-            X_test[, stand.idx] <- scale(X_test[, stand.idx], train.mu, train.sd)
-        }
+        X_train.stand.idx <- scale(X_train[, stand.idx])
+        train.mu <- attr(X_train.stand.idx, "scaled:center")
+        train.sd <- attr(X_train.stand.idx, "scaled:scale")
+        X_train[, stand.idx] <- X_train.stand.idx
+        X_test[, stand.idx] <- scale(X_test[, stand.idx], train.mu, train.sd)
 
         ## parameters not used by a model are ignored
         data.input <- list(N_train=N_train, N_test=N_test,
