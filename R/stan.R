@@ -115,7 +115,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @export
 hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
-                   scale.u=20, nu=3, store.samples=is.null(folds), seed=123,
+                   scale.u=2, nu=3, store.samples=is.null(folds), seed=123,
                    adapt.delta=NULL, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
