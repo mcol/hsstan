@@ -385,7 +385,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
 #' @export loo
 #' @export
 loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
-    if (is.na(x$stanfit))
+    if (!inherits(x$stanfit, "stanfit"))
         stop("No posterior samples found: run 'hsstan' with store.samples=TRUE.")
     suppressWarnings(rstan::loo(x$stanfit, save_psis=save.psis, cores=cores))
 }
