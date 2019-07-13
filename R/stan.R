@@ -94,6 +94,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param store.samples Whether the posterior samples should be saved
 #'        (by default, \code{FALSE} for cross-validation and \code{TRUE}
 #'        otherwise).
+#' @param seed Integer defining the seed for the pseudo-random number generator.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
@@ -114,7 +115,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @export
 hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
-                   scale.u=20, nu=3, store.samples=is.null(folds),
+                   scale.u=20, nu=3, store.samples=is.null(folds), seed=123,
                    adapt.delta=NULL, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -204,7 +205,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
         if (model.type == "mc") {
             samples <- sampling(stanmodels[[model]], data=data.input,
                                 chains=4, iter=iter, warmup=warmup,
-                                seed=123, control=list(adapt_delta=adapt.delta))
+                                seed=seed, control=list(adapt_delta=adapt.delta))
         }
         else {
             samples <- vb(stanmodels[[model]], data=data.input,
