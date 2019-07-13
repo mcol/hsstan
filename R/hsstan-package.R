@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2018 Marco Colombo and Paul McKeigue
+## Copyright (c) 2018-2019 Marco Colombo and Paul McKeigue
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #'
 #' @docType package
 #' @name hsstan-package
-#' @aliases hsstan
 #' @import Rcpp
 #' @import methods
 #' @useDynLib hsstan, .registration = TRUE
