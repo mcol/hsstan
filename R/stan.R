@@ -301,9 +301,13 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
         (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
         (2 * y.obs - 1) * (log(prop.cases) - log(1 - prop.cases))
 
+    if (inherits(hs.cv, "hsstan")) {
+        hs.cv <- list(hs.cv)
+        num.folds <- 1
+    } else {
+        num.folds <- length(hs.cv)
+    }
     y.obs.all <- y.pred.hs.all <- NULL
-    sigma.hs.all <- NULL
-    num.folds <- length(hs.cv)
     llk <- perf <- rep(NA, num.folds)
     llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
 
@@ -354,6 +358,11 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
         llkr <- loglik.ratio(y.pred.hs.all, y.obs.all, prop.cases)
         res$llk.ratio <- c(llk.ratio, mean(llkr))
         res$llk.ratio.var <- c(llk.ratio.var, var(llkr))
+    }
+
+    if (num.folds == 1) {
+        res <- res[1, ]
+        res$set <- "Non cross-validated"
     }
 
     if (!is.null(out.csv))
