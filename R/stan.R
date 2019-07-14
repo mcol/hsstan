@@ -107,6 +107,12 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
     if (!is.numeric(y)) {
         stop("Outcome variable must be numeric")
     }
+    if (logit == TRUE) {
+        if (length(table(y)) != 2)
+            stop("y must contain two classes with logit=TRUE.")
+        if (any(y < 0 | y > 1))
+            stop("y must contain 0-1 values with logit=TRUE.")
+    }
     model.type <- match.arg(model.type)
 
     ## choose the model to be fitted
