@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2017-2018 Marco Colombo and Paul McKeigue
+## Copyright (c) 2017-2019 Marco Colombo and Paul McKeigue
 ##
 ## Parts of the code are based on https://github.com/jpiironen/rstan-varsel
 ##
@@ -236,13 +236,9 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #'
 #' @param sel A data.frame created by \code{\link{projsel}}.
 #' @param title Title of the plot. If \code{NULL}, no title is displayed.
-#' @param filename Optional name of a file where the plot is saved in png
-#'        format. If \code{NULL}, no png file is produced.
 #' @param max.labels Maximum number of points to be labelled. If \code{NULL},
 #'        all those present in the \var{sel} file are displayed.
 #' @param font.size Font size used to scale all text in the plot.
-#' @param width Width of the png file in pixels.
-#' @param height Height of the png file in pixels.
 #' @param ... Other options to plot() (currently ignored).
 #'
 #' @return
@@ -250,11 +246,9 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' predictor starting from the initial set of unpenalized covariates.
 #'
 #' @import ggplot2
-#' @importFrom grDevices dev.off png
 #' @method plot projsel
 #' @export
-plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
-                         font.size=12, width=800, height=800, ...) {
+plot.projsel <- function(sel, title=NULL, max.labels=NULL, font.size=12, ...) {
 
     ## get full variable names if possible
     labs <- tryCatch(get("getfullname")(as.character(sel$var)),
@@ -283,12 +277,5 @@ plot.projsel <- function(sel, title=NULL, filename=NULL, max.labels=NULL,
     if (!is.null(title))
         p <- p + ggtitle(title)
 
-    if (!is.null(filename)) {
-        png(filename, width=width, height=height)
-        print(p)
-        dev.off()
-    }
-    else {
-        return(p)
-    }
+    return(p)
 }
