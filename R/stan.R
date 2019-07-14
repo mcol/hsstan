@@ -18,23 +18,6 @@
 ##=============================================================================
 
 
-#' Returns posterior means and 95\% credible intervals
-#'
-#' @param samples An object of class \code{stanfit}.
-#' @param pars Vector of variables names to be extracted.
-#' @param varnames Vector of variable names.
-#'
-#' @importFrom rstan As.mcmc.list
-summarize.params <- function(samples, pars, varnames) {
-    post.params <- As.mcmc.list(object=samples, pars)
-    params.summary <- summary(post.params)
-    params.summary <- data.frame(mean=params.summary$statistics[, 1],
-                                 params.summary$quantiles[, c(1, 5)])
-    colnames(params.summary) <- c("mean", "centile2.5", "centile97.5")
-    rownames(params.summary) <- varnames
-    return(params.summary)
-}
-
 #' Returns the posterior means for the specified variables
 #'
 #' @param samples An object of class \code{stanfit}.
