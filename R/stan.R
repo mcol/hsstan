@@ -220,17 +220,21 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
 
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
-        y_pred <- colMeans(as.matrix(samples)[, par.idx] %*% t(X_test))
+        post.matrix <- as.matrix(samples)
+        y_pred <- colMeans(post.matrix[, par.idx] %*% t(X_test))
         fitted <- if(logit) to.prob(y_pred) else y_pred
         betas <- get.coefficients(samples, colnames(X))
         coefs <- c(betas$unpenalized, betas$penalized)
         sigma <- tryCatch(posterior.means(samples, "sigma"),
                           error=function(e) return(1))
 
+        ## test log-likelihood
+        loglik <- colMeans(post.matrix[, grep("log_lik", colnames(post.matrix))])
+
         if (!store.samples) samples <- NA
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
                     linear.predictors=y_pred, fitted.values=fitted,
-                    sigma=sigma, train=train, test=test,
+                    sigma=sigma, loglik=loglik, train=train, test=test,
                     data=X_train,
                     y_train=y_train, y_test=y_test)
         if (is.cross.validation)
@@ -285,10 +289,6 @@ sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
 #' @export
 get.cv.performance <- function(hs.cv, out.csv=NULL) {
 
-    gaussian.llk <- function(y.pred, y.obs, disp)
-        -0.5 * sum(log(disp) + (y.pred - y.obs)^2 / disp)
-    binomial.llk <- function(y.pred, y.obs)
-        sum(log(y.pred[y.obs == 1])) + sum(log(1 - y.pred[y.obs == 0]))
     r2 <- function(y.pred, y.obs) {
         corr <- cor(y.pred, y.obs)
         if (corr < 0)
@@ -321,7 +321,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             ## proportion of cases in the training fold (prior probability)
             prop.cases <- sum(hs.cv[[fold]]$y_train) / sum(hs.cv[[fold]]$train)
 
-            llk[fold] <- binomial.llk(y.pred.hs, y.obs)
             perf[fold] <- auc(y.pred.hs, y.obs)
             llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
             llk.ratio[fold] <- mean(llkr)
@@ -330,11 +329,10 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
 
         ## linear regression
         else {
-            llk[fold] <- gaussian.llk(y.pred.hs, y.obs, sigma.hs)
             perf[fold] <- r2(y.pred.hs, y.obs)
         }
 
-        sigma.hs.all <- c(sigma.hs.all, sigma.hs)
+        llk[fold] <- sum(hs.cv[[fold]]$loglik)
         y.obs.all <- c(y.obs.all, y.obs)
         y.pred.hs.all <- c(y.pred.hs.all, y.pred.hs)
     }
@@ -343,10 +341,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     ## compute log-likelihood and performance measure of the full model
     ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
-    llk <- c(llk, ifelse(is.logistic,
-                         binomial.llk(y.pred.hs.all, y.obs.all),
-                         gaussian.llk(y.pred.hs.all, y.obs.all,
-                                      mean(sigma.hs.all))))
+    llk <- c(llk, sum(sapply(hs.cv, function(z) z$loglik)))
     perf <- c(perf, ifelse(is.logistic,
                            auc(y.pred.hs.all, y.obs.all),
                            r2(y.pred.hs.all, y.obs.all)))
