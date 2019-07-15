@@ -21,7 +21,7 @@ Imports:
     pROC,
     Rcpp,
     methods,
-    rstan (>= 2.17.3),
+    rstan (>= 2.18.1),
     stats,
     utils
 LinkingTo:
@@ -29,7 +29,7 @@ LinkingTo:
     Rcpp (>= 0.12.15),
     RcppEigen (>= 0.3.3.4.0),
     StanHeaders (>= 2.17.2),
-    rstan (>= 2.17.3)
+    rstan (>= 2.18.1)
 Suggests:
     loo (>= 2.1.0)
 ByteCompile: yes
