@@ -247,6 +247,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @param max.labels Maximum number of points to be labelled. If \code{NULL},
 #'        all those present in the \var{sel} file are displayed.
 #' @param font.size Font size used to scale all text in the plot.
+#' @param hadj,vadj Horizontal and vertical adjustment for the labels.
 #' @param ... Other options to plot() (currently ignored).
 #'
 #' @return
@@ -256,7 +257,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @import ggplot2
 #' @method plot projsel
 #' @export
-plot.projsel <- function(sel, title=NULL, max.labels=NULL, font.size=12, ...) {
+plot.projsel <- function(sel, title=NULL, max.labels=NULL, font.size=12,
+                         hadj=0.05, vadj=0.02, ...) {
 
     ## get full variable names if possible
     labs <- tryCatch(get("getfullname")(as.character(sel$var)),
@@ -274,8 +276,8 @@ plot.projsel <- function(sel, title=NULL, max.labels=NULL, font.size=12, ...) {
     p <- ggplot(data=sel, aes(x=x, y=rel, label=labs)) +
       coord_cartesian(ylim=range(c(0, 1))) +
       geom_line() + geom_point(size=geom.text.size / 3) +
-      geom_text(aes(x=x + ifelse(text_idx, 0.05, -0.05),
-                    y=rel + ifelse(text_idx, -0.02, 0.02)),
+      geom_text(aes(x=x + ifelse(text_idx, hadj, -hadj),
+                    y=rel + ifelse(text_idx, -vadj, vadj)),
                 size=geom.text.size,
                 hjust=ifelse(text_idx, "left", "right")) +
       xlab("Number of biomarkers") +
