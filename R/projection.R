@@ -242,7 +242,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' names is searched on the current workspace, and if found it is used to
 #' transform the labels before creating the plot.
 #'
-#' @param sel A data.frame created by \code{\link{projsel}}.
+#' @param x A data frame created by \code{\link{projsel}}.
 #' @param title Title of the plot. If \code{NULL}, no title is displayed.
 #' @param max.labels Maximum number of points to be labelled. If \code{NULL},
 #'        all those present in the \var{sel} file are displayed.
@@ -257,10 +257,11 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @import ggplot2
 #' @method plot projsel
 #' @export
-plot.projsel <- function(sel, title=NULL, max.labels=NULL, font.size=12,
+plot.projsel <- function(x, title=NULL, max.labels=NULL, font.size=12,
                          hadj=0.05, vadj=0.02, ...) {
 
     ## get full variable names if possible
+    sel <- x
     labs <- tryCatch(get("getfullname")(as.character(sel$var)),
                      error=function(e) as.character(sel$var))
     labs <- gsub(" \\(.*\\)$", "", labs)
