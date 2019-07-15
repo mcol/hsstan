@@ -223,11 +223,10 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
         if (!store.samples) samples <- NA
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
                     linear.predictors=y_pred, fitted.values=fitted,
-                    sigma=sigma, loglik=loglik, train=train, test=test,
-                    data=X_train,
-                    y_train=y_train, y_test=y_test)
+                    sigma=sigma, loglik=loglik, data=X_train, y=y_train)
         if (is.cross.validation)
-            obj <- c(obj, list(withdrawn.data=X_test))
+            obj <- c(obj, list(withdrawn.data=X_test, y_test=y_test,
+                               train=train, test=test))
         class(obj) <- "hsstan"
         return(obj)
     }
@@ -303,6 +302,8 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     ## loop over the folds
     for (fold in 1:num.folds) {
         y.obs <- hs.cv[[fold]]$y_test
+        if (is.null(y.obs))
+            hs.cv[[fold]]$y
 
         y.pred.hs <- hs.cv[[fold]]$fitted.values
         sigma.hs <- hs.cv[[fold]]$sigma
@@ -312,7 +313,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
         if (is.logistic) {
 
             ## proportion of cases in the training fold (prior probability)
-            prop.cases <- sum(hs.cv[[fold]]$y_train) / sum(hs.cv[[fold]]$train)
+            prop.cases <- sum(hs.cv[[fold]]$y) / length(hs.cv[[fold]]$y)
 
             perf[fold] <- auc(y.pred.hs, y.obs)
             llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
@@ -351,7 +352,8 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
 
     if (num.folds == 1) {
         res <- res[1, ]
-        res$set <- "Non cross-validated"
+        if (is.null(hs.cv[[fold]]$y_test))
+            res$set <- "Non cross-validated"
     }
 
     if (!is.null(out.csv))

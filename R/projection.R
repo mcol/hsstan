@@ -154,15 +154,23 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     }
 
     validate.hsstan(samples)
+    if (!inherits(samples$stanfit, "stanfit"))
+        stop("No posterior samples found: run 'hsstan' with store.samples=TRUE.")
 
     ## check that the model contains penalized predictors
     if (is.null(samples$betas$penalized)) {
         stop("Model doesn't contain penalized predictors.")
     }
 
-    x <- samples$data[samples$train, ]
-    xt <- samples$data[samples$test, ]
-    yt <- samples$y[samples$test]
+    x <- samples$data
+    if (is.null(samples$withdrawn.data)) {
+        xt <- samples$data
+        yt <- samples$y
+    }
+    else {
+        xt <- samples$withdrawn.data
+        yt <- samples$y_test
+    }
     stanfit <- samples$stanfit
 
     beta.samples <- extract(stanfit, pars=c("beta_u", "beta_p"))
