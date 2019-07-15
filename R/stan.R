@@ -336,7 +336,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     ## compute log-likelihood and performance measure of the full model
     ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
-    llk <- c(llk, sum(sapply(hs.cv, function(z) z$loglik)))
+    llk <- c(llk, sum(sapply(hs.cv, function(z) sum(z$loglik))))
     perf <- c(perf, ifelse(is.logistic,
                            auc(y.pred.hs.all, y.obs.all),
                            r2(y.pred.hs.all, y.obs.all)))
