@@ -135,7 +135,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
     which.penalized <- setdiff(1:P, which.unpenalized)
     X <- X[, c(which.unpenalized, which.penalized)]
     N <- nrow(X)
-    num.folds <- min(length(folds), 1)
+    num.folds <- max(length(folds), 1)
 
     ## whether it's a proper cross-validation
     is.cross.validation <- num.folds > 1
