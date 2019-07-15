@@ -92,6 +92,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
 #'        \code{"vb"} for variational Bayes.
 #'
+#' @importFrom foreach %dopar%
 #' @importFrom rstan stan_model
 #' @importFrom stats model.matrix reformulate
 #' @importMethodsFrom rstan sampling vb
@@ -134,7 +135,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
     which.penalized <- setdiff(1:P, which.unpenalized)
     X <- X[, c(which.unpenalized, which.penalized)]
     N <- nrow(X)
-    num.folds <- length(folds)
+    num.folds <- min(length(folds), 1)
 
     ## whether it's a proper cross-validation
     is.cross.validation <- num.folds > 1
