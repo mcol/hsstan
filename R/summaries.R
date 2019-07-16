@@ -18,27 +18,65 @@
 ##=============================================================================
 
 
-#' Prints a summary for the fitted model
+#' Summary for the fitted model
 #'
-#' @param x An object of class \code{hsstan}.
+#' @param object An object of class \code{hsstan}.
 #' @param pars Vector of parameter names to be extracted. If \code{NULL}
 #'        (default) then this refers to the set of covariates and biomarkers
 #'        (if available).
-#' @param probs Quantiles to be printed.
-#' @param digits Number of significant digits to be printed.
+#' @param prob Width of the posterior intervals (0.95, by default).
+#' @param digits Number of significant digits to be reported.
+#' @param sort Column name used to sort the results according to the absolute
+#'        value of the column. If \code{NULL} (default) or the column name cannot
+#'        be found, no sorting occurs.
+#' @param decreasing Whether the results should be sorted in decreasing order
+#'        when a valid column name is specified in \code{sort} (\code{TRUE} by
+#'        default).
+#' @param max.rows Maximum number of rows to be returned. If \code{NULL}
+#'        (default) or 0, all results are returned.
 #' @param ... Currently ignored.
 #'
+#' @return
+#' A matrix with summaries from the posterior distribution of the parameters
+#' of interest.
+#'
 #' @importMethodsFrom rstan summary
-print.hsstan <- function(x, pars=NULL, probs=c(0.025, 0.5, 0.975),
-                         digits=2, ...) {
-    if (!inherits(x$stanfit, "stanfit")) {
+#' @method summary hsstan
+#' @export
+summary.hsstan <- function(object, pars=NULL, prob=0.95, digits=2,
+                          sort=NULL, decreasing=TRUE, max.rows=NULL, ...) {
+    if (!inherits(object$stanfit, "stanfit")) {
         cat("No posterior samples found, run 'hsstan' with store.samples=TRUE.\n")
         return(invisible(NULL))
     }
     if (is.null(pars))
-        pars <- grep("^beta_", x$stanfit@model_pars, value=TRUE)
-    summary <- summary(x$stanfit, pars=pars, probs=probs)$summary
+        pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
+    if (prob <= 0 | prob >= 1) {
+        cat("'prob' must be between 0 and 1.\n")
+        return(invisible(NULL))
+    }
+    low <- (1 - prob) / 2
+    upp <- 1 - low
+    summary <- summary(object$stanfit, pars=pars, probs=c(low, upp))$summary
     summary[, "n_eff"] <- round(summary[, "n_eff"], 0)
-    print(round(summary[, -match(c("se_mean", "sd"), colnames(summary))], digits))
-    return(invisible(summary))
+    if (!is.null(sort) && sort %in% colnames(summary)) {
+        ord <- order(abs(summary[, sort]), decreasing=decreasing)
+        summary <- summary[ord, ]
+    }
+    if (!is.null(max.rows)) {
+        if (max.rows > 0 && max.rows < nrow(summary))
+            summary <- summary[1:max.rows, , drop=FALSE]
+    }
+    round(summary[, -match("se_mean", colnames(summary)), drop=FALSE],
+                digits)
+}
+
+#' Print a summary for the fitted model
+#'
+#' @param x An object of class \code{hsstan}.
+#' @param ... Further arguments to \code{\link{summary.hsstan}}.
+#'
+#' @export
+print.hsstan <- function(x, ...) {
+    print(summary(x, ...))
 }

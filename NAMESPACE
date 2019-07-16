@@ -2,6 +2,8 @@
 
 S3method(loo,hsstan)
 S3method(plot,projsel)
+S3method(print,hsstan)
+S3method(summary,hsstan)
 export(get.cv.performance)
 export(hsstan)
 export(loo)
