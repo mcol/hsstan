@@ -20,7 +20,7 @@
 ##=============================================================================
 
 
-#' Computes projections of full predictors on to subspace of predictors
+#' Compute projections of full predictors on to subspace of predictors
 #'
 #' @param x Design matrix.
 #' @param fit Matrix of fitted values for the full model.
@@ -78,7 +78,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     return(list(w=wp, sigma2=sigma2p, fit=fitp, kl=kl))
 }
 
-#' Returns the next variable to be added to the current submodel
+#' Return the next variable to be added to the current submodel
 #'
 #' Returns the index of the variable that should be added to the current model
 #' according to the smallest KL-divergence (linear regression) or the largest

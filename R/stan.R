@@ -18,7 +18,7 @@
 ##=============================================================================
 
 
-#' Returns the posterior means for the specified variables
+#' Return the posterior means for the specified variables
 #'
 #' @param samples An object of class \code{stanfit}.
 #' @param varnames Vector of variable names to be extracted.
@@ -29,7 +29,7 @@ posterior.means <- function(samples, varnames) {
                   function(z) if (is.matrix(z)) colMeans(z) else mean(z)))
 }
 
-#' Returns the posterior means of the regression coefficients
+#' Return the posterior means of the regression coefficients
 #'
 #' @param samples An object of class \code{stanfit}.
 #' @param coeff.names Vector of names for the coefficients.
@@ -51,7 +51,7 @@ get.coefficients <- function(samples, coeff.names) {
     return(list(unpenalized=beta.u, penalized=beta.p))
 }
 
-#' Runs a plain or cross-validated Stan model
+#' Fit a plain or cross-validated Stan model
 #'
 #' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
 #' cross-validation folds (if specified) or over all the data.
@@ -61,7 +61,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' standardized according to mean and standard deviation of the corresponding
 #' training fold.
 #'
-#' @param x Data.frame of predictors.
+#' @param x Data frame of predictors.
 #' @param y Vector of outcomes. For a logistic regression model, this is
 #'        expected to contain only \code{0-1} entries.
 #' @param covariates Names of the variables to be used as (unpenalized)
