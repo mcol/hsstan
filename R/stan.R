@@ -88,7 +88,22 @@ get.coefficients <- function(samples, coeff.names) {
 #'        total number of iterations).
 #' @param scale.u Prior scale (standard deviation) for the unpenalised
 #'        covariates.
-#' @param nu Number of degrees of freedom for the half-Student-t priors.
+#' @param regularized If \code{TRUE} (default), the regularized horseshoe prior
+#'        is used as opposed to the original horseshoe prior.
+#' @param nu Number of degrees of freedom of the half-Student-t prior on the
+#'        local shrinkage parameters (by default, 1 if \code{regularized=TRUE}
+#'        and 3 otherwise).
+#' @param par.ratio Expected ratio of non-zero to zero coefficients (ignored
+#'        if \code{regularized=FALSE}). The scale of the global shrinkage
+#'        parameter corresponds to \code{par.ratio} divided by the square root
+#'        of the number of observations; for linear regression only, it's further
+#'        multiplied by the residual standard deviation \code{sigma}.
+#' @param global.df Number of degrees of freedom for the global shrinkage
+#'        parameter (ignored if \code{regularized=FALSE}).
+#' @param slab.scale Scale of the regularization parameter (ignored if
+#'        \code{regularized=FALSE}).
+#' @param slab.df Number of degrees of freedom of the regularization parameter
+#'        (ignored if \code{regularized=FALSE}).
 #' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
 #'        \code{"vb"} for variational Bayes.
 #'
@@ -99,7 +114,9 @@ get.coefficients <- function(samples, coeff.names) {
 #' @export
 hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
-                   scale.u=2, nu=3, store.samples=is.null(folds), seed=123,
+                   scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
+                   par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
+                   store.samples=is.null(folds), seed=123,
                    adapt.delta=NULL, model.type=c("mc", "vb")) {
 
     stopifnot(nrow(x) == length(y))
@@ -114,6 +131,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
         if (any(y < 0 | y > 1))
             stop("y must contain 0-1 values with logit=TRUE.")
     }
+    regularized <- as.integer(regularized)
     model.type <- match.arg(model.type)
 
     ## choose the model to be fitted
@@ -186,11 +204,17 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
         X_train[, stand.idx] <- X_train.stand.idx
         X_test[, stand.idx] <- scale(X_test[, stand.idx], train.mu, train.sd)
 
+        ## global scale for regularized horseshoe prior
+        global.scale <- if (regularized) par.ratio / sqrt(N_train) else 1
+
         ## parameters not used by a model are ignored
         data.input <- list(N_train=N_train, N_test=N_test,
                            y_train=y_train, y_test=y_test,
                            X_train=X_train, X_test=X_test,
-                           P=P, U=U, scale_u=scale.u, nu=nu)
+                           P=P, U=U, scale_u=scale.u,
+                           regularized=regularized, nu=nu,
+                           global_scale=global.scale, global_df=global.df,
+                           slab_scale=slab.scale, slab_df=slab.df)
 
         if (model.type == "mc") {
             samples <- sampling(stanmodels[[model]], data=data.input,
