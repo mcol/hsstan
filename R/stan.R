@@ -259,14 +259,29 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
     return(if(is.cross.validation) cv else cv[[1]])
 }
 
+#' Deprecated functions to fit hierarchical shrinkage models
+#'
+#' @param x Data frame of predictors.
+#' @param y Vector of outcomes. For a logistic regression model, this is
+#'        expected to contain only \code{0-1} entries.
+#' @param covariates Names of the variables to be used as (unpenalized)
+#'        predictors.
+#' @param biomarkers Names of the variables to be used as penalized predictors.
+#'        If it is specified as an empty vector, a model with only unpenalized
+#'        covariates is used.
+#' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
+#'        logistic regression.
+#' @param folds List of cross-validation folds, where each element contains
+#'        the indices of the test observations. If \code{NULL} (default), no
+#'        cross-validation is performed.
+#' @param ... Further options passed to \code{hsstan}.
+#'
 #' @section Note:
 #' \code{sample.stan} and \code{sample.stan.cv} are thin wrappers around
 #' \code{hsstan} provided for backward compatibility. They are considered
 #' deprecated.
 #'
-#' @param ... Further options passed to \code{hsstan}.
-#'
-#' @rdname hsstan
+#' @seealso \code{\link{hsstan}}
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
                         logit=FALSE, ...) {
@@ -278,7 +293,7 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
     do.call(hsstan, c(default.args, input.args))
 }
 
-#' @rdname hsstan
+#' @rdname sample.stan
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
                            logit=FALSE, ...) {
