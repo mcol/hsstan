@@ -69,11 +69,11 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param biomarkers Names of the variables to be used as penalized predictors.
 #'        If it is specified as an empty vector, a model with only unpenalized
 #'        covariates is used.
+#' @param family Type of model fitted: either \code{gaussian()} for linear
+#'        regression (default) or \code{binomial()} for logistic regression.
 #' @param folds List of cross-validation folds, where each element contains
 #'        the indices of the test observations. If \code{NULL} (default), no
 #'        cross-validation is performed.
-#' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
-#'        logistic regression.
 #' @param store.samples Whether the posterior samples should be saved
 #'        (by default, \code{FALSE} for cross-validation and \code{TRUE}
 #'        otherwise).
@@ -109,10 +109,10 @@ get.coefficients <- function(samples, coeff.names) {
 #'
 #' @importFrom foreach %dopar%
 #' @importFrom rstan stan_model
-#' @importFrom stats model.matrix reformulate
+#' @importFrom stats gaussian model.matrix reformulate
 #' @importMethodsFrom rstan sampling vb
 #' @export
-hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
+hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
@@ -125,18 +125,13 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
     if (!is.numeric(y)) {
         stop("Outcome variable must be numeric")
     }
-    if (logit == TRUE) {
-        if (length(table(y)) != 2)
-            stop("y must contain two classes with logit=TRUE.")
-        if (any(y < 0 | y > 1))
-            stop("y must contain 0-1 values with logit=TRUE.")
-    }
+    family <- validate.family(family, y)
     regularized <- as.integer(regularized)
     model.type <- match.arg(model.type)
 
     ## choose the model to be fitted
     model <- ifelse(length(biomarkers) == 0, "base", "hs")
-    if (logit) model <- paste0(model, "_logit")
+    if (family$family == "binomial") model <- paste0(model, "_logit")
 
     ## set or check adapt.delta
     if (is.null(adapt.delta)) {
@@ -236,7 +231,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
         ## residual standard deviation
         post.matrix <- as.matrix(samples)
         y_pred <- colMeans(post.matrix[, par.idx] %*% t(X_test))
-        fitted <- if(logit) to.prob(y_pred) else y_pred
+        fitted <- family$linkinv(y_pred)
         betas <- get.coefficients(samples, colnames(X))
         coefs <- c(betas$unpenalized, betas$penalized)
         sigma <- tryCatch(posterior.means(samples, "sigma"),
@@ -247,7 +242,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
 
         if (!store.samples) samples <- NA
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
-                    linear.predictors=y_pred, fitted.values=fitted,
+                    linear.predictors=y_pred, fitted.values=fitted, family=family,
                     sigma=sigma, loglik=loglik, data=X_train, y=y_train)
         if (is.cross.validation)
             obj <- c(obj, list(withdrawn.data=X_test, y_test=y_test,
@@ -286,7 +281,8 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, folds=NULL, logit=FALSE,
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
                         logit=FALSE, ...) {
     default.args <- list(x=x, y=y, covariates=covariates, biomarkers=biomarkers,
-                         folds=NULL, logit=logit, iter=2000)
+                         folds=NULL, family=ifelse(logit, binomial, gaussian),
+                         iter=2000)
     input.args <- list(...)
     default.args[names(input.args)] <- input.args
     input.args[names(default.args)] <- NULL
@@ -298,7 +294,8 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
                            logit=FALSE, ...) {
     default.args <- list(x=x, y=y, covariates=covariates, biomarkers=biomarkers,
-                         folds=folds, logit=logit, iter=1000)
+                         folds=folds, family=ifelse(logit, binomial, gaussian),
+                         iter=1000)
     input.args <- list(...)
     default.args[names(input.args)] <- input.args
     input.args[names(default.args)] <- NULL
@@ -426,18 +423,6 @@ loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
     suppressWarnings(rstan::loo(x$stanfit, save_psis=save.psis, cores=cores))
 }
 
-#' Logistic transformation
-#'
-#' @param lin.pred Linear predictor.
-#'
-#' @return
-#' A probability.
-#'
-#' @noRd
-to.prob <- function(lin.pred) {
-    1 / (1 + exp(-lin.pred))
-}
-
 #' Validate hsstan object
 #'
 #' Checks that the object has been created by \code{\link{sample.stan}}.
@@ -452,6 +437,46 @@ validate.hsstan <- function(obj) {
     if (!inherits(obj, "hsstan")) {
         stop("Not an object of class 'hsstan'.")
     }
+}
+
+#' Validate the family argument
+#'
+#' Ensure that the family argument has been specified correctly.
+#' This is inspired by code in \code{\link{glm}}.
+#'
+#' @param family Family argument to test.
+#' @param y Outcome variable.
+#'
+#' @return
+#' A valid family. The function throws an error if the family argument cannot
+#' be used.
+#'
+#' @importFrom methods is
+#' @noRd
+validate.family <- function(family, y) {
+    if (missing(family))
+        stop("Argument of 'family' is missing.")
+    if (is.character(family))
+        tryCatch(
+            family <- get(family, mode="function", envir=parent.frame(2)),
+                          error=function(e)
+                              stop("'", family, "' is not a valid family.")
+        )
+    if (is.function(family))
+        family <- family()
+    if (!is(family, "family"))
+        stop("Argument of 'family' is not a valid family.")
+    if (!family$family %in% c("gaussian", "binomial"))
+        stop("Only 'gaussian' and 'binomial' are supported families.")
+
+    if (family$family == "binomial") {
+        if (length(table(y)) != 2)
+            stop("y must contain two classes with family=binomial().")
+      if (!is.factor(y) && any(y < 0 | y > 1))
+          stop("y must contain 0-1 values with family=binomial().")
+    }
+
+    return(family)
 }
 
 #' Validate adapt.delta
