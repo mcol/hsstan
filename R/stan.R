@@ -328,7 +328,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     for (fold in 1:num.folds) {
         y.obs <- hs.cv[[fold]]$y_test
         if (is.null(y.obs))
-            hs.cv[[fold]]$y
+            y.obs <- hs.cv[[fold]]$y
 
         y.pred.hs <- hs.cv[[fold]]$fitted.values
         sigma.hs <- hs.cv[[fold]]$sigma
