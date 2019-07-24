@@ -2,7 +2,7 @@
 % Please edit documentation in R/projection.R
 \name{lm_proj}
 \alias{lm_proj}
-\title{Computes projections of full predictors on to subspace of predictors}
+\title{Compute projections of full predictors on to subspace of predictors}
 \usage{
 lm_proj(x, fit, sigma2, indproj, is.logistic)
 }
@@ -19,6 +19,6 @@ projection subspace.}
 \item{is.logistic}{Set to \code{TRUE} for a logistic regression model.}
 }
 \description{
-Computes projections of full predictors on to subspace of predictors
+Compute projections of full predictors on to subspace of predictors
 }
 \keyword{internal}

@@ -3,7 +3,6 @@
 \docType{package}
 \name{hsstan-package}
 \alias{hsstan-package}
-\alias{hsstan}
 \title{The 'hsstan' package.}
 \description{
 Regression models with hierarchical shrinkage priors

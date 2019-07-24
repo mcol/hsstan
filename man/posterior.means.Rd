@@ -2,7 +2,7 @@
 % Please edit documentation in R/stan.R
 \name{posterior.means}
 \alias{posterior.means}
-\title{Returns the posterior means for the specified variables}
+\title{Return the posterior means for the specified variables}
 \usage{
 posterior.means(samples, varnames)
 }
@@ -12,5 +12,5 @@ posterior.means(samples, varnames)
 \item{varnames}{Vector of variable names to be extracted.}
 }
 \description{
-Returns the posterior means for the specified variables
+Return the posterior means for the specified variables
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/projection.R
 \name{choose.next}
 \alias{choose.next}
-\title{Returns the next variable to be added to the current submodel}
+\title{Return the next variable to be added to the current submodel}
 \usage{
 choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
 }

@@ -4,26 +4,20 @@
 \alias{plot.projsel}
 \title{Plot of the incremental contribution of each predictor}
 \usage{
-\method{plot}{projsel}(sel, title = NULL, filename = NULL,
-  max.labels = NULL, font.size = 12, width = 800, height = 800,
-  ...)
+\method{plot}{projsel}(x, title = NULL, max.labels = NULL,
+  font.size = 12, hadj = 0.05, vadj = 0.02, ...)
 }
 \arguments{
-\item{sel}{A data.frame created by \code{\link{projsel}}.}
+\item{x}{A data frame created by \code{\link{projsel}}.}
 
 \item{title}{Title of the plot. If \code{NULL}, no title is displayed.}
-
-\item{filename}{Optional name of a file where the plot is saved in png
-format. If \code{NULL}, no png file is produced.}
 
 \item{max.labels}{Maximum number of points to be labelled. If \code{NULL},
 all those present in the \var{sel} file are displayed.}
 
 \item{font.size}{Font size used to scale all text in the plot.}
 
-\item{width}{Width of the png file in pixels.}
-
-\item{height}{Height of the png file in pixels.}
+\item{hadj, vadj}{Horizontal and vertical adjustment for the labels.}
 
 \item{...}{Other options to plot() (currently ignored).}
 }

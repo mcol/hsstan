@@ -2,7 +2,7 @@
 % Please edit documentation in R/stan.R
 \name{get.coefficients}
 \alias{get.coefficients}
-\title{Returns the posterior means of the regression coefficients}
+\title{Return the posterior means of the regression coefficients}
 \usage{
 get.coefficients(samples, coeff.names)
 }
@@ -17,5 +17,5 @@ of the unpenalized covariates, and \var{penalized} for the posterior means
 of the penalized predictors (which can be \code{NULL} for baseline models).
 }
 \description{
-Returns the posterior means of the regression coefficients
+Return the posterior means of the regression coefficients
 }

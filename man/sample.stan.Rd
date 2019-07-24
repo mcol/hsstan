@@ -2,15 +2,16 @@
 % Please edit documentation in R/stan.R
 \name{sample.stan}
 \alias{sample.stan}
-\title{Runs a Stan model on all available data.}
+\alias{sample.stan.cv}
+\title{Deprecated functions to fit hierarchical shrinkage models}
 \usage{
-sample.stan(x, y, covariates, biomarkers = NULL, logit = FALSE,
-  standardize = TRUE, adapt.delta = 0.99, iter = 2000,
-  warmup = iter/2, scale.u = 20, nu = 3, model.type = c("mc",
-  "vb"))
+sample.stan(x, y, covariates, biomarkers = NULL, logit = FALSE, ...)
+
+sample.stan.cv(x, y, covariates, biomarkers = NULL, folds,
+  logit = FALSE, ...)
 }
 \arguments{
-\item{x}{Data.frame of predictors.}
+\item{x}{Data frame of predictors.}
 
 \item{y}{Vector of outcomes. For a logistic regression model, this is
 expected to contain only \code{0-1} entries.}
@@ -25,24 +26,22 @@ covariates is used.}
 \item{logit}{\code{FALSE} for linear regression (default), \code{TRUE} for
 logistic regression.}
 
-\item{standardize}{Whether the design matrix should be standardized.}
+\item{...}{Further options passed to \code{hsstan}.}
 
-\item{adapt.delta}{Target average proposal acceptance probability for
-adaptation (0.99 by default).}
-
-\item{iter}{Number of iterations in each chain (including warmup).}
-
-\item{warmup}{Number of warmup iterations per chain (by default, half the
-total number of iterations).}
-
-\item{scale.u}{Prior scale (standard deviation) for the unpenalised
-covariates.}
-
-\item{nu}{Number of degrees of freedom for the half-Student-t priors.}
-
-\item{model.type}{Either \code{"mc"} for Hamiltonian Monte Carlo, or
-\code{"vb"} for variational Bayes.}
+\item{folds}{List of cross-validation folds, where each element contains
+the indices of the test observations. If \code{NULL} (default), no
+cross-validation is performed.}
 }
 \description{
-Runs a Stan model on all available data.
+Deprecated functions to fit hierarchical shrinkage models
+}
+\section{Note}{
+
+\code{sample.stan} and \code{sample.stan.cv} are thin wrappers around
+\code{hsstan} provided for backward compatibility. They are considered
+deprecated.
+}
+
+\seealso{
+\code{\link{hsstan}}
 }
