@@ -25,7 +25,7 @@
 #'        (default) then this refers to the set of covariates and biomarkers
 #'        (if available).
 #' @param prob Width of the posterior intervals (0.95, by default).
-#' @param digits Number of significant digits to be reported.
+#' @param digits Number of decimal places to be reported (2 by default).
 #' @param sort Column name used to sort the results according to the absolute
 #'        value of the column. If \code{NULL} (default) or the column name cannot
 #'        be found, no sorting occurs.
