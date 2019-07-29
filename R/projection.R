@@ -47,7 +47,6 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
         ## compute the projection for each sample
         s <- NULL   # silence a note raised by R CMD check
         wp <- foreach(s=1:S, .combine=cbind) %dopar% {
-            ## XXX: what about the intercept?
             glm.fit(xp, fit[, s], family=quasibinomial())$coefficients
         }
 
@@ -107,8 +106,6 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
         }
         idx.selected <- which.min(kl)
         return(notchosen[idx.selected])
-        sigma2 <- sigma2 + colMeans((fit - fitp)^2)
-        dinv.link <- matrix(1, ncol(fit), nrow(fit))
     }
     yminusexp <- t(fit - fitp)
 
