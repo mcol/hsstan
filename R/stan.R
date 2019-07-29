@@ -344,7 +344,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
 
         y.pred.hs <- hs.cv[[fold]]$fitted.values
         sigma.hs <- hs.cv[[fold]]$sigma
-        is.logistic <- length(sigma.hs) == 1 && sigma.hs == 1
+        is.logistic <- hs.cv[[fold]]$family$family == "binomial"
 
         ## logistic regression
         if (is.logistic) {
