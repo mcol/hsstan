@@ -128,7 +128,7 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 #' @export
 projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
-    fit.submodel <- function(x, w, sigma2, fit, chosen, xt, yt, is.logistic) {
+    fit.submodel <- function(x, sigma2, fit, chosen, xt, yt, is.logistic) {
 
         ## projected parameters
         submodel <- lm_proj(x, fit, sigma2, chosen, is.logistic)
@@ -184,7 +184,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     ## start from the model having only unpenalized variables
     chosen <- 1:U
     notchosen <- setdiff(1:P, chosen)
-    sub <- fit.submodel(x, w, sigma2, fit, chosen, xt, yt, is.logistic)
+    sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
     fitp <- sub$fit
     kl[1] <- sub$kl
     elpd[1] <- sub$elpd
@@ -197,7 +197,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         chosen <- c(chosen, sel.idx)
 
         ## evaluate current submodel according to projected parameters
-        sub <- fit.submodel(x, w, sigma2, fit, chosen, xt, yt, is.logistic)
+        sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
         fitp <- sub$fit
         kl[k] <- sub$kl
         elpd[k] <- sub$elpd
@@ -209,7 +209,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     }
 
     ## evaluate the full model
-    full <- fit.submodel(x, w, sigma2, fit, 1:P, xt, yt, is.logistic)
+    full <- fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
 
     ## remove trailing zeros
     len <- length(chosen) - U + 1
