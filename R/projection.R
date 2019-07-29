@@ -51,7 +51,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
         }
 
         ## estimate the KL divergence between full and projected model
-        fitp <- 1 / (1 + exp(-xp %*% wp))
+        fitp <- binomial()$linkinv(xp %*% wp)
         kl <- 0.5 * mean(colMeans(binomial()$dev.resids(fit, fitp, 1)))
         sigma2p <- 1
     }
@@ -135,15 +135,13 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         ## projected parameters
         submodel <- lm_proj(x, fit, sigma2, chosen, is.logistic)
         wp <- submodel$w
-        sigma2p <- submodel$sigma2
 
-        ## mean log predictive density on test set (mean test log-likelihood
-        ## per observation)
+        ## expected log predictive density on test set
         if (is.logistic) {
-            pd <- dbinom(yt, 1, 1 / (1 + exp(-xt %*% wp)))
+            pd <- dbinom(yt, 1, binomial()$linkinv(xt %*% wp))
         }
         else {
-            pd <- dnorm(yt, xt %*% wp, sqrt(sigma2p))
+            pd <- dnorm(yt, xt %*% wp, sqrt(submodel$sigma2))
         }
         elpd <- sum(log(rowMeans(pd)))
 
@@ -177,9 +175,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     is.logistic <- length(sigma2) == 1 && sigma2 == 1
 
     ## fit of the full model (matrix of dimension N x S)
-    fit <- x %*% w
-    if (is.logistic)
-        fit <- 1 / (1 + exp(-fit))
+    fit <- samples$family$linkinv(x %*% w)
 
     ## U is number of unpenalized variables (always chosen) including intercept
     P <- ncol(x)
