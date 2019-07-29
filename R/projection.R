@@ -95,10 +95,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 #' @keywords internal
 choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
     notchosen <- setdiff(1:ncol(x), chosen)
-    if (is.logistic) {
-        dinv.link <- t(fitp * (1 - fitp))
-    }
-    else {
+    if (!is.logistic) {
         i <- NULL   # silence a note raised by R CMD check
         kl <- foreach(i=1:length(notchosen), .combine=c) %dopar% {
             ind <- sort(c(chosen, notchosen[i]))
@@ -107,9 +104,10 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
         idx.selected <- which.min(kl)
         return(notchosen[idx.selected])
     }
-    yminusexp <- t(fit - fitp)
 
     ## score test
+    dinv.link <- t(fitp * (1 - fitp))
+    yminusexp <- t(fit - fitp)
     U <- colMeans(yminusexp %*% x[, notchosen] / sigma2)
     V <- colMeans(dinv.link %*% x[, notchosen]^2 / sigma2)
     idx.selected <- which.max(U^2 / V)
