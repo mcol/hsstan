@@ -33,8 +33,6 @@
 #' @keywords internal
 lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 
-    Q <- length(indproj)
-    N <- nrow(x)
     P <- ncol(x)
     S <- ncol(fit)
 
@@ -69,12 +67,11 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
         kl <- mean(0.5 * log(sigma2p / sigma2))
     }
 
-    ## reshape wp so that it has same dimension (P x N) as t(x), and zeros for
+    ## reshape wp so that it has same dimension (P x S) as t(x), and zeros for
     ## those variables that are not included in the projected model
-    wptemp <- matrix(0, P, S)
-    wptemp[indproj, ] <- wp
-    wp <- wptemp
-    return(list(w=wp, sigma2=sigma2p, fit=fitp, kl=kl))
+    wp.all <- matrix(0, P, S)
+    wp.all[indproj, ] <- wp
+    return(list(w=wp.all, sigma2=sigma2p, fit=fitp, kl=kl))
 }
 
 #' Return the next variable to be added to the current submodel
