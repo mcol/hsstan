@@ -234,8 +234,6 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
         fitted <- family$linkinv(y_pred)
         betas <- get.coefficients(samples, colnames(X))
         coefs <- c(betas$unpenalized, betas$penalized)
-        sigma <- tryCatch(posterior.means(samples, "sigma"),
-                          error=function(e) return(1))
 
         ## test log-likelihood
         loglik <- colMeans(post.matrix[, grep("log_lik", colnames(post.matrix))])
@@ -243,7 +241,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
         if (!store.samples) samples <- NA
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
                     linear.predictors=y_pred, fitted.values=fitted, family=family,
-                    sigma=sigma, loglik=loglik, data=X_train, y=y_train)
+                    loglik=loglik, data=X_train, y=y_train)
         if (is.cross.validation)
             obj <- c(obj, list(withdrawn.data=X_test, y_test=y_test,
                                train=train, test=test))
@@ -343,7 +341,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             y.obs <- hs.cv[[fold]]$y
 
         y.pred.hs <- hs.cv[[fold]]$fitted.values
-        sigma.hs <- hs.cv[[fold]]$sigma
         is.logistic <- hs.cv[[fold]]$family$family == "binomial"
 
         ## logistic regression
