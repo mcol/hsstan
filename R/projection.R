@@ -57,7 +57,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     ## linear regression model
     else {
         ## solve the projection equations
-        wp <- solve(t(xp) %*% xp, t(xp) %*% fit) # matrix of dimension Q x S
+        wp <- solve(crossprod(xp, xp), crossprod(xp, fit)) # Q x S matrix
 
         ## fit of the projected model
         fitp <- xp %*% wp

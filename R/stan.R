@@ -230,7 +230,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
         post.matrix <- as.matrix(samples)
-        y_pred <- colMeans(post.matrix[, par.idx] %*% t(X_test))
+        y_pred <- colMeans(tcrossprod(post.matrix[, par.idx], X_test))
         fitted <- family$linkinv(y_pred)
         betas <- get.coefficients(samples, colnames(X))
         coefs <- c(betas$unpenalized, betas$penalized)
