@@ -94,10 +94,10 @@ model {
   vector[N_train] mu = X_train[, 1:U] * beta_u + X_train[, (U+1):P] * beta_p;
 
   // half t-priors for lambdas and tau
-  z ~ normal(0, 1);
-  r1_local ~ normal(0, 1);
+  z ~ std_normal();
+  r1_local ~ std_normal();
   r2_local ~ inv_gamma(0.5 * nu, 0.5 * nu);
-  r1_global ~ normal(0, 1);
+  r1_global ~ std_normal();
   r2_global ~ inv_gamma(0.5 * global_df, 0.5 * global_df);
 
   // inverse-gamma prior for c^2
