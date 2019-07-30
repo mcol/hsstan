@@ -45,10 +45,7 @@
 #' @export
 summary.hsstan <- function(object, pars=NULL, prob=0.95, digits=2,
                           sort=NULL, decreasing=TRUE, max.rows=NULL, ...) {
-    if (!inherits(object$stanfit, "stanfit")) {
-        cat("No posterior samples found, run 'hsstan' with store.samples=TRUE.\n")
-        return(invisible(NULL))
-    }
+    validate.samples(object)
     if (is.null(pars))
         pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
     if (prob <= 0 | prob >= 1) {

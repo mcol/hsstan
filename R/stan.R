@@ -418,8 +418,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
 #' @export loo
 #' @export
 loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
-    if (!inherits(x$stanfit, "stanfit"))
-        stop("No posterior samples found: run 'hsstan' with store.samples=TRUE.")
+    validate.samples(x)
     suppressWarnings(rstan::loo(x$stanfit, save_psis=save.psis, cores=cores))
 }
 
@@ -436,6 +435,23 @@ loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
 validate.hsstan <- function(obj) {
     if (!inherits(obj, "hsstan")) {
         stop("Not an object of class 'hsstan'.")
+    }
+}
+
+#' Validate the posterior samples
+#'
+#' Checks that the object contains valid posterior samples in the
+#' \code{stanfit} field.
+#'
+#' @param obj An object of class \code{hsstan}.
+#'
+#' @return
+#' Throws an error if the object does not contain posterior samples.
+#'
+#' @noRd
+validate.samples <- function(obj) {
+    if (!inherits(obj$stanfit, "stanfit")) {
+        stop("No posterior samples found, run 'hsstan' with store.samples=TRUE.")
     }
 }
 
