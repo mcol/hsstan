@@ -240,6 +240,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
 
         if (!store.samples) samples <- NA
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
+                    covariates=covariates, biomarkers=biomarkers,
                     linear.predictors=y_pred, fitted.values=fitted, family=family,
                     loglik=loglik, data=X_train, y=y_train)
         if (is.cross.validation)

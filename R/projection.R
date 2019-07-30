@@ -147,7 +147,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     validate.samples(samples)
 
     ## check that the model contains penalized predictors
-    if (is.null(samples$betas$penalized)) {
+    if (length(samples$biomarkers) == 0) {
         stop("Model doesn't contain penalized predictors.")
     }
 
