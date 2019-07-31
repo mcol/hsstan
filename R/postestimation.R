@@ -73,19 +73,7 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
 posterior_linpred.hsstan <- function(object, newdata=NULL,
                                      transform=FALSE, ...) {
     validate.samples(object)
-    if (is.null(newdata)) {
-        newdata <- object$data
-    } else {
-        ## only check for NAs in the variables used in the model
-        vars <- c(object$covariates, object$biomarkers)
-        newdata <- newdata[, colnames(newdata) %in% vars, drop=FALSE]
-        if (any(is.na(newdata)))
-            stop("NAs are not allowed in 'newdata'.")
-
-        ## this adds the intercept column back
-        newdata <- model.matrix(reformulate(vars), newdata)
-    }
-
+    newdata <- validate.newdata(object, newdata)
     pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
     post.matrix <- as.matrix(object$stanfit, pars=pars)
     linear.predictor <- tcrossprod(post.matrix, newdata)

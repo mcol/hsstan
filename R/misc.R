@@ -51,6 +51,38 @@ validate.samples <- function(obj) {
     }
 }
 
+#' Validate new data
+#'
+#' Checks that the new data contains all variables used in the model with no
+#' missing values, and generates the corresponding model matrix.
+#'
+#' @param obj Object of class \code{hsstan}.
+#' @param newdata Optional data frame containing the variables used in the
+#'        model. If \code{NULL}, the model matrix used when fitting the model
+#'        is returned.
+#'
+#' @return
+#' A model matrix corresponding to the variables used in the model.
+#'
+#' @importFrom stats model.matrix reformulate
+#' @noRd
+validate.newdata <- function(obj, newdata) {
+
+    if (is.null(newdata))
+        return(obj$data)
+
+    ## only check for NAs in the variables used in the model
+    vars <- c(obj$covariates, obj$biomarkers)
+    newdata <- newdata[, colnames(newdata) %in% vars, drop=FALSE]
+    if (any(is.na(newdata)))
+        stop("NAs are not allowed in 'newdata'.")
+
+    ## this adds the intercept column back
+    newdata <- model.matrix(reformulate(vars), newdata)
+
+    return(newdata)
+}
+
 #' Validate the family argument
 #'
 #' Ensure that the family argument has been specified correctly.
