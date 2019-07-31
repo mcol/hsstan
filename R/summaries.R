@@ -76,3 +76,24 @@ summary.hsstan <- function(object, pars=NULL, prob=0.95, digits=2,
 print.hsstan <- function(x, ...) {
     print(summary(x, ...))
 }
+
+#' Number of posterior samples
+#'
+#' Extracts the number of posterior samples stored in a fitted model.
+#'
+#' @param object An object of class \code{hsstan}.
+#' @param ... Currently ignored.
+#'
+#' @return
+#' The total number of posterior samples across the chains after discarding
+#' the warmup iterations.
+#'
+#' @importFrom rstantools nsamples
+#' @method nsamples hsstan
+#' @aliases nsamples
+#' @export nsamples
+#' @export
+nsamples <- function(object, ...) {
+    validate.samples(object)
+    with(object$stanfit@sim, sum(n_save - warmup2))
+}
