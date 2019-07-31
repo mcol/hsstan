@@ -88,3 +88,54 @@ posterior_linpred.hsstan <- function(object, transform=FALSE,
         return(linear.predictor)
     return(object$family$linkinv(linear.predictor))
 }
+
+#' Posterior predictive distribution
+#'
+#' Draw from the posterior predictive distribution of the outcome.
+#'
+#' @param object An object of class \code{hsstan}.
+#' @param newdata An optional data frame containing the variables used to
+#'        predict. If \code{NULL} (default), the model matrix is used. If
+#'        specified, its continuous variables should be standardized, since
+#'        the model coefficients are learnt on standardized data.
+#' @param nsamples A positive integer indicating the number of posterior samples
+#'        to use. If \code{NULL} (default) all samples are used.
+#' @param seed Optional integer defining the seed for the pseudo-random number
+#'        generator.
+#' @param ... Currently ignored.
+#'
+#' @return
+#' A matrix of size \code{S} by \code{N}, where \code{S} is the number of
+#' simulations from the posterior predictive distribution, and \code{N} is the
+#' number of data points.
+#'
+#' @importFrom rstantools posterior_predict
+#' @importFrom stats rbinom rnorm
+#' @method posterior_predict hsstan
+#' @aliases posterior_predict
+#' @export posterior_predict
+#' @export
+posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
+                                     seed=NULL, ...) {
+    validate.samples(object)
+
+    ## extract a random subset of the posterior samples
+    if (!is.null(seed))
+        set.seed(seed)
+    num.samples <- nsamples(object)
+    samp <- sample(num.samples, min(num.samples, nsamples))
+    nsamples <- length(samp)
+    if (nsamples == 0)
+        stop("'nsamples' must be a positive integer.")
+
+    ## generate the posterior predictions
+    mu <- posterior_linpred(object, newdata, transform=TRUE)[samp, , drop=FALSE]
+    nobs <- ncol(mu)
+    if (is.logistic(object))
+        pp <- t(sapply(1:nsamples, function(z) rbinom(nobs, 1, mu[z, ])))
+    else {
+        sigma <- as.matrix(object$stanfit, pars="sigma")[samp, , drop=FALSE]
+        pp <- t(sapply(1:nsamples, function(z) rnorm(nobs, mu[z, ], sigma[z])))
+    }
+    return(pp)
+}
