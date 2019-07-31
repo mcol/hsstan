@@ -24,8 +24,8 @@
 #'
 #' @param object An object of class \code{hsstan}.
 #' @param pars Names of parameters for which posterior intervals should be
-#'        returned. If \code{NULL} (default) then this refers to the set of
-#'        predictors used in the model.
+#'        returned, which can be specified as regular expressions. If \code{NULL}
+#'        (default) then this refers to the set of predictors used in the model.
 #' @param prob A value between 0 and 1 indicating the desired probability
 #'        to be covered by the uncertainty intervals (0.95, by default).
 #' @param ... Currently ignored.
@@ -40,8 +40,15 @@
 #' @export posterior_interval
 #' @export
 posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
+    validate.samples(object)
     if (is.null(pars))
         pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
+    else {
+        if (!is.character(pars))
+            stop("'pars' must be a character vector.")
+        get.pars <- function(x) grep(x, object$stanfit@sim$fnames_oi, value=TRUE)
+        pars <- sapply(pars, get.pars)
+    }
     post.matrix <- as.matrix(object$stanfit, pars=pars)
     rstantools::posterior_interval(post.matrix, prob=prob)
 }
