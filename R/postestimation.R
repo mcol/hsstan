@@ -59,12 +59,12 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
 #' by the inverse-link function.
 #'
 #' @param object An object of class \code{hsstan}.
+#' @param transform Whether the linear predictor should be transformed using
+#'        the inverse-link function (\code{FALSE} by default).
 #' @param newdata An optional data frame containing the variables used to
 #'        predict. If \code{NULL} (default), the model matrix is used. If
 #'        specified, its continuous variables should be standardized, since
 #'        the model coefficients are learnt on standardized data.
-#' @param transform Whether the linear predictor should be transformed using
-#'        the inverse-link function (\code{FALSE} by default).
 #' @param ... Currently ignored.
 #'
 #' @return
@@ -77,8 +77,8 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
 #' @aliases posterior_linpred
 #' @export posterior_linpred
 #' @export
-posterior_linpred.hsstan <- function(object, newdata=NULL,
-                                     transform=FALSE, ...) {
+posterior_linpred.hsstan <- function(object, transform=FALSE,
+                                     newdata=NULL, ...) {
     validate.samples(object)
     newdata <- validate.newdata(object, newdata)
     pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)

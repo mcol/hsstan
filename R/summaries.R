@@ -93,7 +93,7 @@ print.hsstan <- function(x, ...) {
 #' @aliases nsamples
 #' @export nsamples
 #' @export
-nsamples <- function(object, ...) {
+nsamples.hsstan <- function(object, ...) {
     validate.samples(object)
     with(object$stanfit@sim, sum(n_save - warmup2))
 }
