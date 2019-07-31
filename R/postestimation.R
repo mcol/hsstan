@@ -47,7 +47,7 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
         if (!is.character(pars))
             stop("'pars' must be a character vector.")
         get.pars <- function(x) grep(x, object$stanfit@sim$fnames_oi, value=TRUE)
-        pars <- sapply(pars, get.pars)
+        pars <- unlist(sapply(pars, get.pars))
     }
     post.matrix <- as.matrix(object$stanfit, pars=pars)
     rstantools::posterior_interval(post.matrix, prob=prob)
