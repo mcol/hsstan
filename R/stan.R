@@ -335,6 +335,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     llk <- perf <- rep(NA, num.folds)
     llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
     is.logistic <- is.logistic(hs.cv[[1]])
+    perf.fun <- ifelse(is.logistic, auc, r2)
 
     ## loop over the folds
     for (fold in 1:num.folds) {
@@ -343,22 +344,15 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             y.obs <- hs.cv[[fold]]$y
 
         y.pred.hs <- hs.cv[[fold]]$fitted.values
+        perf[fold] <- perf.fun(y.pred.hs, y.obs)
 
-        ## logistic regression
+        ## log-likelihood ratio
         if (is.logistic) {
-
             ## proportion of cases in the training fold (prior probability)
             prop.cases <- sum(hs.cv[[fold]]$y) / length(hs.cv[[fold]]$y)
-
-            perf[fold] <- auc(y.pred.hs, y.obs)
             llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
             llk.ratio[fold] <- mean(llkr)
             llk.ratio.var[fold] <- var(llkr)
-        }
-
-        ## linear regression
-        else {
-            perf[fold] <- r2(y.pred.hs, y.obs)
         }
 
         llk[fold] <- sum(hs.cv[[fold]]$loglik)
@@ -371,9 +365,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
     llk <- c(llk, sum(sapply(hs.cv, function(z) sum(z$loglik))))
-    perf <- c(perf, ifelse(is.logistic,
-                           auc(y.pred.hs.all, y.obs.all),
-                           r2(y.pred.hs.all, y.obs.all)))
+    perf <- c(perf, perf.fun(y.pred.hs.all, y.obs.all))
 
     res <- data.frame(set=set, test.llk=llk, perf=perf)
     colnames(res)[3] <- gsub("perf", ifelse(is.logistic, "auc", "r2"),
