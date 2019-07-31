@@ -146,3 +146,15 @@ validate.adapt.delta <- function(adapt.delta) {
         stop("'adapt.delta' must be below 1.")
     }
 }
+
+#' Checks whether the model fitted is a logistic regression model.
+#'
+#' @param obj An object of class \code{hsstan}.
+#'
+#' @return
+#' \code{TRUE} for logistic regression models, \code{FALSE} otherwise.
+#'
+#' @noRd
+is.logistic <- function(obj) {
+    obj$family$family == "binomial"
+}

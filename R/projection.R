@@ -164,9 +164,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
     beta.samples <- extract(stanfit, pars=c("beta_u", "beta_p"))
     w <- t(cbind(beta.samples$beta_u, beta.samples$beta_p)) # P x S
-    sigma2 <- tryCatch(unlist(extract(stanfit, pars=c("sigma")))^2,
-                       error=function(e) return(1))
-    is.logistic <- samples$family$family == "binomial"
+    is.logistic <- is.logistic(samples)
+    sigma2 <- if (is.logistic) 1 else unlist(extract(stanfit, pars="sigma"))^2
 
     ## fit of the full model (matrix of dimension N x S)
     fit <- samples$family$linkinv(x %*% w)

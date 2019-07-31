@@ -334,6 +334,7 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     y.obs.all <- y.pred.hs.all <- NULL
     llk <- perf <- rep(NA, num.folds)
     llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
+    is.logistic <- is.logistic(hs.cv[[1]])
 
     ## loop over the folds
     for (fold in 1:num.folds) {
@@ -342,7 +343,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
             y.obs <- hs.cv[[fold]]$y
 
         y.pred.hs <- hs.cv[[fold]]$fitted.values
-        is.logistic <- hs.cv[[fold]]$family$family == "binomial"
 
         ## logistic regression
         if (is.logistic) {
