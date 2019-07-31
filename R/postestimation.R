@@ -45,3 +45,51 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
     post.matrix <- as.matrix(object$stanfit, pars=pars)
     rstantools::posterior_interval(post.matrix, prob=prob)
 }
+
+#' Posterior distribution of the linear predictor
+#'
+#' Extract the posterior draws of the linear predictor, possibly transformed
+#' by the inverse-link function.
+#'
+#' @param object An object of class \code{hsstan}.
+#' @param newdata An optional data frame containing the variables used to
+#'        predict. If \code{NULL} (default), the model matrix is used. If
+#'        specified, its continuous variables should be standardized, since
+#'        the model coefficients are learnt on standardized data.
+#' @param transform Whether the linear predictor should be transformed using
+#'        the inverse-link function (\code{FALSE} by default).
+#' @param ... Currently ignored.
+#'
+#' @return
+#' A matrix of size \code{S} by \code{N}, where \code{S} is the number of draws
+#' from the posterior distribution of the (transformed) linear predictor, and
+#' \code{N} is the number of data points.
+#'
+#' @importFrom rstantools posterior_linpred
+#' @method posterior_linpred hsstan
+#' @aliases posterior_linpred
+#' @export posterior_linpred
+#' @export
+posterior_linpred.hsstan <- function(object, newdata=NULL,
+                                     transform=FALSE, ...) {
+    validate.samples(object)
+    if (is.null(newdata)) {
+        newdata <- object$data
+    } else {
+        ## only check for NAs in the variables used in the model
+        vars <- c(object$covariates, object$biomarkers)
+        newdata <- newdata[, colnames(newdata) %in% vars, drop=FALSE]
+        if (any(is.na(newdata)))
+            stop("NAs are not allowed in 'newdata'.")
+
+        ## this adds the intercept column back
+        newdata <- model.matrix(reformulate(vars), newdata)
+    }
+
+    pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
+    post.matrix <- as.matrix(object$stanfit, pars=pars)
+    linear.predictor <- tcrossprod(post.matrix, newdata)
+    if (!transform)
+        return(linear.predictor)
+    return(object$family$linkinv(linear.predictor))
+}
