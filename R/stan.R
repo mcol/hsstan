@@ -50,14 +50,11 @@ get.coefficients <- function(samples, coeff.names) {
 #' standardized according to mean and standard deviation of the corresponding
 #' training fold.
 #'
-#' @param x Data frame of predictors.
-#' @param y Vector of outcomes. For a logistic regression model, this is
-#'        expected to contain only \code{0-1} entries.
-#' @param covariates Names of the variables to be used as (unpenalized)
-#'        predictors.
-#' @param biomarkers Names of the variables to be used as penalized predictors.
-#'        If it is specified as an empty vector, a model with only unpenalized
-#'        covariates is used.
+#' @param x Data frame containing outcome, covariates and penalized predictors.
+#' @param covs.model Formula containing the unpenalized covariates.
+#' @param penalized Names of the variables to be used as penalized predictors.
+#'        If \code{NULL} or an empty vector, a model with only unpenalized
+#'        covariates is fitted.
 #' @param family Type of model fitted: either \code{gaussian()} for linear
 #'        regression (default) or \code{binomial()} for logistic regression.
 #' @param folds List of cross-validation folds, where each element contains
@@ -98,24 +95,21 @@ get.coefficients <- function(samples, coeff.names) {
 #' @importFrom rstan stan_model
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export
-hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NULL,
+hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
                    store.samples=is.null(folds), seed=123,
                    adapt.delta=NULL) {
 
-    stopifnot(nrow(x) == length(y))
-    stopifnot(all(covariates %in% colnames(x)))
-    stopifnot(all(biomarkers %in% colnames(x)))
-    if (!is.numeric(y)) {
-        stop("Outcome variable must be numeric")
-    }
+    model.terms <- validate.model(covs.model, penalized)
+    x <- validate.data(x, model.terms)
+    y <- validate.outcome(x[[model.terms$outcome]])
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
 
     ## choose the model to be fitted
-    model <- ifelse(length(biomarkers) == 0, "base", "hs")
+    model <- ifelse(length(penalized) == 0, "base", "hs")
     if (family$family == "binomial") model <- paste0(model, "_logit")
 
     ## set or check adapt.delta
@@ -126,9 +120,10 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
     }
 
     ## create the design matrix
-    X <- model.matrix(reformulate(c(covariates, biomarkers)), data=x)
+    unpenalized <- model.terms$unpenalized
+    X <- model.matrix(reformulate(c(unpenalized, penalized)), data=x)
     P <- ncol(X)
-    U <- P - length(biomarkers)
+    U <- P - length(penalized)
     which.unpenalized <- 1:U
     which.penalized <- setdiff(1:P, which.unpenalized)
     X <- X[, c(which.unpenalized, which.penalized)]
@@ -220,7 +215,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
 
         if (!store.samples) samples <- NA
         obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
-                    covariates=covariates, biomarkers=biomarkers,
+                    model.terms=model.terms,
                     linear.predictors=y_pred, fitted.values=fitted, family=family,
                     loglik=loglik, data=X_train, y=y_train)
         if (is.cross.validation)
@@ -256,7 +251,8 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
                         logit=FALSE, ...) {
-    default.args <- list(x=x, y=y, covariates=covariates, biomarkers=biomarkers,
+    default.args <- list(x=cbind(x, hsstan_y_=y), penalized=biomarkers,
+                         covs.model=reformulate(covariates, "hsstan_y_"),
                          folds=NULL, family=ifelse(logit, binomial, gaussian),
                          iter=2000)
     input.args <- list(...)

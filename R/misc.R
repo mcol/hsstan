@@ -72,7 +72,7 @@ validate.newdata <- function(obj, newdata) {
         return(obj$data)
 
     ## only check for NAs in the variables used in the model
-    vars <- c(obj$covariates, obj$biomarkers)
+    vars <- c(obj$model.terms$unpenalized, obj$model.terms$penalized)
     newdata <- newdata[, colnames(newdata) %in% vars, drop=FALSE]
     if (any(is.na(newdata)))
         stop("NAs are not allowed in 'newdata'.")
@@ -81,6 +81,102 @@ validate.newdata <- function(obj, newdata) {
     newdata <- model.matrix(reformulate(vars), newdata)
 
     return(newdata)
+}
+
+#' Validate a model formula
+#'
+#' Check that the formula that specifies a model contains all required elements.
+#'
+#' @param model Formula to be checked.
+#' @param penalized Vector of names for the penalized predictors.
+#'
+#' @return
+#' A list containing the formula representing the covariates model, the name of
+#' the outcome variable, the names of the upenalized and penalized predictors.
+#'
+#' @noRd
+validate.model <- function(model, penalized) {
+    if (is.character(model) && length(model) > 1)
+        stop("Model formula specified incorrectly.")
+    model <- as.formula(model)
+    tt <- terms(model)
+    if (attr(tt, "response") == 0)
+        stop("No outcome variable specified in the model.")
+    if (attr(tt, "intercept") == 0)
+        stop("Models with no intercept are not supported.")
+    if (any(grepl(":", attr(tt, "term.labels"))))
+        stop("Interaction terms are not supported.")
+    if (length(penalized) > 0 && !is.character(penalized))
+        stop("'penalized' must be a character vector.")
+    vars <- rownames(attr(tt, "factors"))
+    if (is.null(vars))
+        vars <- as.character(model)[2]
+    return(list(model=model, outcome=vars[1],
+                unpenalized=vars[-1], penalized=penalized))
+}
+
+#' Validate the model data
+#'
+#' Check if the model data can be used with the given model formula and
+#' penalized predictors.
+#'
+#' @param x An object to be checked.
+#' @param model Validated model formula.
+#'
+#' @return
+#' A data frame containing the model data.
+#'
+#' @noRd
+validate.data <- function(x, model) {
+    if (!inherits(x, c("data.frame", "matrix")))
+        stop("x must be a data frame or a matrix.")
+    x <- as.data.frame(x)
+    validate.variables(x, model$outcome)
+    validate.variables(x, c(model$unpenalized, model$penalized))
+    return(x)
+}
+
+#' Validate variables
+#'
+#' Check that the required variables are in the dataset.
+#'
+#' @param x Data frame containing the variables of interest.
+#' @param variables Vector of variable names.
+#'
+#' @return
+#' Throws if variables are not present in the dataset or contain missing values.
+#'
+#' @noRd
+validate.variables <- function(x, variables) {
+    if (length(variables) == 0)
+        stop("No predictors present in the model.")
+    var.match <- match(variables, colnames(x))
+    if (anyNA(var.match))
+        stop(collapse(variables[is.na(var.match)]), " not present in x.")
+    if (anyNA(x[, variables]))
+        stop("Missing values in model variables.")
+}
+
+#' Validate the outcome variable
+#'
+#' Check that the outcome variable can be converted to a valid numerical
+#' vector.
+#'
+#' @param y Outcome vector to be checked.
+#'
+#' @return
+#' A numeric vector.
+#'
+#' @noRd
+validate.outcome <- function(y) {
+    if (is.factor(y)) {
+        if (nlevels(y) != 2)
+            stop("A factor outcome variable can only have two levels.")
+        y <- as.integer(y) - 1
+    }
+    if (!(is.numeric(y) || is.logical(y)))
+        stop("Outcome variable of invalid type.")
+    return(as.numeric(y))
 }
 
 #' Validate the family argument
@@ -157,4 +253,19 @@ validate.adapt.delta <- function(adapt.delta) {
 #' @noRd
 is.logistic <- function(obj) {
     obj$family$family == "binomial"
+}
+
+#' Comma-separated string concatenation
+#'
+#' Collapse the elements of a character vector into a comma-separated string.
+#'
+#' @param x Character vector.
+#'
+#' @return
+#' A comma-separated string where each element of the original vector is
+#' surrounded by single quotes.
+#'
+#' @noRd
+collapse <- function(x) {
+    paste0("'", x, "'", collapse=", ")
 }
