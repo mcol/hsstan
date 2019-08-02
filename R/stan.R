@@ -255,6 +255,7 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
 
 #' Deprecated functions to fit hierarchical shrinkage models
 #'
+#' @inheritParams hsstan
 #' @param x Data frame of predictors.
 #' @param y Vector of outcomes. For a logistic regression model, this is
 #'        expected to contain only \code{0-1} entries.
@@ -265,9 +266,6 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
 #'        covariates is used.
 #' @param logit \code{FALSE} for linear regression (default), \code{TRUE} for
 #'        logistic regression.
-#' @param folds List of cross-validation folds, where each element contains
-#'        the indices of the test observations. If \code{NULL} (default), no
-#'        cross-validation is performed.
 #' @param ... Further options passed to \code{hsstan}.
 #'
 #' @section Note:
@@ -275,7 +273,6 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
 #' \code{hsstan} provided for backward compatibility. They are considered
 #' deprecated.
 #'
-#' @seealso \code{\link{hsstan}}
 #' @export
 sample.stan <- function(x, y, covariates, biomarkers=NULL,
                         logit=FALSE, ...) {
@@ -291,14 +288,8 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 #' @rdname sample.stan
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
-                           logit=FALSE, ...) {
-    default.args <- list(x=x, y=y, covariates=covariates, biomarkers=biomarkers,
-                         folds=folds, family=ifelse(logit, binomial, gaussian),
-                         iter=1000)
-    input.args <- list(...)
-    default.args[names(input.args)] <- input.args
-    input.args[names(default.args)] <- NULL
-    do.call(hsstan, c(default.args, input.args))
+                           logit=FALSE, iter=1000, ...) {
+    sample.stan(x, y, covariates, biomarkers, logit, folds=folds, iter=iter, ...)
 }
 
 #' Extract measures of performance from the cross-validation results
