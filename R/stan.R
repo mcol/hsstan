@@ -93,20 +93,17 @@ get.coefficients <- function(samples, coeff.names) {
 #'        \code{regularized=FALSE}).
 #' @param slab.df Number of degrees of freedom of the regularization parameter
 #'        (ignored if \code{regularized=FALSE}).
-#' @param model.type Either \code{"mc"} for Hamiltonian Monte Carlo, or
-#'        \code{"vb"} for variational Bayes.
 #'
 #' @importFrom foreach %dopar%
 #' @importFrom rstan stan_model
 #' @importFrom stats gaussian model.matrix reformulate
-#' @importMethodsFrom rstan sampling vb
 #' @export
 hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
                    store.samples=is.null(folds), seed=123,
-                   adapt.delta=NULL, model.type=c("mc", "vb")) {
+                   adapt.delta=NULL) {
 
     stopifnot(nrow(x) == length(y))
     stopifnot(all(covariates %in% colnames(x)))
@@ -116,7 +113,6 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
     }
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
-    model.type <- match.arg(model.type)
 
     ## choose the model to be fitted
     model <- ifelse(length(biomarkers) == 0, "base", "hs")
@@ -200,16 +196,11 @@ hsstan <- function(x, y, covariates, biomarkers=NULL, family=gaussian, folds=NUL
                            global_scale=global.scale, global_df=global.df,
                            slab_scale=slab.scale, slab_df=slab.df)
 
-        if (model.type == "mc") {
-            samples <- sampling(stanmodels[[model]], data=data.input,
-                                chains=4, iter=iter, warmup=warmup,
-                                seed=seed, control=list(adapt_delta=adapt.delta))
-        }
-        else {
-            samples <- vb(stanmodels[[model]], data=data.input,
-                          iter=50000, output_samples=2000,
-                          init="random", algorithm="meanfield")
-        }
+        ## run the stan model
+        samples <- rstan::sampling(stanmodels[[model]], data=data.input,
+                                   iter=iter, warmup=warmup,
+                                   chains=4, seed=seed,
+                                   control=list(adapt_delta=adapt.delta))
 
         ## assign proper names
         par.idx <- grep("^beta_[up]", names(samples))
