@@ -18,17 +18,6 @@
 ##=============================================================================
 
 
-#' Return the posterior means for the specified variables
-#'
-#' @param samples An object of class \code{stanfit}.
-#' @param varnames Vector of variable names to be extracted.
-#'
-#' @importMethodsFrom rstan extract
-posterior.means <- function(samples, varnames) {
-    unlist(lapply(extract(samples, pars=varnames),
-                  function(z) if (is.matrix(z)) colMeans(z) else mean(z)))
-}
-
 #' Return the posterior means of the regression coefficients
 #'
 #' @param samples An object of class \code{stanfit}.
@@ -39,8 +28,8 @@ posterior.means <- function(samples, varnames) {
 #' of the unpenalized covariates, and \var{penalized} for the posterior means
 #' of the penalized predictors (which can be \code{NULL} for baseline models).
 get.coefficients <- function(samples, coeff.names) {
-    beta.u <- posterior.means(samples, "beta_u")
-    beta.p <- tryCatch(posterior.means(samples, "beta_p"),
+    beta.u <- colMeans(as.matrix(samples, pars="beta_u"))
+    beta.p <- tryCatch(colMeans(as.matrix(samples, pars="beta_p")),
                        error=function(e) return(NULL))
     stopifnot(length(c(beta.u, beta.p)) == length(coeff.names))
     u.idx <- 1:length(beta.u)
