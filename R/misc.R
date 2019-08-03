@@ -239,7 +239,7 @@ validate.adapt.delta <- function(adapt.delta) {
         stop("'adapt.delta' must be at least 0.8.")
     }
     if (adapt.delta >= 1) {
-        stop("'adapt.delta' must be below 1.")
+        stop("'adapt.delta' must be less than 1.")
     }
 }
 
