@@ -333,27 +333,3 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
         write.csv(file=out.csv, res, row.names=FALSE)
     return(res)
 }
-
-#' Approximate leave-one-out cross-validation
-#'
-#' This computes an efficient approximate leave-one-out cross-validation
-#' using Pareto smoothed importance sampling (PSIS-LOO).
-#'
-#' @param x An object of class \code{hsstan}.
-#' @param save.psis Whether intermediate results should be saved in the
-#'        returned object (\code{FALSE} by default).
-#' @param cores Number of cores used for parallelisation (the value of
-#'        the \code{mc.cores} option by default).
-#'
-#' @return
-#' A \code{loo} object.
-#'
-#' @importMethodsFrom rstan loo
-#' @method loo hsstan
-#' @aliases loo
-#' @export loo
-#' @export
-loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
-    validate.samples(x)
-    suppressWarnings(rstan::loo(x$stanfit, save_psis=save.psis, cores=cores))
-}
