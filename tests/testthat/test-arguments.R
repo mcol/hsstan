@@ -61,6 +61,12 @@ test_that("model formula",
     expect_equal(validate.model(y ~ x1 + x2, NULL),
                  model)
     expect_length(model$penalized, 0)
+
+    model <- validate.model(y ~ 1, c())
+    expect_equal(model$outcome,
+                 "y")
+    expect_length(model$unpenalized, 0)
+    expect_length(model$penalized, 0)
 })
 
 test_that("model data",
