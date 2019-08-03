@@ -63,6 +63,7 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param store.samples Whether the posterior samples should be saved
 #'        (by default, \code{FALSE} for cross-validation and \code{TRUE}
 #'        otherwise).
+#' @param chains Number of Markov chains to run (4 by default).
 #' @param seed Integer defining the seed for the pseudo-random number generator.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
@@ -99,7 +100,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
-                   store.samples=is.null(folds), seed=123,
+                   store.samples=is.null(folds), chains=4, seed=123,
                    adapt.delta=NULL) {
 
     model.terms <- validate.model(covs.model, penalized)
@@ -107,6 +108,8 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     y <- validate.outcome(x[[model.terms$outcome]])
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
+    if (chains < 1)
+        stop("'chains' must be a positive integer.")
 
     ## choose the model to be fitted
     model <- ifelse(length(penalized) == 0, "base", "hs")
@@ -194,7 +197,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         ## run the stan model
         samples <- rstan::sampling(stanmodels[[model]], data=data.input,
                                    iter=iter, warmup=warmup,
-                                   chains=4, seed=seed,
+                                   chains=chains, seed=seed,
                                    control=list(adapt_delta=adapt.delta))
 
         ## assign proper names
