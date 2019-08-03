@@ -32,7 +32,8 @@ LinkingTo:
     StanHeaders (>= 2.17.2),
     rstan (>= 2.18.1)
 Suggests:
-    loo (>= 2.1.0)
+    loo (>= 2.1.0),
+    testthat (>= 2.1.0)
 ByteCompile: yes
 NeedsCompilation: yes
 Encoding: UTF-8
