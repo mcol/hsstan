@@ -45,12 +45,10 @@ get.coefficients <- function(samples, coeff.names) {
 #' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
 #' cross-validation folds (if specified) or over all the data.
 #'
-#' The continuous predictors and outcome variable are standardized before
-#' fitting the models. In case of cross-validation, the test fold is
-#' standardized according to mean and standard deviation of the corresponding
-#' training fold.
-#'
 #' @param x Data frame containing outcome, covariates and penalized predictors.
+#'        Continuous predictors and outcome variable should be standardized
+#'        before fitting the models as priors assume them to have mean zero and
+#'        have the same scale.
 #' @param covs.model Formula containing the unpenalized covariates.
 #' @param penalized Names of the variables to be used as penalized predictors.
 #'        If \code{NULL} or an empty vector, a model with only unpenalized
@@ -136,10 +134,6 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     ## whether it's a proper cross-validation
     is.cross.validation <- num.folds > 1
 
-    ## names of variables to be standardized
-    stand.cols <- colnames(x)[!sapply(x, class) %in% c("factor", "character")]
-    stand.idx <- which(colnames(X) %in% stand.cols)
-
     ## loop over the cross-validation folds
     fold <- NULL   # silence a note raised by R CMD check
     cv <- foreach(fold=1:num.folds) %dopar% {
@@ -163,24 +157,6 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         X_test <- X[test, ]
         y_test <- y[test]
         N_test <- nrow(X_test)
-
-        ## standardize continuous outcome
-        if (length(unique(y_train)) > 2) {
-            y_train <- scale(y_train)
-            train.mu <- attr(y_train, "scaled:center")
-            train.sd <- attr(y_train, "scaled:scale")
-            y_train <- as.numeric(y_train)
-            y_test <- as.numeric(scale(y_test, train.mu, train.sd))
-        }
-
-        ## standardize all columns corresponding to numerical variables: this
-        ## excludes those generated from factor/character variables and the
-        ## intercept column
-        X_train.stand.idx <- scale(X_train[, stand.idx])
-        train.mu <- attr(X_train.stand.idx, "scaled:center")
-        train.sd <- attr(X_train.stand.idx, "scaled:scale")
-        X_train[, stand.idx] <- X_train.stand.idx
-        X_test[, stand.idx] <- scale(X_test[, stand.idx], train.mu, train.sd)
 
         ## global scale for regularized horseshoe prior
         global.scale <- if (regularized) par.ratio / sqrt(N_train) else 1
