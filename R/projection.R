@@ -214,7 +214,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
     res <- data.frame(var=c("Initial set of covariates",
                             colnames(x)[setdiff(chosen, 1:U)]),
-                      kl=kl, elpd=elpd, delta.elpd=delta.elpd)
+                      kl=kl, elpd=elpd, delta.elpd=delta.elpd,
+                      stringsAsFactors=FALSE)
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)
 
