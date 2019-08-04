@@ -184,8 +184,9 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
         post.matrix <- as.matrix(samples)
-        y_pred <- colMeans(tcrossprod(post.matrix[, par.idx], X_test))
-        fitted <- family$linkinv(y_pred)
+        y_pred <- tcrossprod(post.matrix[, par.idx], X_test)
+        fitted <- colMeans(family$linkinv(y_pred))
+        y_pred <- colMeans(y_pred)
         betas <- get.coefficients(samples, colnames(X))
         coefs <- c(betas$unpenalized, betas$penalized)
 

@@ -83,20 +83,39 @@ test_that("sample.stan.cv",
 
 test_that("get.cv.performance",
 {
+    tol <- 0.000001
     out <- get.cv.performance(hs.gauss)
     expect_is(out, "data.frame")
     expect_equal(colnames(out),
                  c("set", "test.llk", "r2"))
     expect_equal(out$set, "Non cross-validated")
+    expect_equal(out$test.llk,
+                 -108.7622, tolerance=tol)
+    expect_equal(out$r2,
+                 0.2737298, tolerance=tol)
 
     out <- get.cv.performance(hs.binom)
     expect_equal(colnames(out),
                  c("set", "test.llk", "auc", "llk.ratio", "llk.ratio.var"))
+    expect_equal(out$test.llk,
+                 -33.28791, tolerance=tol)
+    expect_equal(out$auc,
+                 0.736, tolerance=tol)
 
     out <- get.cv.performance(cv.gauss, out.csv="out.csv")
     expect_equal(nrow(out), length(folds) + 1)
+    expect_equal(out$test.llk,
+                 c(-67.06889, -63.05863, -130.12752), tolerance=tol)
+    expect_equal(out$r2,
+                 c(0.016581920, 0.175190218, 0.003522558), tolerance=tol)
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
+
+    out <- get.cv.performance(cv.binom)
+    expect_equal(out$test.llk,
+                 c(-28.85088, -27.02137, -55.87226), tolerance=tol)
+    expect_equal(out$auc,
+                 c(0.4935065, 0.4821429, 0.4692308), tolerance=tol)
 })
 
 test_that("summary.hsstan",
