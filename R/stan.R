@@ -258,9 +258,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     }
     auc <- function(y.pred, y.obs)
         as.numeric(roc(y.obs, y.pred, direction="<", quiet=TRUE)$auc)
-    loglik.ratio <- function(y.pred, y.obs, prop.cases)
-        (2 * y.obs - 1) * (log(y.pred) - log(1 - y.pred)) -
-        (2 * y.obs - 1) * (log(prop.cases) - log(1 - prop.cases))
 
     if (inherits(hs.cv, "hsstan")) {
         hs.cv <- list(hs.cv)
@@ -270,7 +267,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     }
     y.obs.all <- y.pred.hs.all <- NULL
     llk <- perf <- rep(NA, num.folds)
-    llk.ratio <- llk.ratio.var <- rep(NA, num.folds)
     is.logistic <- is.logistic(hs.cv[[1]])
     perf.fun <- ifelse(is.logistic, auc, r2)
 
@@ -284,18 +280,8 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
         newdata <- hs.cv[[fold]]$withdrawn.data
         y.pred.hs <- colMeans(posterior_linpred(hs.cv[[fold]], newdata=newdata,
                                                 transform=TRUE))
-        perf[fold] <- perf.fun(y.pred.hs, y.obs)
-
-        ## log-likelihood ratio
-        if (is.logistic) {
-            ## proportion of cases in the training fold (prior probability)
-            prop.cases <- sum(hs.cv[[fold]]$y) / length(hs.cv[[fold]]$y)
-            llkr <- loglik.ratio(y.pred.hs, y.obs, prop.cases)
-            llk.ratio[fold] <- mean(llkr)
-            llk.ratio.var[fold] <- var(llkr)
-        }
-
         llk[fold] <- sum(hs.cv[[fold]]$loglik)
+        perf[fold] <- perf.fun(y.pred.hs, y.obs)
         y.obs.all <- c(y.obs.all, y.obs)
         y.pred.hs.all <- c(y.pred.hs.all, y.pred.hs)
     }
@@ -310,12 +296,6 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     res <- data.frame(set=set, test.llk=llk, perf=perf)
     colnames(res)[3] <- gsub("perf", ifelse(is.logistic, "auc", "r2"),
                              colnames(res)[3])
-    if (is.logistic) {
-        prop.cases <- sum(y.obs.all == 1) / length(y.obs.all)
-        llkr <- loglik.ratio(y.pred.hs.all, y.obs.all, prop.cases)
-        res$llk.ratio <- c(llk.ratio, mean(llkr))
-        res$llk.ratio.var <- c(llk.ratio.var, var(llkr))
-    }
 
     if (num.folds == 1) {
         res <- res[1, ]

@@ -97,7 +97,7 @@ test_that("get.cv.performance",
 
     out <- get.cv.performance(hs.binom)
     expect_equal(colnames(out),
-                 c("set", "test.llk", "auc", "llk.ratio", "llk.ratio.var"))
+                 c("set", "test.llk", "auc"))
     expect_equal(out$test.llk,
                  -33.28791, tolerance=tol)
     expect_equal(out$auc,
