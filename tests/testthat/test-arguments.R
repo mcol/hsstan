@@ -74,9 +74,9 @@ test_that("model formula",
 test_that("model data",
 {
     expect_error(validate.data(NULL, y ~ 1),
-                 "x must be a data frame or a matrix")
+                 "'x' must be a data frame or a matrix")
     expect_error(validate.data(1:10, y ~ 1),
-                 "x must be a data frame or a matrix")
+                 "'x' must be a data frame or a matrix")
     expect_equal(validate.data(as.matrix(x), validate.model(y ~ X1, "X3")),
                  x)
     expect_error(validate.variables(x, c()),

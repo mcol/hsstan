@@ -131,7 +131,7 @@ validate.model <- function(model, penalized) {
 #' @noRd
 validate.data <- function(x, model) {
     if (!inherits(x, c("data.frame", "matrix")))
-        stop("x must be a data frame or a matrix.")
+        stop("'x' must be a data frame or a matrix.")
     x <- as.data.frame(x)
     validate.variables(x, model$outcome)
     validate.variables(x, c(model$unpenalized, model$penalized))
@@ -213,9 +213,9 @@ validate.family <- function(family, y) {
 
     if (family$family == "binomial") {
         if (length(table(y)) != 2)
-            stop("y must contain two classes with family=binomial().")
-      if (!is.factor(y) && any(y < 0 | y > 1))
-          stop("y must contain 0-1 values with family=binomial().")
+            stop("Outcome variable must contain two classes with family=binomial.")
+        if (!is.factor(y) && any(y < 0 | y > 1))
+            stop("Outcome variable must contain 0-1 values with family=binomial.")
     }
 
     return(family)
