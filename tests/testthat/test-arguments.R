@@ -12,7 +12,7 @@ test_that("valid objects",
     expect_error(validate.hsstan(x),
                  "Not an object of class 'hsstan'")
     expect_error(validate.samples(list(stanfit=NA)),
-                 "No posterior samples found")
+                 "No valid posterior samples stored in the 'hsstan' object")
 })
 
 test_that("newdata",

@@ -54,6 +54,7 @@ test_that("hsstan",
     expect_length(cv.gauss, 2)
     expect_s3_class(cv.gauss[[1]],
                     "hsstan")
+    expect_silent(validate.samples(cv.gauss[[1]]))
 })
 
 test_that("sample.stan",

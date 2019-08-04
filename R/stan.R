@@ -58,9 +58,6 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param folds List of cross-validation folds, where each element contains
 #'        the indices of the test observations. If \code{NULL} (default), no
 #'        cross-validation is performed.
-#' @param store.samples Whether the posterior samples should be saved
-#'        (by default, \code{FALSE} for cross-validation and \code{TRUE}
-#'        otherwise).
 #' @param chains Number of Markov chains to run (4 by default).
 #' @param seed Integer defining the seed for the pseudo-random number generator.
 #' @param adapt.delta Target average proposal acceptance probability for
@@ -98,8 +95,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
-                   store.samples=is.null(folds), chains=4, seed=123,
-                   adapt.delta=NULL) {
+                   chains=4, seed=123, adapt.delta=NULL) {
 
     model.terms <- validate.model(covs.model, penalized)
     x <- validate.data(x, model.terms)
@@ -184,19 +180,13 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         ## linear predictor of test data, regression coefficients and
         ## residual standard deviation
         post.matrix <- as.matrix(samples)
-        y_pred <- tcrossprod(post.matrix[, par.idx], X_test)
-        fitted <- colMeans(family$linkinv(y_pred))
-        y_pred <- colMeans(y_pred)
         betas <- get.coefficients(samples, colnames(X))
-        coefs <- c(betas$unpenalized, betas$penalized)
 
         ## test log-likelihood
         loglik <- colMeans(post.matrix[, grep("log_lik", colnames(post.matrix))])
 
-        if (!store.samples) samples <- NA
-        obj <- list(stanfit=samples, betas=betas, coefficients=coefs,
-                    model.terms=model.terms,
-                    linear.predictors=y_pred, fitted.values=fitted, family=family,
+        obj <- list(stanfit=samples, betas=betas,
+                    model.terms=model.terms, family=family,
                     loglik=loglik, data=X_train, y=y_train)
         if (is.cross.validation)
             obj <- c(obj, list(withdrawn.data=X_test, y_test=y_test,
@@ -290,7 +280,10 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
         if (is.null(y.obs))
             y.obs <- hs.cv[[fold]]$y
 
-        y.pred.hs <- hs.cv[[fold]]$fitted.values
+        ## retrieve the fitted values on test data
+        newdata <- hs.cv[[fold]]$withdrawn.data
+        y.pred.hs <- colMeans(posterior_linpred(hs.cv[[fold]], newdata=newdata,
+                                                transform=TRUE))
         perf[fold] <- perf.fun(y.pred.hs, y.obs)
 
         ## log-likelihood ratio

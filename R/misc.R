@@ -47,7 +47,7 @@ validate.hsstan <- function(obj) {
 #' @noRd
 validate.samples <- function(obj) {
     if (!inherits(obj$stanfit, "stanfit")) {
-        stop("No posterior samples found, run 'hsstan' with store.samples=TRUE.")
+        stop("No valid posterior samples stored in the 'hsstan' object.")
     }
 }
 
