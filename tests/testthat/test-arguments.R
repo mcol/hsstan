@@ -19,6 +19,8 @@ test_that("newdata",
 {
     expect_equal(validate.newdata(list(data=x), NULL),
                  x)
+    expect_error(validate.newdata(list(data=x), y.gauss),
+                 "'newdata' must be a data frame or a matrix")
 
     mt <- list(unpenalized="X1", penalized="X.NA")
     expect_error(validate.newdata(list(model.terms=mt), x),

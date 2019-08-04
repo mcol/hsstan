@@ -70,6 +70,8 @@ validate.newdata <- function(obj, newdata) {
 
     if (is.null(newdata))
         return(obj$data)
+    if (!inherits(newdata, c("data.frame", "matrix")))
+        stop("'newdata' must be a data frame or a matrix.")
 
     ## only check for NAs in the variables used in the model
     vars <- c(obj$model.terms$unpenalized, obj$model.terms$penalized)
@@ -78,7 +80,7 @@ validate.newdata <- function(obj, newdata) {
         stop("NAs are not allowed in 'newdata'.")
 
     ## this adds the intercept column back
-    newdata <- model.matrix(reformulate(vars), newdata)
+    newdata <- model.matrix(reformulate(vars), as.data.frame(newdata))
 
     return(newdata)
 }
