@@ -69,18 +69,18 @@ validate.samples <- function(obj) {
 validate.newdata <- function(obj, newdata) {
 
     if (is.null(newdata))
-        return(obj$data)
-    if (!inherits(newdata, c("data.frame", "matrix")))
+        newdata <- obj$data
+    else if (!inherits(newdata, c("data.frame", "matrix")))
         stop("'newdata' must be a data frame or a matrix.")
 
     ## only check for NAs in the variables used in the model
-    vars <- c(obj$model.terms$unpenalized, obj$model.terms$penalized)
+    vars <- with(obj$model.terms, c(outcome, unpenalized, penalized))
     newdata <- newdata[, colnames(newdata) %in% vars, drop=FALSE]
     if (any(is.na(newdata)))
         stop("NAs are not allowed in 'newdata'.")
 
     ## this adds the intercept column back
-    newdata <- model.matrix(reformulate(vars), as.data.frame(newdata))
+    newdata <- model.matrix(reformulate(vars[-1]), as.data.frame(newdata))
 
     return(newdata)
 }

@@ -17,16 +17,14 @@ test_that("valid objects",
 
 test_that("newdata",
 {
-    expect_equal(validate.newdata(list(data=x), NULL),
-                 x)
     expect_error(validate.newdata(list(data=x), y.gauss),
                  "'newdata' must be a data frame or a matrix")
 
-    mt <- list(unpenalized="X1", penalized="X.NA")
+    mt <- list(outcome="y", unpenalized="X1", penalized="X.NA")
     expect_error(validate.newdata(list(model.terms=mt), x),
                  "NAs are not allowed in 'newdata'")
 
-    mt <- list(unpenalized="X1", penalized="X2")
+    mt <- list(outcome="y", unpenalized="X1", penalized="X2")
     expect_error(validate.newdata(list(model.terms=mt), x[, 3:4]),
                  "object 'X1' not found")
     expect_equal(validate.newdata(list(model.terms=mt), x),

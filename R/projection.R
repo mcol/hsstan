@@ -152,22 +152,20 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         stop("Model doesn't contain penalized predictors.")
     }
 
-    x <- samples$data
-    if (is.null(samples$withdrawn.data)) {
-        xt <- samples$data
-        yt <- samples$y
-    }
-    else {
-        xt <- samples$withdrawn.data
-        yt <- samples$y_test
-    }
+    in.test <- samples$in.test
+    in.train <- !in.test
+    if (sum(in.train) == 0)
+        in.train <- in.test
+    x <- validate.newdata(samples, samples$data[in.train, ])
+    xt <- validate.newdata(samples, samples$data[in.test, ])
+    yt <- samples$data[in.test, samples$model.terms$outcome]
     stanfit <- samples$stanfit
 
     is.logistic <- is.logistic(samples)
     sigma2 <- if (is.logistic) 1 else as.matrix(stanfit, pars="sigma")^2
 
     ## fit of the full model (matrix of dimension N x S)
-    fit <- t(posterior_linpred(samples, transform=TRUE))
+    fit <- t(posterior_linpred(samples, transform=TRUE, newdata=x))
 
     ## U is number of unpenalized variables (always chosen) including intercept
     P <- length(c(samples$betas$unpenalized, samples$betas$penalized))

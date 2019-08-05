@@ -48,7 +48,6 @@ test_that("hsstan",
     expect_equal(names(hs.gauss$betas$penalized),
                  hs.gauss$model.terms$penalized)
     expect_length(hs.gauss$betas, 2)
-    expect_length(hs.gauss$y, N)
 
     expect_is(cv.gauss, "list")
     expect_length(cv.gauss, 2)
@@ -64,7 +63,12 @@ test_that("sample.stan",
     })
     expect_equal(names(ss.gauss),
                  names(hs.gauss))
-    for (field in setdiff(names(hs.gauss), c("stanfit", "model.terms")))
+    expect_equal(dim(ss.gauss$data), # sample.stan adds the hsstan_y_ column
+                 dim(hs.gauss$data) + c(0, 1))
+    expect_equal(ss.gauss$model.terms[3:4],
+                 hs.gauss$model.terms[3:4])
+    skip.check <- c("stanfit", "data", "model.terms")
+    for (field in setdiff(names(hs.gauss), skip.check))
         expect_equal(ss.gauss[[field]],
                      hs.gauss[[field]])
 })
@@ -77,7 +81,12 @@ test_that("sample.stan.cv",
     })
     expect_equal(names(cv.binom[[1]]),
                  names(sv.binom[[1]]))
-    for (field in setdiff(names(cv.binom[[1]]), c("stanfit", "model.terms")))
+    expect_equal(dim(sv.binom[[1]]$data), # sample.stan adds the hsstan_y_ column
+                 dim(cv.binom[[1]]$data) + c(0, 1))
+    expect_equal(sv.binom[[1]]$model.terms[3:4],
+                 cv.binom[[1]]$model.terms[3:4])
+    skip.check <- c("stanfit", "data", "model.terms")
+    for (field in setdiff(names(cv.binom[[1]]), skip.check))
         expect_equal(cv.binom[[1]][[field]],
                      sv.binom[[1]][[field]])
 })

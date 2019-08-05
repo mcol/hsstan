@@ -1,6 +1,9 @@
 ## silence output and warnings
 SW <- function(expr) capture.output(suppressWarnings(expr))
 
+library(doParallel)
+registerDoParallel(cores=1)
+
 set.seed(1)
 N <- 50
 P <- 10
@@ -82,4 +85,17 @@ test_that("projsel for binomial family",
     expect_equal(sel.binom$delta.elpd[1],
                  -1.172055517, tolerance=tol)
     expect_true(all(diff(sel.binom$kl) < 0))
+})
+
+test_that("projsel for a cross-validated object",
+{
+    SW({
+        folds <- list(1:25, 26:N)
+        cv.gauss <- hsstan(df, mod.gauss, pen, iter=200, chains=2,
+                           folds=folds, family=gaussian)
+        sel.gauss <- projsel(cv.gauss[[1]])
+    })
+
+    expect_equal(sel.gauss$elpd[length(pen) + 1],
+                 sum(cv.gauss[[1]]$loglik))
 })

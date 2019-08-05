@@ -187,10 +187,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
 
         obj <- list(stanfit=samples, betas=betas,
                     model.terms=model.terms, family=family,
-                    loglik=loglik, data=X_train, y=y_train)
-        if (is.cross.validation)
-            obj <- c(obj, list(withdrawn.data=X_test, y_test=y_test,
-                               train=train, test=test))
+                    loglik=loglik, data=x, in.test=test)
         class(obj) <- "hsstan"
         return(obj)
     }
@@ -272,12 +269,10 @@ get.cv.performance <- function(obj, out.csv=NULL) {
     ## loop over the folds
     for (fold in 1:num.folds) {
         hs.fold <- obj[[fold]]
-        y.obs <- hs.fold$y_test
-        if (is.null(y.obs))
-            y.obs <- hs.fold$y
+        y.obs <- hs.fold$data[hs.fold$in.test, hs.fold$model.terms$outcome]
 
         ## retrieve the fitted values on test data
-        newdata <- hs.fold$withdrawn.data
+        newdata <- hs.fold$data[hs.fold$in.test, ]
         y.pred <- colMeans(posterior_linpred(hs.fold, newdata=newdata,
                                              transform=TRUE))
         llk[fold] <- sum(hs.fold$loglik)
