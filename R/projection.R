@@ -129,16 +129,18 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
         ## projected parameters
         submodel <- lm_proj(x, fit, sigma2, chosen, is.logistic)
-        wp <- submodel$w
+        eta <- xt %*% submodel$w
 
         ## expected log predictive density on test set
         if (is.logistic) {
-            pd <- dbinom(yt, 1, binomial()$linkinv(xt %*% wp))
+            pd <- dbinom(yt, 1, binomial()$linkinv(eta), log=TRUE)
         }
         else {
-            pd <- dnorm(yt, xt %*% wp, sqrt(submodel$sigma2))
+            pd <- t(cbind(sapply(1:nrow(eta),
+                                 function(z) dnorm(yt[z], eta[z, ],
+                                                   sqrt(sigma2), log=TRUE))))
         }
-        elpd <- sum(log(rowMeans(pd)))
+        elpd <- sum(rowMeans(pd))
 
         return(list(fit=submodel$fit, kl=submodel$kl, elpd=elpd))
     }
