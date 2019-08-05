@@ -1,5 +1,6 @@
 *.o
 *.so
+*.swp
 *.tar.gz
 .Rhistory
 src/stan_files/*.hpp
