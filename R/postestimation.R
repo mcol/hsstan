@@ -18,6 +18,43 @@
 ##=============================================================================
 
 
+#' Pointwise log-likelihood
+#'
+#' Compute the pointwise log-likelihood.
+#'
+#' @param object An object of class \code{hsstan}.
+#' @param newdata Optional data frame to use to evaluate the log-likelihood.
+#'        If \code{NULL} (default), the model matrix is used.
+#' @param ... Currently ignored.
+#'
+#' @return
+#' A matrix of size \code{S} by \code{N}, where \code{S} is number of draws
+#' from the posterior distribution, and \code{N} is the number of data points.
+#'
+#' @importFrom rstantools log_lik
+#' @importFrom stats rbinom rnorm
+#' @method log_lik hsstan
+#' @aliases log_lik
+#' @export log_lik
+#' @export
+log_lik.hsstan <- function(object, newdata=NULL, ...) {
+
+    ## extract the outcome before creating the model matrix
+    if (is.null(newdata))
+        newdata <- object$data[object$in.train, ]
+    y <- newdata[[object$model.terms$outcome]]
+
+    newdata <- validate.newdata(object, newdata)
+    mu <- posterior_linpred(object, newdata, transform=TRUE)
+    if (!is.logistic(object))
+        sigma <- as.matrix(object$stanfit, pars="sigma")
+    llkfun <- ifelse(is.logistic(object),
+                      function(x) dbinom(y[x], 1, mu[, x], log=TRUE),
+                      function(x) dnorm(y[x], mu[, x], sigma, log=TRUE))
+    llk <- cbind(sapply(1:ncol(mu), llkfun))
+    return(llk)
+}
+
 #' Posterior uncertainty intervals
 #'
 #' Compute posterior uncertainty intervals for \code{hsstan} objects.

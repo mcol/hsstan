@@ -1,6 +1,9 @@
 ## silence output and warnings
 SW <- function(expr) capture.output(suppressWarnings(expr))
 
+library(doParallel)
+registerDoParallel(cores=1)
+
 set.seed(1)
 N <- 50
 P <- 10
@@ -10,6 +13,7 @@ b <- runif(P) - 0.5
 y.gauss <- rnorm(N, mean=x %*% b, sd=runif(1, 1, 2))
 y.binom <- rbinom(N, 1, binomial()$linkinv(x %*% b))
 df <- data.frame(x, y.gauss=y.gauss, y.binom=y.binom)
+folds <- list(1:25, 26:N)
 unp <- paste0("X", 1:U)
 pen <- setdiff(paste0("X", 1:P), unp)
 
@@ -17,8 +21,23 @@ mod.gauss <- reformulate(unp, "y.gauss")
 mod.binom <- reformulate(unp, "y.binom")
 
 SW({
-    hs.gauss <- hsstan(df, mod.gauss, pen, iter=500, chains=2, family=gaussian)
-    hs.binom <- hsstan(df, mod.binom, pen, iter=500, chains=2, family=binomial)
+    hs.gauss <- hsstan(df, mod.gauss, pen, iter=200, chains=2, family=gaussian)
+    hs.binom <- hsstan(df, mod.binom, pen, iter=200, chains=2, family=binomial)
+    cv.gauss <- hsstan(df, mod.gauss, pen, iter=200, chains=2, family=gaussian,
+                       folds=folds)
+})
+
+test_that("log_lik",
+{
+    out <- log_lik(hs.gauss)
+    expect_equal(nrow(out), 200)
+    expect_equal(ncol(out), N)
+
+    expect_equal(log_lik(hs.binom),
+                 log_lik(hs.binom, newdata=df))
+
+    expect_equal(log_lik(cv.gauss[[1]]),
+                 log_lik(cv.gauss[[1]], newdata=df[folds[[2]], ]))
 })
 
 test_that("posterior_interval",
