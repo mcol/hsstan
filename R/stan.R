@@ -187,7 +187,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
 
         obj <- list(stanfit=samples, betas=betas,
                     model.terms=model.terms, family=family,
-                    loglik=loglik, data=x, in.test=test)
+                    loglik=loglik, data=x, in.train=train, in.test=test)
         class(obj) <- "hsstan"
         return(obj)
     }

@@ -152,10 +152,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
         stop("Model doesn't contain penalized predictors.")
     }
 
+    in.train <- samples$in.train
     in.test <- samples$in.test
-    in.train <- !in.test
-    if (sum(in.train) == 0)
-        in.train <- in.test
     x <- validate.newdata(samples, samples$data[in.train, ])
     xt <- validate.newdata(samples, samples$data[in.test, ])
     yt <- samples$data[in.test, samples$model.terms$outcome]
