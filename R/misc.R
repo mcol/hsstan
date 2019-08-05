@@ -96,6 +96,7 @@ validate.newdata <- function(obj, newdata) {
 #' A list containing the formula representing the covariates model, the name of
 #' the outcome variable, the names of the upenalized and penalized predictors.
 #'
+#' @importFrom stats as.formula terms
 #' @noRd
 validate.model <- function(model, penalized) {
     if (is.character(model) && length(model) > 1)
