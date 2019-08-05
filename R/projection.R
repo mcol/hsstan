@@ -121,7 +121,6 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 #'
 #' @importFrom stats dbinom dnorm
 #' @importFrom utils write.csv
-#' @importMethodsFrom rstan extract
 #' @export
 projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 
@@ -164,17 +163,15 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     }
     stanfit <- samples$stanfit
 
-    beta.samples <- extract(stanfit, pars=c("beta_u", "beta_p"))
-    w <- t(cbind(beta.samples$beta_u, beta.samples$beta_p)) # P x S
     is.logistic <- is.logistic(samples)
-    sigma2 <- if (is.logistic) 1 else unlist(extract(stanfit, pars="sigma"))^2
+    sigma2 <- if (is.logistic) 1 else as.matrix(stanfit, pars="sigma")^2
 
     ## fit of the full model (matrix of dimension N x S)
-    fit <- samples$family$linkinv(x %*% w)
+    fit <- t(posterior_linpred(samples, transform=TRUE))
 
     ## U is number of unpenalized variables (always chosen) including intercept
-    P <- ncol(x)
-    U <- ncol(beta.samples$beta_u)
+    P <- length(c(samples$betas$unpenalized, samples$betas$penalized))
+    U <- length(samples$betas$unpenalized)
     kl <- elpd <- rep(0, P - U + 1)
     cat(sprintf("%58s  %8s %9s\n", "Model", "KL", "ELPD"))
 
