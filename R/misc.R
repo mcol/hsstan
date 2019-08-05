@@ -69,7 +69,7 @@ validate.samples <- function(obj) {
 validate.newdata <- function(obj, newdata) {
 
     if (is.null(newdata))
-        newdata <- obj$data
+        newdata <- obj$data[obj$in.train, ]
     else if (!inherits(newdata, c("data.frame", "matrix")))
         stop("'newdata' must be a data frame or a matrix.")
     if (nrow(newdata) == 0 || ncol(newdata) == 0)
