@@ -20,6 +20,11 @@ test_that("newdata",
     expect_error(validate.newdata(list(data=x), y.gauss),
                  "'newdata' must be a data frame or a matrix")
 
+    expect_error(validate.newdata(list(data=matrix(nrow=0, ncol=P)), NULL),
+                 "'newdata' contains no rows or no columns")
+    expect_error(validate.newdata(list(data=matrix(nrow=P, ncol=0)), NULL),
+                 "'newdata' contains no rows or no columns")
+
     mt <- list(outcome="y", unpenalized="X1", penalized="X.NA")
     expect_error(validate.newdata(list(model.terms=mt), x),
                  "NAs are not allowed in 'newdata'")

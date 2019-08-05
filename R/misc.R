@@ -72,6 +72,8 @@ validate.newdata <- function(obj, newdata) {
         newdata <- obj$data
     else if (!inherits(newdata, c("data.frame", "matrix")))
         stop("'newdata' must be a data frame or a matrix.")
+    if (nrow(newdata) == 0 || ncol(newdata) == 0)
+        stop("'newdata' contains no rows or no columns.")
 
     ## only check for NAs in the variables used in the model
     vars <- with(obj$model.terms, c(outcome, unpenalized, penalized))
