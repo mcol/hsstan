@@ -105,6 +105,8 @@ test_that("get.cv.performance",
 
     out <- get.cv.performance(cv.gauss, out.csv="out.csv")
     expect_equal(nrow(out), length(folds) + 1)
+    expect_equal(out$set,
+                 c(paste("Fold", 1:length(folds)), "Overall"))
     expect_equal(out$test.llk,
                  c(-67.06889, -63.05863, -130.12752), tolerance=tol)
     expect_equal(out$r2,

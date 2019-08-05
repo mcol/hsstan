@@ -238,9 +238,11 @@ sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
     sample.stan(x, y, covariates, biomarkers, logit, folds=folds, iter=iter, ...)
 }
 
-#' Extract measures of performance from the cross-validation results
+#' Performance measures
 #'
-#' @param hs.cv Cross-validated Stan model.
+#' Extract measures of performance from plain or cross-validated results.
+#'
+#' @param obj An object or a list of objects of class \code{hsstan}.
 #' @param out.csv Optional name of a file where the output can be saved in
 #'        CSV format.
 #'
@@ -248,7 +250,7 @@ sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
 #' @importFrom stats cor var
 #' @importFrom utils write.csv
 #' @export
-get.cv.performance <- function(hs.cv, out.csv=NULL) {
+get.cv.performance <- function(obj, out.csv=NULL) {
 
     r2 <- function(y.pred, y.obs) {
         corr <- cor(y.pred, y.obs)
@@ -259,47 +261,46 @@ get.cv.performance <- function(hs.cv, out.csv=NULL) {
     auc <- function(y.pred, y.obs)
         as.numeric(roc(y.obs, y.pred, direction="<", quiet=TRUE)$auc)
 
-    if (inherits(hs.cv, "hsstan")) {
-        hs.cv <- list(hs.cv)
-        num.folds <- 1
-    } else {
-        num.folds <- length(hs.cv)
-    }
-    y.obs.all <- y.pred.hs.all <- NULL
+    if (inherits(obj, "hsstan"))
+        obj <- list(obj)
+    num.folds <- length(obj)
+    y.obs.all <- y.pred.all <- NULL
     llk <- perf <- rep(NA, num.folds)
-    is.logistic <- is.logistic(hs.cv[[1]])
+    is.logistic <- is.logistic(obj[[1]])
     perf.fun <- ifelse(is.logistic, auc, r2)
 
     ## loop over the folds
     for (fold in 1:num.folds) {
-        y.obs <- hs.cv[[fold]]$y_test
+        hs.fold <- obj[[fold]]
+        y.obs <- hs.fold$y_test
         if (is.null(y.obs))
-            y.obs <- hs.cv[[fold]]$y
+            y.obs <- hs.fold$y
 
         ## retrieve the fitted values on test data
-        newdata <- hs.cv[[fold]]$withdrawn.data
-        y.pred.hs <- colMeans(posterior_linpred(hs.cv[[fold]], newdata=newdata,
-                                                transform=TRUE))
-        llk[fold] <- sum(hs.cv[[fold]]$loglik)
-        perf[fold] <- perf.fun(y.pred.hs, y.obs)
+        newdata <- hs.fold$withdrawn.data
+        y.pred <- colMeans(posterior_linpred(hs.fold, newdata=newdata,
+                                             transform=TRUE))
+        llk[fold] <- sum(hs.fold$loglik)
+        perf[fold] <- perf.fun(y.pred, y.obs)
         y.obs.all <- c(y.obs.all, y.obs)
-        y.pred.hs.all <- c(y.pred.hs.all, y.pred.hs)
+        y.pred.all <- c(y.pred.all, y.pred)
     }
     set <- paste("Fold", 1:num.folds)
 
     ## compute log-likelihood and performance measure of the full model
     ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
-    llk <- c(llk, sum(sapply(hs.cv, function(z) sum(z$loglik))))
-    perf <- c(perf, perf.fun(y.pred.hs.all, y.obs.all))
+    llk <- c(llk, sum(sapply(obj, function(z) sum(z$loglik))))
+    perf <- c(perf, perf.fun(y.pred.all, y.obs.all))
 
-    res <- data.frame(set=set, test.llk=llk, perf=perf)
+    res <- data.frame(set=set, test.llk=llk, perf=perf,
+                      stringsAsFactors=FALSE)
     colnames(res)[3] <- gsub("perf", ifelse(is.logistic, "auc", "r2"),
                              colnames(res)[3])
 
     if (num.folds == 1) {
         res <- res[1, ]
-        if (is.null(hs.cv[[fold]]$y_test))
+        if (is.null(hs.fold$y_test))
             res$set <- "Non cross-validated"
     }
 
