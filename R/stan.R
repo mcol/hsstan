@@ -176,18 +176,10 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         par.idx <- grep("^beta_[up]", names(samples))
         stopifnot(length(par.idx) == ncol(X))
         names(samples)[par.idx] <- colnames(X)
-
-        ## linear predictor of test data, regression coefficients and
-        ## residual standard deviation
-        post.matrix <- as.matrix(samples)
         betas <- get.coefficients(samples, colnames(X))
-
-        ## test log-likelihood
-        loglik <- colMeans(post.matrix[, grep("log_lik", colnames(post.matrix))])
-
         obj <- list(stanfit=samples, betas=betas,
                     model.terms=model.terms, family=family,
-                    loglik=loglik, data=x, in.train=train, in.test=test)
+                    data=x, in.train=train, in.test=test)
         class(obj) <- "hsstan"
         return(obj)
     }
@@ -263,6 +255,7 @@ get.cv.performance <- function(obj, out.csv=NULL) {
     num.folds <- length(obj)
     y.obs.all <- y.pred.all <- NULL
     llk <- perf <- rep(NA, num.folds)
+    llk.all <- 0
     is.logistic <- is.logistic(obj[[1]])
     perf.fun <- ifelse(is.logistic, auc, r2)
 
@@ -275,17 +268,18 @@ get.cv.performance <- function(obj, out.csv=NULL) {
         newdata <- hs.fold$data[hs.fold$in.test, ]
         y.pred <- colMeans(posterior_linpred(hs.fold, newdata=newdata,
                                              transform=TRUE))
-        llk[fold] <- sum(hs.fold$loglik)
+        llk[fold] <- sum(colMeans(log_lik(hs.fold, newdata=newdata)))
         perf[fold] <- perf.fun(y.pred, y.obs)
         y.obs.all <- c(y.obs.all, y.obs)
         y.pred.all <- c(y.pred.all, y.pred)
+        llk.all <- llk.all + llk[fold]
     }
     set <- paste("Fold", 1:num.folds)
 
     ## compute log-likelihood and performance measure of the full model
     ## on the full vector of withdrawn observations
     set <- c(set, "Overall")
-    llk <- c(llk, sum(sapply(obj, function(z) sum(z$loglik))))
+    llk <- c(llk, llk.all)
     perf <- c(perf, perf.fun(y.pred.all, y.obs.all))
 
     res <- data.frame(set=set, test.llk=llk, perf=perf,

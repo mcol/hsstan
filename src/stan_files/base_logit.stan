@@ -46,12 +46,3 @@ model {
   // likelihood
   y_train ~ bernoulli_logit(mu);
 }
-
-generated quantities {
-
-  // test log-likelihood
-  vector[N_test] log_lik;
-  for (n in 1:N_test) {
-    log_lik[n] = bernoulli_logit_lpmf(y_test[n] | X_test[n] * beta_u);
-  }
-}

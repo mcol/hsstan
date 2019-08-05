@@ -97,5 +97,5 @@ test_that("projsel for a cross-validated object",
     })
 
     expect_equal(sel.gauss$elpd[length(pen) + 1],
-                 sum(cv.gauss[[1]]$loglik))
+                 sum(colMeans(log_lik(cv.gauss[[1]], newdata=df[folds[[1]], ]))))
 })
