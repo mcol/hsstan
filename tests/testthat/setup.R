@@ -35,6 +35,10 @@ message("Running hsstan models...")
 SW({
     hs.gauss <- hs(mod.gauss, gaussian)
     hs.binom <- hs(mod.binom, binomial)
+})
+
+message("Running cross-validated hsstan models...")
+SW({
     cv.gauss <- hs(mod.gauss, gaussian, folds=folds)
     cv.binom <- hs(mod.binom, binomial, folds=folds)
 })

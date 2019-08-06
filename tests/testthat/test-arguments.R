@@ -19,7 +19,6 @@ test_that("newdata",
 {
     expect_error(validate.newdata(list(data=x), y.gauss),
                  "'newdata' must be a data frame or a matrix")
-
     expect_error(validate.newdata(list(data=matrix(nrow=0, ncol=P)), NULL),
                  "'newdata' contains no rows or no columns")
     expect_error(validate.newdata(list(data=matrix(nrow=P, ncol=0)), NULL),
@@ -27,7 +26,7 @@ test_that("newdata",
 
     mt <- list(outcome="y", unpenalized="X1", penalized="X.NA")
     expect_error(validate.newdata(list(model.terms=mt), x),
-                 "NAs are not allowed in 'newdata'")
+                 "'newdata' contains missing values")
 
     mt <- list(outcome="y", unpenalized="X1", penalized="X2")
     expect_error(validate.newdata(list(model.terms=mt), x[, 3:4]),
@@ -85,9 +84,9 @@ test_that("model data",
     expect_error(validate.variables(x, c()),
                  "No predictors present in the model")
     expect_error(validate.variables(x, c("X1", "zzz")),
-                 "'zzz' not present in x")
+                 "'zzz' not present in 'x'")
     expect_error(validate.variables(x, "X.NA"),
-                 "Missing values in model variables")
+                 "Model variables contain missing values")
 })
 
 test_that("outcome variable",
@@ -144,12 +143,12 @@ test_that("valid family inputs",
                  "gaussian")
 })
 
-test_that("adapt.delta",
+test_that("validate.adapt.delta",
 {
     expect_error(validate.adapt.delta("a"),
-                 "must be a single numeric value")
+                 "must be a single numerical value")
     expect_error(validate.adapt.delta(1:3),
-                 "must be a single numeric value")
+                 "must be a single numerical value")
     expect_error(validate.adapt.delta(0.5),
                  "must be at least 0.8")
     expect_error(validate.adapt.delta(1.5),

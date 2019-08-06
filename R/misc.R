@@ -79,7 +79,7 @@ validate.newdata <- function(obj, newdata) {
     vars <- with(obj$model.terms, c(outcome, unpenalized, penalized))
     newdata <- newdata[, colnames(newdata) %in% vars, drop=FALSE]
     if (any(is.na(newdata)))
-        stop("NAs are not allowed in 'newdata'.")
+        stop("'newdata' contains missing values.")
 
     ## this adds the intercept column back
     newdata <- model.matrix(reformulate(vars[-1]), as.data.frame(newdata))
@@ -159,9 +159,9 @@ validate.variables <- function(x, variables) {
         stop("No predictors present in the model.")
     var.match <- match(variables, colnames(x))
     if (anyNA(var.match))
-        stop(collapse(variables[is.na(var.match)]), " not present in x.")
+        stop(collapse(variables[is.na(var.match)]), " not present in 'x'.")
     if (anyNA(x[, variables]))
-        stop("Missing values in model variables.")
+        stop("Model variables contain missing values.")
 }
 
 #' Validate the outcome variable
@@ -239,7 +239,7 @@ validate.family <- function(family, y) {
 #' @noRd
 validate.adapt.delta <- function(adapt.delta) {
     if (!is.numeric(adapt.delta) || length(adapt.delta) != 1) {
-        stop("'adapt.delta' must be a single numeric value.")
+        stop("'adapt.delta' must be a single numerical value.")
     }
     if (adapt.delta < 0.8) {
         stop("'adapt.delta' must be at least 0.8.")

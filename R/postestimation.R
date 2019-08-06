@@ -45,8 +45,8 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
     if (!is.logistic(object))
         sigma <- as.matrix(object$stanfit, pars="sigma")
     llkfun <- ifelse(is.logistic(object),
-                      function(x) dbinom(y[x], 1, mu[, x], log=TRUE),
-                      function(x) dnorm(y[x], mu[, x], sigma, log=TRUE))
+                     function(x) dbinom(y[x], 1, mu[, x], log=TRUE),
+                     function(x) dnorm(y[x], mu[, x], sigma, log=TRUE))
     llk <- cbind(sapply(1:ncol(mu), llkfun))
     return(llk)
 }
@@ -238,7 +238,6 @@ loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
 bayes_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     validate.samples(object)
     validate.probability(prob)
-
     mu <- posterior_linpred(object, transform=TRUE)
     var.mu <- apply(mu, 1, var)
     if (is.logistic(object))
@@ -264,13 +263,11 @@ bayes_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
 loo_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     validate.samples(object)
     validate.probability(prob)
-
     y <- object$data[object$in.train, object$model.terms$outcome]
     mu <- posterior_linpred(object, transform=TRUE)
+    ll <- log_lik(object)
     S <- nrow(mu)
     N <- ncol(mu)
-
-    ll <- log_lik(object)
     chains <- object$stanfit@sim$chains
     r.eff <- loo::relative_eff(exp(ll), chain_id=rep(1:chains, each=S / chains))
     psis <- suppressWarnings(loo::psis(-ll, r_eff=r.eff))

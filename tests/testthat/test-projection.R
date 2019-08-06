@@ -5,6 +5,7 @@ test_that("projsel",
     SW({
         hs.nopen <- hsstan(df, mod.gauss, iter=50, chains=1, family=gaussian)
     })
+
     expect_error(projsel(hs.nopen),
                  "Model doesn't contain penalized predictors")
 })

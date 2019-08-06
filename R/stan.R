@@ -185,7 +185,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         return(obj)
     }
 
-    return(if(is.cross.validation) cv else cv[[1]])
+    return(if (is.cross.validation) cv else cv[[1]])
 }
 
 #' Deprecated functions to fit hierarchical shrinkage models

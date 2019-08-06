@@ -60,7 +60,7 @@ test_that("sample.stan.cv",
                      sv.binom[[1]][[field]])
 })
 
-test_that("get.cv.performance works for a non-crossvalidated models",
+test_that("get.cv.performance works for non-crossvalidated models",
 {
     out <- get.cv.performance(hs.gauss)
     expect_is(out, "data.frame")
