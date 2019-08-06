@@ -155,3 +155,17 @@ test_that("adapt.delta",
     expect_error(validate.adapt.delta(1.5),
                  "must be less than 1")
 })
+
+test_that("validate.probability",
+{
+    expect_error(validate.probability(NULL),
+                 "'prob' must be a single value between 0 and 1")
+    expect_error(validate.probability("a"),
+                 "'prob' must be a single value between 0 and 1")
+    expect_error(validate.probability(0),
+                 "'prob' must be a single value between 0 and 1")
+    expect_error(validate.probability(1),
+                 "'prob' must be a single value between 0 and 1")
+    expect_error(validate.probability(c(0.2, 0.8)),
+                 "'prob' must be a single value between 0 and 1")
+})

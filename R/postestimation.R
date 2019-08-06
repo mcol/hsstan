@@ -77,6 +77,7 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
 #' @export
 posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
     validate.samples(object)
+    validate.probability(prob)
     if (is.null(pars))
         pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
     else {

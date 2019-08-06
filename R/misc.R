@@ -248,6 +248,21 @@ validate.adapt.delta <- function(adapt.delta) {
     }
 }
 
+#' Validate a probability
+#'
+#' Checks that a probability value is valid.
+#'
+#' @param prob Value to be checked.
+#'
+#' @return
+#' Throws an error if the value passed is not a valid probability.
+#'
+#' @noRd
+validate.probability <- function(prob) {
+    if (length(prob) != 1 || prob <= 0 || prob >= 1)
+        stop("'prob' must be a single value between 0 and 1.\n")
+}
+
 #' Checks whether the model fitted is a logistic regression model.
 #'
 #' @param obj An object of class \code{hsstan}.
