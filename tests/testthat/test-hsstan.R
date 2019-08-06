@@ -1,41 +1,7 @@
-library(hsstan)
-
-## silence output and warnings
-SW <- function(expr) capture.output(suppressWarnings(expr))
-
-library(doParallel)
-registerDoParallel(cores=1)
-
-set.seed(1)
-N <- 50
-P <- 10
-U <- 3
-x <- matrix(rnorm(N * P), nrow=N, ncol=P)
-b <- runif(P) - 0.5
-y.gauss <- rnorm(N, mean=x %*% b, sd=runif(1, 1, 2))
-y.binom <- rbinom(N, 1, binomial()$linkinv(x %*% b))
-df <- data.frame(x, y.gauss=y.gauss, y.binom=y.binom)
-folds <- list(1:25, 25:N)
-unp <- paste0("X", 1:U)
-pen <- setdiff(paste0("X", 1:P), unp)
-mod.gauss <- reformulate(unp, "y.gauss")
-mod.binom <- reformulate(unp, "y.binom")
-
-SW({
-    hs.gauss <- hsstan(df, mod.gauss, pen, iter=500, chains=2, family=gaussian)
-    hs.binom <- hsstan(df, mod.binom, pen, iter=500, chains=2, family=binomial)
-    cv.gauss <- hsstan(df, mod.gauss, pen, iter=500, chains=2, family=gaussian,
-                       folds=folds)
-    cv.binom <- hsstan(df, mod.binom, pen, iter=500, chains=2, family=binomial,
-                       folds=folds)
-})
-
 test_that("hsstan",
 {
     expect_error(hsstan(df, mod.gauss, chains=0),
                  "'chains' must be a positive integer")
-    expect_error(hsstan(df, mod.gauss, adapt.delta=1),
-                 "'adapt.delta' must be less than 1")
 
     expect_s3_class(hs.gauss,
                     "hsstan")
@@ -59,7 +25,8 @@ test_that("hsstan",
 test_that("sample.stan",
 {
     SW({
-        ss.gauss <- sample.stan(df, df$y.gauss, unp, pen, iter=500, chains=2)
+        ss.gauss <- sample.stan(df, df$y.gauss, unp, pen,
+                                iter=iters, chains=chains)
     })
     expect_equal(names(ss.gauss),
                  names(hs.gauss))
@@ -76,8 +43,8 @@ test_that("sample.stan",
 test_that("sample.stan.cv",
 {
     SW({
-        sv.binom <- sample.stan.cv(df, df$y.binom, unp, pen, iter=500, chains=2,
-                                   family=binomial, folds=folds)
+        sv.binom <- sample.stan.cv(df, df$y.binom, unp, pen, logit=TRUE,
+                                   iter=iters, chains=chains, folds=folds)
     })
     expect_equal(names(cv.binom[[1]]),
                  names(sv.binom[[1]]))
@@ -91,9 +58,8 @@ test_that("sample.stan.cv",
                      sv.binom[[1]][[field]])
 })
 
-test_that("get.cv.performance",
+test_that("get.cv.performance works for a non-crossvalidated models",
 {
-    tol <- 0.000001
     out <- get.cv.performance(hs.gauss)
     expect_is(out, "data.frame")
     expect_equal(colnames(out),
@@ -111,23 +77,26 @@ test_that("get.cv.performance",
                  -33.28791, tolerance=tol)
     expect_equal(out$auc,
                  0.736, tolerance=tol)
+})
 
+test_that("get.cv.performance works for cross-validated models",
+{
     out <- get.cv.performance(cv.gauss, out.csv="out.csv")
     expect_equal(nrow(out), length(folds) + 1)
     expect_equal(out$set,
                  c(paste("Fold", 1:length(folds)), "Overall"))
     expect_equal(out$test.llk,
-                 c(-67.06889, -63.05863, -130.12752), tolerance=tol)
+                 c(-67.06889, -59.52169, -126.59058), tolerance=tol)
     expect_equal(out$r2,
-                 c(0.016581920, 0.175190218, 0.003522558), tolerance=tol)
+                 c(0.016581920, 0.182042541, 0.005568317), tolerance=tol)
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
 
     out <- get.cv.performance(cv.binom)
     expect_equal(out$test.llk,
-                 c(-28.85088, -27.02137, -55.87226), tolerance=tol)
+                 c(-28.85088, -27.24616, -56.09704), tolerance=tol)
     expect_equal(out$auc,
-                 c(0.4935065, 0.4821429, 0.4692308), tolerance=tol)
+                 c(0.4935065, 0.4935065, 0.4640000), tolerance=tol)
 })
 
 test_that("summary.hsstan",
@@ -167,5 +136,5 @@ test_that("sampler.params",
 
 test_that("nsamples",
 {
-    expect_equal(nsamples(hs.gauss), 500)
+    expect_equal(nsamples(hs.gauss), iters * chains / 2)
 })
