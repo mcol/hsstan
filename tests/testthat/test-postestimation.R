@@ -44,6 +44,8 @@ test_that("posterior_interval",
 {
     expect_error(posterior_interval(hs.gauss, pars=1:3),
                  "'pars' must be a character vector")
+    expect_error(posterior_interval(hs.gauss, pars="zzz"),
+                 "No pattern in 'pars' matches parameter names")
     expect_error(posterior_interval(hs.gauss, prob=0),
                  "'prob' should be a single number greater than 0 and less than 1")
 
