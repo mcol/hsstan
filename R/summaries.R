@@ -77,6 +77,29 @@ print.hsstan <- function(x, ...) {
     print(summary(x, ...))
 }
 
+#' Sampler parameters
+#'
+#' Report the parameters used for the sampler.
+#'
+#' @param object An object of class \code{hsstan}.
+#'
+#' @return
+#' A matrix with as many rows as number of Markov chains reporting the average
+#' acceptance probability, the total number of divergent transitions, the maximum
+#' tree depth and the total number of gradient evaluations.
+#'
+#' @export
+sampler.params <- function(object) {
+    validate.hsstan(object)
+    validate.samples(object)
+    sp <- rstan::get_sampler_params(object$stanfit, inc_warmup=FALSE)
+    accept.stat <- sapply(sp, function(x) mean(x[, "accept_stat__"]))
+    divergences <- sapply(sp, function(x) sum(x[, "divergent__"]))
+    treedepth <- sapply(sp, function(x) max(x[, "treedepth__"]))
+    n.gradients <- sapply(sp, function(z) sum(z[, "n_leapfrog__"]))
+    round(cbind(accept.stat, divergences, treedepth, n.gradients), 4)
+}
+
 #' Number of posterior samples
 #'
 #' Extracts the number of posterior samples stored in a fitted model.

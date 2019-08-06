@@ -155,6 +155,16 @@ test_that("print.hsstan",
     expect_output(print(hs.gauss))
 })
 
+test_that("sampler.params",
+{
+    out <- sampler.params(hs.gauss)
+    expect_is(out, "matrix")
+    expect_equal(colnames(out),
+                 c("accept.stat", "divergences", "treedepth", "n.gradients"))
+    expect_equal(nrow(out),
+                 hs.gauss$stanfit@sim$chains)
+})
+
 test_that("nsamples",
 {
     expect_equal(nsamples(hs.gauss), 500)
