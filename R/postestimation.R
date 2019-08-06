@@ -199,3 +199,108 @@ loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
     validate.samples(x)
     suppressWarnings(rstan::loo(x$stanfit, save_psis=save.psis, cores=cores))
 }
+
+#' Bayesian and LOO-adjusted R-squared
+#'
+#' Compute the Bayesian and the LOO-adjusted R-squared from the posterior
+#' samples. For Bayesian R-squared it uses the modelled residual variance
+#' (rather than the variance of the posterior distribution of the residuals).
+#' The LOO-adjusted R-squared uses Pareto smoothed importance sampling LOO
+#' residuals and Bayesian bootstrap.
+#'
+#' @param object An object of class \code{hsstan}.
+#' @param prob Width of the posterior interval (0.95, by default). It is
+#'        ignored if \code{summary=FALSE}.
+#' @param summary Whether a summary of the distribution of the R-squared
+#'        should be returned rather than the pointwise values (\code{TRUE} by
+#'        default).
+#' @param ... Currently ignored.
+#'
+#' @return
+#' The mean, standard deviation and posterior interval of R-squared if
+#' \code{summary=TRUE}, or a vector of R-squared values with length equal to
+#' the size of the posterior sample if \code{summary=FALSE}.
+#'
+#' @references
+#' Andrew Gelman, Ben Goodrich, Jonah Gabry and Aki Vehtari (2019),
+#' R-squared for Bayesian regression models, \emph{The American Statistician},
+#' \url{https://doi.org/10.1080/00031305.2018.1549100}.
+#'
+#' Aki Vehtari, Andrew Gelman, Ben Goodrich and Jonah Gabry (2019),
+#' Bayesian R2 and LOO-R2,
+#' \url{https://avehtari.github.io/bayes_R2/bayes_R2.html}.
+#'
+#' @importFrom rstantools bayes_R2
+#' @method bayes_R2 hsstan
+#' @aliases bayes_R2
+#' @export bayes_R2
+#' @export
+bayes_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
+    validate.samples(object)
+    validate.probability(prob)
+
+    mu <- posterior_linpred(object, transform=TRUE)
+    var.mu <- apply(mu, 1, var)
+    if (is.logistic(object))
+        sigma2 <- rowMeans(mu * (1 - mu))
+    else
+        sigma2 <- drop(as.matrix(object$stanfit, pars="sigma"))^2
+    R2 <- var.mu / (var.mu + sigma2)
+    if (summary) {
+        low <- (1 - prob) / 2
+        upp <- 1 - low
+        R2 <- c(mean=mean(R2), sd=stats::sd(R2),
+                stats::quantile(R2, c(low, upp)))
+    }
+    return(R2)
+}
+
+#' @rdname bayes_R2.hsstan
+#' @importFrom rstantools loo_R2
+#' @method loo_R2 hsstan
+#' @aliases loo_R2
+#' @export loo_R2
+#' @export
+loo_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
+    validate.samples(object)
+    validate.probability(prob)
+
+    y <- object$data[object$in.train, object$model.terms$outcome]
+    mu <- posterior_linpred(object, transform=TRUE)
+    S <- nrow(mu)
+    N <- ncol(mu)
+
+    ll <- log_lik(object)
+    chains <- object$stanfit@sim$chains
+    r.eff <- loo::relative_eff(exp(ll), chain_id=rep(1:chains, each=S / chains))
+    psis <- suppressWarnings(loo::psis(-ll, r_eff=r.eff))
+    mu.loo <- loo::E_loo(mu, psis, log_ratios=-ll)$value
+    err.loo <- mu.loo - y
+
+    ## set the random seed as the seed used in the first chain and ensure
+    ## the old RNG state is restored on exit
+    rng.state.old <- .Random.seed
+    on.exit(assign(".Random.seed", rng.state.old, envir=.GlobalEnv))
+    set.seed(object$stanfit@stan_args[[1]]$seed)
+
+    ## dirichlet weights for bayesian bootstrap
+    exp.draws <- matrix(rexp(S * N, rate=1), nrow=S, ncol=N)
+    dw <- exp.draws / rowSums(exp.draws)
+
+    var.y <- (rowSums(sweep(dw, 2, y^2, FUN = "*")) -
+              rowSums(sweep(dw, 2, y, FUN = "*"))^2) * (N / (N - 1))
+    var.err.loo <- (rowSums(sweep(dw, 2, err.loo^2, FUN = "*")) -
+                    rowSums(sweep(dw, 2, err.loo, FUN = "*")^2)) * (N / (N - 1))
+
+    R2 <- 1 - var.err.loo / var.y
+    R2[R2 < -1] <- -1
+    R2[R2 > 1] <- 1
+
+    if (summary) {
+        low <- (1 - prob) / 2
+        upp <- 1 - low
+        R2 <- c(mean=mean(R2), sd=stats::sd(R2),
+                stats::quantile(R2, c(low, upp)))
+    }
+    return(R2)
+}

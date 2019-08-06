@@ -53,3 +53,32 @@ test_that("loo",
     out <- loo(hs.gauss)
     expect_s3_class(out, "loo")
 })
+
+test_that("bayes_R2",
+{
+    expect_error(bayes_R2(hs.gauss, prob=1),
+                 "'prob' must be a single value between 0 and 1")
+    expect_error(bayes_R2(hs.gauss, prob=c(0.2, 0.5)),
+                 "'prob' must be a single value between 0 and 1")
+
+    out <- bayes_R2(hs.gauss)
+    expect_is(out, "numeric")
+    expect_named(out,
+                 c("mean", "sd", "2.5%", "97.5%"))
+
+    out <- bayes_R2(hs.binom, summary=FALSE)
+    expect_is(out, "numeric")
+    expect_length(out, iters * chains / 2)
+})
+
+test_that("loo_R2",
+{
+    out <- loo_R2(hs.gauss, summary=FALSE)
+    expect_is(out, "numeric")
+    expect_length(out, iters * chains / 2)
+
+    out <- loo_R2(hs.binom)
+    expect_is(out, "numeric")
+    expect_named(out,
+                 c("mean", "sd", "2.5%", "97.5%"))
+})
