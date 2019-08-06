@@ -74,9 +74,9 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     return(list(w=wp.all, sigma2=sigma2p, fit=fitp, kl=kl))
 }
 
-#' Return the next variable to be added to the current submodel
+#' Next variable to enter the current submodel
 #'
-#' Returns the index of the variable that should be added to the current model
+#' Return the index of the variable that should be added to the current model
 #' according to the smallest KL-divergence (linear regression) or the largest
 #' score test (logistic regression).
 #'
@@ -113,7 +113,7 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 
 #' Forward selection minimizing KL-divergence in projection
 #'
-#' @param samples Object produced by \code{\link{sample.stan}}.
+#' @param samples Object produced by \code{\link{hsstan}}.
 #' @param max.num.pred Maximum number of predictors after which the selection
 #'        procedure should stop.
 #' @param out.csv If not \code{NULL}, the name of a CSV file to save the

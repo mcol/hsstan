@@ -97,7 +97,7 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
 #' @param object An object of class \code{hsstan}.
 #' @param transform Whether the linear predictor should be transformed using
 #'        the inverse-link function (\code{FALSE} by default).
-#' @param newdata An optional data frame containing the variables used to
+#' @param newdata Optional data frame containing the variables to use to
 #'        predict. If \code{NULL} (default), the model matrix is used. If
 #'        specified, its continuous variables should be standardized, since
 #'        the model coefficients are learnt on standardized data.
@@ -130,7 +130,7 @@ posterior_linpred.hsstan <- function(object, transform=FALSE,
 #' Draw from the posterior predictive distribution of the outcome.
 #'
 #' @param object An object of class \code{hsstan}.
-#' @param newdata An optional data frame containing the variables used to
+#' @param newdata Optional data frame containing the variables to use to
 #'        predict. If \code{NULL} (default), the model matrix is used. If
 #'        specified, its continuous variables should be standardized, since
 #'        the model coefficients are learnt on standardized data.
@@ -178,7 +178,7 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 
 #' Approximate leave-one-out cross-validation
 #'
-#' This computes an efficient approximate leave-one-out cross-validation
+#' Compute an efficient approximate leave-one-out cross-validation
 #' using Pareto smoothed importance sampling (PSIS-LOO).
 #'
 #' @param x An object of class \code{hsstan}.

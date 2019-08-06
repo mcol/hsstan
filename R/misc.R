@@ -18,9 +18,9 @@
 ##=============================================================================
 
 
-#' Validate hsstan object
+#' Validate an hsstan object
 #'
-#' Checks that the object has been created by \code{\link{hsstan}}.
+#' Check that the object has been created by \code{\link{hsstan}}.
 #'
 #' @param obj An object to be checked.
 #'
@@ -36,7 +36,7 @@ validate.hsstan <- function(obj) {
 
 #' Validate the posterior samples
 #'
-#' Checks that the object contains valid posterior samples in the
+#' Check that the object contains valid posterior samples in the
 #' \code{stanfit} field.
 #'
 #' @param obj An object of class \code{hsstan}.
@@ -53,8 +53,8 @@ validate.samples <- function(obj) {
 
 #' Validate new data
 #'
-#' Checks that the new data contains all variables used in the model with no
-#' missing values, and generates the corresponding model matrix.
+#' Check that the new data contains all variables used in the model and no
+#' missing values, and generate the corresponding model matrix.
 #'
 #' @param obj Object of class \code{hsstan}.
 #' @param newdata Optional data frame containing the variables used in the
@@ -228,13 +228,12 @@ validate.family <- function(family, y) {
 
 #' Validate adapt.delta
 #'
-#' Checks that the \code{adapt.delta} value is valid.
+#' Check that an adaptation acceptance probability is valid.
 #'
 #' @param adapt.delta Value to be checked.
 #'
 #' @return
-#' A valid acceptance probability for adaptation.
-#' Throws an error if the value passed it not a valid acceptance probability
+#' Throws an error if the given value is not a valid acceptance probability
 #' for adaptation.
 #'
 #' @noRd
@@ -252,12 +251,12 @@ validate.adapt.delta <- function(adapt.delta) {
 
 #' Validate a probability
 #'
-#' Checks that a probability value is valid.
+#' Check that a probability value is valid.
 #'
 #' @param prob Value to be checked.
 #'
 #' @return
-#' Throws an error if the value passed is not a valid probability.
+#' Throws an error if the given value is not a valid probability.
 #'
 #' @noRd
 validate.probability <- function(prob) {
@@ -265,7 +264,7 @@ validate.probability <- function(prob) {
         stop("'prob' must be a single value between 0 and 1.\n")
 }
 
-#' Checks whether the model fitted is a logistic regression model.
+#' Check whether the model fitted is a logistic regression model.
 #'
 #' @param obj An object of class \code{hsstan}.
 #'

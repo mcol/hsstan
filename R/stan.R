@@ -42,8 +42,8 @@ get.coefficients <- function(samples, coeff.names) {
 
 #' Fit a plain or cross-validated Stan model
 #'
-#' Runs either with Hamiltonian Monte Carlo or variational Bayes over the
-#' cross-validation folds (if specified) or over all the data.
+#' Run the No-U-Turn Sampler (NUTS) as implemented in Stan over all the data
+#' or within the cross-validation folds.
 #'
 #' @param x Data frame containing outcome, covariates and penalized predictors.
 #'        Continuous predictors and outcome variable should be standardized
@@ -59,7 +59,8 @@ get.coefficients <- function(samples, coeff.names) {
 #'        the indices of the test observations. If \code{NULL} (default), no
 #'        cross-validation is performed.
 #' @param chains Number of Markov chains to run (4 by default).
-#' @param seed Integer defining the seed for the pseudo-random number generator.
+#' @param seed Optional integer defining the seed for the pseudo-random number
+#'        generator.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for

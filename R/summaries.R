@@ -22,8 +22,8 @@
 #'
 #' @param object An object of class \code{hsstan}.
 #' @param pars Vector of parameter names to be extracted. If \code{NULL}
-#'        (default) then this refers to the set of covariates and biomarkers
-#'        (if available).
+#'        (default) then this refers to the set of predictors used in the
+#'        model.
 #' @param prob Width of the posterior intervals (0.95, by default).
 #' @param digits Number of decimal places to be reported (2 by default).
 #' @param sort Column name used to sort the results according to the absolute
