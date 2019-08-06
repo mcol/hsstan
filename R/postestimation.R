@@ -44,7 +44,6 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
         newdata <- object$data[object$in.train, ]
     y <- newdata[[object$model.terms$outcome]]
 
-    newdata <- validate.newdata(object, newdata)
     mu <- posterior_linpred(object, newdata, transform=TRUE)
     if (!is.logistic(object))
         sigma <- as.matrix(object$stanfit, pars="sigma")
