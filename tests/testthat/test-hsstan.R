@@ -131,9 +131,10 @@ test_that("sampler.params",
     out <- sampler.params(hs.gauss)
     expect_is(out, "matrix")
     expect_equal(colnames(out),
-                 c("accept.stat", "divergences", "treedepth", "n.gradients"))
-    expect_equal(nrow(out),
-                 hs.gauss$stanfit@sim$chains)
+                 c("accept.stat", "stepsize", "divergences", "treedepth",
+                   "gradients", "warmup", "sample"))
+    expect_equal(rownames(out),
+                 paste0("chain:", 1:chains))
 })
 
 test_that("nsamples",

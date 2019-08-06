@@ -83,8 +83,9 @@ print.hsstan <- function(x, ...) {
 #'
 #' @return
 #' A matrix with as many rows as number of Markov chains reporting the average
-#' acceptance probability, the total number of divergent transitions, the maximum
-#' tree depth and the total number of gradient evaluations.
+#' acceptance probability, the mean stepsize, the total number of divergent
+#' transitions, the maximum tree depth, the total number of gradient
+#' evaluations, the warmup and sample times in seconds.
 #'
 #' @export
 sampler.params <- function(object) {
@@ -92,10 +93,12 @@ sampler.params <- function(object) {
     validate.samples(object)
     sp <- rstan::get_sampler_params(object$stanfit, inc_warmup=FALSE)
     accept.stat <- sapply(sp, function(x) mean(x[, "accept_stat__"]))
+    stepsize <- sapply(sp, function(x) mean(x[, "stepsize__"]))
     divergences <- sapply(sp, function(x) sum(x[, "divergent__"]))
     treedepth <- sapply(sp, function(x) max(x[, "treedepth__"]))
-    n.gradients <- sapply(sp, function(z) sum(z[, "n_leapfrog__"]))
-    round(cbind(accept.stat, divergences, treedepth, n.gradients), 4)
+    gradients <- sapply(sp, function(z) sum(z[, "n_leapfrog__"]))
+    et <- rstan::get_elapsed_time(object$stanfit)
+    round(cbind(accept.stat, stepsize, divergences, treedepth, gradients, et), 4)
 }
 
 #' Number of posterior samples
