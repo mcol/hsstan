@@ -12,7 +12,7 @@ U <- 3
 x <- matrix(rnorm(N * P), nrow=N, ncol=P)
 b <- runif(P) - 0.5
 y.gauss <- rnorm(N, mean=x %*% b, sd=runif(1, 1, 2))
-y.binom <- rbinom(N, 1, binomial()$linkinv(x %*% b))
+y.binom <- factor(rbinom(N, 1, binomial()$linkinv(x %*% b)))
 df <- data.frame(x, y.gauss=y.gauss, y.binom=y.binom)
 
 ## model options

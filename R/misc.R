@@ -129,7 +129,8 @@ validate.model <- function(model, penalized) {
 #' @param model Validated model formula.
 #'
 #' @return
-#' A data frame containing the model data.
+#' A data frame containing the model data. A factor or logical outcome variable
+#' is replaced by its numeric equivalent.
 #'
 #' @noRd
 validate.data <- function(x, model) {
@@ -138,6 +139,7 @@ validate.data <- function(x, model) {
     x <- as.data.frame(x)
     validate.variables(x, model$outcome)
     validate.variables(x, c(model$unpenalized, model$penalized))
+    x[[model$outcome]] <- validate.outcome(x[[model$outcome]])
     return(x)
 }
 

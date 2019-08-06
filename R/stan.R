@@ -99,7 +99,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
 
     model.terms <- validate.model(covs.model, penalized)
     x <- validate.data(x, model.terms)
-    y <- validate.outcome(x[[model.terms$outcome]])
+    y <- x[[model.terms$outcome]]
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
     if (chains < 1)

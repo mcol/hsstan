@@ -38,12 +38,9 @@
 #' @export log_lik
 #' @export
 log_lik.hsstan <- function(object, newdata=NULL, ...) {
-
-    ## extract the outcome before creating the model matrix
     if (is.null(newdata))
         newdata <- object$data[object$in.train, ]
-    y <- newdata[[object$model.terms$outcome]]
-
+    y <- validate.outcome(newdata[[object$model.terms$outcome]])
     mu <- posterior_linpred(object, newdata, transform=TRUE)
     if (!is.logistic(object))
         sigma <- as.matrix(object$stanfit, pars="sigma")
