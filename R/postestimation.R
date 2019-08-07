@@ -75,16 +75,7 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
 posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
     validate.samples(object)
     validate.probability(prob)
-    if (is.null(pars))
-        pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
-    else {
-        if (!is.character(pars))
-            stop("'pars' must be a character vector.")
-        get.pars <- function(x) grep(x, object$stanfit@sim$fnames_oi, value=TRUE)
-        pars <- unlist(sapply(pars, get.pars))
-        if (length(pars) == 0)
-            stop("No pattern in 'pars' matches parameter names.")
-    }
+    pars <- get.pars(object, pars)
     post.matrix <- as.matrix(object$stanfit, pars=pars)
     rstantools::posterior_interval(post.matrix, prob=prob)
 }

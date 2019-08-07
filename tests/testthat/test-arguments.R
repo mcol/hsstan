@@ -168,3 +168,17 @@ test_that("validate.probability",
     expect_error(validate.probability(c(0.2, 0.8)),
                  "'prob' must be a single value between 0 and 1")
 })
+
+test_that("get.pars",
+{
+    expect_error(get.pars(hs.gauss, NA),
+                 "'pars' must be a character vector")
+    expect_error(get.pars(hs.gauss, "zzz"),
+                 "No pattern in 'pars' matches parameter names")
+    expect_equal(get.pars(hs.gauss, NULL),
+                 c("beta_u", "beta_p"))
+    expect_equal(get.pars(hs.gauss, "X1"),
+                 c("X1b", "X1c", "X10"))
+    expect_equal(get.pars(hs.gauss, c("X[345]", "9$")),
+                 c("X3", "X4", "X5", "X9"))
+})

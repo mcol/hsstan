@@ -264,6 +264,33 @@ validate.probability <- function(prob) {
         stop("'prob' must be a single value between 0 and 1.\n")
 }
 
+#' Parameter names
+#'
+#' Get the parameter names corresponding to the regression coefficients or
+#' matching a regular expression.
+#'
+#' @param obj An object of class \code{hsstan}.
+#' @param pars Regular expression to match a parameter name, or \code{NULL}
+#'        to retrieve the names of all regression coefficients.
+#'
+#' @return
+#' A character vector.
+#'
+#' @noRd
+get.pars <- function(object, pars) {
+    if (is.null(pars))
+        pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
+    else {
+        if (!is.character(pars))
+            stop("'pars' must be a character vector.")
+        get.pars <- function(x) grep(x, object$stanfit@sim$fnames_oi, value=TRUE)
+        pars <- unlist(lapply(pars, get.pars))
+        if (length(pars) == 0)
+            stop("No pattern in 'pars' matches parameter names.")
+    }
+    return(pars)
+}
+
 #' Check whether the model fitted is a logistic regression model.
 #'
 #' @param obj An object of class \code{hsstan}.

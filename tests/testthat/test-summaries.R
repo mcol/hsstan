@@ -12,7 +12,12 @@ test_that("summary.hsstan",
     expect_equal(nrow(out),
                  P + 1 + 1) # intercept and extra factor level for X1
 
-    expect_equal(summary(hs.gauss, max.rows=0), out)
+    out <- summary(hs.gauss, pars="X1")
+    expect_equal(rownames(out),
+                 c("X1b", "X1c", "X10"))
+
+    expect_equal(summary(hs.gauss, max.rows=0),
+                 summary(hs.gauss))
     expect_equal(nrow(summary(hs.gauss, max.rows=5)), 5)
 
     out <- summary(hs.gauss, sort="n_eff", decreasing=FALSE)

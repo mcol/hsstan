@@ -47,8 +47,7 @@ summary.hsstan <- function(object, pars=NULL, prob=0.95, digits=2,
                           sort=NULL, decreasing=TRUE, max.rows=NULL, ...) {
     validate.samples(object)
     validate.probability(prob)
-    if (is.null(pars))
-        pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
+    pars <- get.pars(object, pars)
     low <- (1 - prob) / 2
     upp <- 1 - low
     summary <- summary(object$stanfit, pars=pars, probs=c(low, upp))$summary
