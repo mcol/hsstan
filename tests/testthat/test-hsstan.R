@@ -12,7 +12,7 @@ test_that("hsstan",
     expect_equal(hs.gauss$family,
                  gaussian())
     expect_equal(names(hs.gauss$betas$unpenalized),
-                 c("(Intercept)", hs.gauss$model.terms$unpenalized))
+                 c("(Intercept)", "X1b", "X1c", "X2", "X3"))
     expect_equal(names(hs.gauss$betas$penalized),
                  hs.gauss$model.terms$penalized)
     expect_length(hs.gauss$betas, 2)
@@ -68,15 +68,15 @@ test_that("get.cv.performance works for non-crossvalidated models",
                  c("set", "test.llk", "r2"))
     expect_equal(out$set, "Non cross-validated")
     expect_equal(out$test.llk,
-                 -108.7622, tolerance=tol)
+                 -109.0076, tolerance=tol)
     expect_equal(out$r2,
-                 0.2737298, tolerance=tol)
+                 0.2807520, tolerance=tol)
 
     out <- get.cv.performance(hs.binom)
     expect_equal(colnames(out),
                  c("set", "test.llk", "auc"))
     expect_equal(out$test.llk,
-                 -33.28791, tolerance=tol)
+                 -33.98784, tolerance=tol)
     expect_equal(out$auc,
                  0.736, tolerance=tol)
 })
@@ -88,17 +88,17 @@ test_that("get.cv.performance works for cross-validated models",
     expect_equal(out$set,
                  c(paste("Fold", 1:length(folds)), "Overall"))
     expect_equal(out$test.llk,
-                 c(-67.06889, -59.52169, -126.59058), tolerance=tol)
+                 c(-64.69576, -66.82234, -131.51811), tolerance=tol)
     expect_equal(out$r2,
-                 c(0.016581920, 0.182042541, 0.005568317), tolerance=tol)
+                 c(0.043298172, 0, 0.001573825), tolerance=tol)
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
 
     out <- get.cv.performance(cv.binom)
     expect_equal(out$test.llk,
-                 c(-28.85088, -27.24616, -56.09704), tolerance=tol)
+                 c(-23.38949, -24.67107, -48.06056), tolerance=tol)
     expect_equal(out$auc,
-                 c(0.4935065, 0.4935065, 0.4640000), tolerance=tol)
+                 c(0.5714286, 0.5779221, 0.5088000), tolerance=tol)
 })
 
 test_that("summary.hsstan",
@@ -112,7 +112,8 @@ test_that("summary.hsstan",
     expect_is(out, "matrix")
     expect_equal(colnames(out),
                  c("mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat"))
-    expect_equal(nrow(out), P + 1)
+    expect_equal(nrow(out),
+                 P + 1 + 1) # intercept and extra factor level for X1
 
     expect_equal(summary(hs.gauss, max.rows=0), out)
     expect_equal(nrow(summary(hs.gauss, max.rows=5)), 5)

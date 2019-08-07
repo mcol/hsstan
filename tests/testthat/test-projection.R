@@ -25,17 +25,17 @@ test_that("projsel for gaussian family",
     expect_equal(sel.gauss$var[1],
                  "Initial set of covariates")
     expect_equal(sel.gauss$var[-1],
-                 paste0("X", c(9, 4, 8, 6, 5, 10, 7)))
+                 paste0("X", c(9, 4, 8, 10, 5, 6, 7)))
     expect_equal(sel.gauss$kl[1],
-                 0.0495296386, tolerance=tol)
+                 0.042956809, tolerance=tol)
     expect_equal(sel.gauss$kl[length(pen) + 1],
                  0)
     expect_equal(sel.gauss$elpd[1],
-                 -111.86225, tolerance=tol)
+                 -111.490730, tolerance=tol)
     expect_equal(sel.gauss$elpd[length(pen) + 1],
-                 -108.762183, tolerance=tol)
+                 -109.007642, tolerance=tol)
     expect_equal(sel.gauss$delta.elpd[1],
-                 -3.100042, tolerance=tol)
+                 -2.48308827, tolerance=tol)
     expect_true(all(diff(sel.gauss$kl) < 0))
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
@@ -50,17 +50,17 @@ test_that("projsel for binomial family",
     expect_equal(nrow(sel.binom),
                  num.sel + 1)
     expect_equal(sel.binom$var[-1],
-                 paste0("X", c(6, 9, 5, 10, 8)))
+                 paste0("X", c(6, 9, 5, 8, 7)))
     expect_equal(sel.binom$kl[1],
-                 0.020612966, tolerance=tol)
+                 0.027614647, tolerance=tol)
     expect_equal(sel.binom$kl[num.sel + 1],
-                 0.001237768, tolerance=tol)
+                 0.001228455, tolerance=tol)
     expect_equal(sel.binom$elpd[1],
-                 -34.20002, tolerance=tol)
+                 -35.4397847, tolerance=tol)
     expect_equal(sel.binom$elpd[num.sel + 1],
-                 -33.25163, tolerance=tol)
+                 -33.9461796, tolerance=tol)
     expect_equal(sel.binom$delta.elpd[1],
-                 -0.912113031, tolerance=tol)
+                 -1.45194666, tolerance=tol)
     expect_true(all(diff(sel.binom$kl) < 0))
 })
 

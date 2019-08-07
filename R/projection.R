@@ -163,7 +163,7 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     sigma2 <- if (is.logistic) 1 else as.matrix(stanfit, pars="sigma")^2
 
     ## fit of the full model (matrix of dimension N x S)
-    fit <- t(posterior_linpred(samples, transform=TRUE, newdata=x))
+    fit <- t(posterior_linpred(samples, transform=TRUE))
 
     ## U is number of unpenalized variables (always chosen) including intercept
     P <- length(c(samples$betas$unpenalized, samples$betas$penalized))

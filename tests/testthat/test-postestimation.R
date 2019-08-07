@@ -22,11 +22,13 @@ test_that("posterior_interval",
 
     out <- posterior_interval(hs.gauss)
     expect_is(out, "matrix")
-    expect_equal(nrow(out), P + 1)
+    expect_equal(nrow(out),
+                 P + 1 + 1) # intercept and extra factor level for X1
     expect_equal(colnames(out), c("2.5%", "97.5%"))
 
     out <- posterior_interval(hs.gauss, pars="X1", prob=0.5)
-    expect_equal(nrow(out), 2)
+    expect_equal(nrow(out),
+                 3) # X1b, X1c, X10
     expect_equal(colnames(out), c("25%", "75%"))
 })
 
