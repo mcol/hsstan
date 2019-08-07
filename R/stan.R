@@ -120,12 +120,9 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     ## create the design matrix
     unpenalized <- model.terms$unpenalized
     X <- model.matrix(reformulate(c(unpenalized, penalized)), data=x)
+    N <- nrow(X)
     P <- ncol(X)
     U <- P - length(penalized)
-    which.unpenalized <- 1:U
-    which.penalized <- setdiff(1:P, which.unpenalized)
-    X <- X[, c(which.unpenalized, which.penalized)]
-    N <- nrow(X)
     num.folds <- max(length(folds), 1)
 
     ## whether it's a proper cross-validation
