@@ -39,6 +39,17 @@ test_that("get.cv.performance works for cross-validated models",
                  c(0.5714286, 0.5779221, 0.5088000), tolerance=tol)
 })
 
+test_that("get.cv.performance works for one fold of a cross-validated model",
+{
+    out <- get.cv.performance(cv.gauss[[1]])
+    expect_equal(out$set,
+                 "Fold 1")
+    expect_equal(out$test.llk,
+                 get.cv.performance(cv.gauss)$test.llk[1])
+    expect_equal(out$r2,
+                 get.cv.performance(cv.gauss)$r2[1])
+})
+
 test_that("summary.hsstan",
 {
     expect_error(summary(hs.gauss, prob=c(0.2, 0.8)),

@@ -137,7 +137,7 @@ get.cv.performance <- function(obj, out.csv=NULL) {
 
     if (num.folds == 1) {
         res <- res[1, ]
-        if (is.null(hs.fold$y_test))
+        if (all(hs.fold$in.train))
             res$set <- "Non cross-validated"
     }
 
