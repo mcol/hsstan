@@ -126,15 +126,15 @@ test_that("print.hsstan",
     expect_output(print(hs.gauss))
 })
 
-test_that("sampler.params",
+test_that("sampler.stats",
 {
-    out <- sampler.params(hs.gauss)
+    out <- sampler.stats(hs.gauss)
     expect_is(out, "matrix")
     expect_equal(colnames(out),
                  c("accept.stat", "stepsize", "divergences", "treedepth",
                    "gradients", "warmup", "sample"))
     expect_equal(rownames(out),
-                 paste0("chain:", 1:chains))
+                 c(paste0("chain:", 1:chains), "all"))
 })
 
 test_that("nsamples",

@@ -75,20 +75,21 @@ print.hsstan <- function(x, ...) {
     print(summary(x, ...))
 }
 
-#' Sampler parameters
+#' Sampler statistics
 #'
-#' Report the parameters used for the sampler.
+#' Report statistics on the parameters used in the sampler, the sampler
+#' behaviour and the sampling time.
 #'
 #' @param object An object of class \code{hsstan}.
 #'
 #' @return
-#' A matrix with as many rows as number of Markov chains reporting the average
-#' acceptance probability, the mean stepsize, the total number of divergent
-#' transitions, the maximum tree depth, the total number of gradient
-#' evaluations, the warmup and sample times in seconds.
+#' A matrix with \code{C + 1} rows, where \code{C} is the number of Markov
+#' chains, reporting average acceptance probability, average stepsize, number
+#' of divergent transitions, maximum tree depth, total number of gradient
+#' evaluations, warmup and sample times in seconds.
 #'
 #' @export
-sampler.params <- function(object) {
+sampler.stats <- function(object) {
     validate.hsstan(object)
     validate.samples(object)
     sp <- rstan::get_sampler_params(object$stanfit, inc_warmup=FALSE)
@@ -97,8 +98,11 @@ sampler.params <- function(object) {
     divergences <- sapply(sp, function(x) sum(x[, "divergent__"]))
     treedepth <- sapply(sp, function(x) max(x[, "treedepth__"]))
     gradients <- sapply(sp, function(z) sum(z[, "n_leapfrog__"]))
-    et <- rstan::get_elapsed_time(object$stanfit)
-    round(cbind(accept.stat, stepsize, divergences, treedepth, gradients, et), 4)
+    et <- round(rstan::get_elapsed_time(object$stanfit), 2)
+    res <- cbind(accept.stat, stepsize, divergences, treedepth, gradients, et)
+    avg <- colMeans(res)
+    tot <- colSums(res)
+    round(rbind(res, all=c(avg[1:2], tot[3], max(res[, 4]), tot[5:7])), 4)
 }
 
 #' Number of posterior samples
