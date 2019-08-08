@@ -37,6 +37,11 @@ test_that("projsel for gaussian family",
     expect_true(all(diff(sel.gauss$kl) < 0))
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
+
+    expect_s3_class(plot(sel.gauss),
+                    "ggplot")
+    expect_silent(print(plot(sel.gauss, title="Test", max.labels=3)))
+    unlink("Rplots.pdf")
 })
 
 test_that("projsel for binomial family",
