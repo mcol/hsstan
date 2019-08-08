@@ -272,7 +272,7 @@ loo_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     set.seed(object$stanfit@stan_args[[1]]$seed)
 
     ## dirichlet weights for bayesian bootstrap
-    exp.draws <- matrix(rexp(S * N, rate=1), nrow=S, ncol=N)
+    exp.draws <- matrix(stats::rexp(S * N, rate=1), nrow=S, ncol=N)
     dw <- exp.draws / rowSums(exp.draws)
 
     var.y <- (rowSums(sweep(dw, 2, y^2, FUN = "*")) -
