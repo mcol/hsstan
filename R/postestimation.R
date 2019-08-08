@@ -245,11 +245,15 @@ bayes_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     return(R2)
 }
 
+#' @export
+loo_R2 <- function(object, ...) {
+  # temporary generic until available in rstantools or loo
+  UseMethod("loo_R2")
+}
+
 #' @rdname bayes_R2.hsstan
-#' @importFrom rstantools loo_R2
 #' @method loo_R2 hsstan
 #' @aliases loo_R2
-#' @export loo_R2
 #' @export
 loo_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     validate.samples(object)
