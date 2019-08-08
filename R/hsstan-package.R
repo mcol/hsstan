@@ -36,24 +36,17 @@ NULL
   for (m in modules) loadModule(m, what = TRUE)
 }
 
-#' @importFrom doParallel registerDoParallel
-#' @importFrom parallel detectCores
-#' @importFrom foreach getDoParWorkers
 #' @importFrom utils packageVersion
 .onAttach <- function(libname, pkgname) {
 
     ## number of cores used by default for sampling from the chains
-    options(mc.cores=ceiling(parallel::detectCores() / 2))
-
-    ## number of cores used by default for cross-validation and projection
-    registerDoParallel()
-    if (getDoParWorkers() > 10)
-        registerDoParallel(cores=10)
+    if (.Platform$OS.type != "windows")
+        options(mc.cores=ceiling(parallel::detectCores() / 2))
+    else
+        options(mc.cores=1) # nocov
 
     packageStartupMessage("hsstan ", packageVersion("hsstan"), ":")
-    packageStartupMessage("  ", options("mc.cores"),
-                          " cores for sampling -> 'options(mc.cores=<n.cores>)'")
-    packageStartupMessage("  ", getDoParWorkers(),
-                          " cores for cross-validation and projection ->",
-                          " 'options(cores=<n.cores>)'\n")
+    if (.Platform$OS.type != "windows")
+        packageStartupMessage("  - Defaulting to ", options("mc.cores"),
+                              " cores: use 'options(mc.cores=<cores>)' to change")
 }

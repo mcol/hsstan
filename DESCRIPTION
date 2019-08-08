@@ -15,9 +15,8 @@ LazyLoad: yes
 Depends:
     R (>= 3.6)
 Imports:
-    doParallel,
-    foreach,
     ggplot2,
+    parallel,
     pROC,
     Rcpp,
     methods,

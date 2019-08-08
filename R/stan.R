@@ -91,7 +91,6 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param slab.df Number of degrees of freedom of the regularization parameter
 #'        (ignored if \code{regularized=FALSE}).
 #'
-#' @importFrom foreach %dopar%
 #' @importFrom rstan stan_model
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export
@@ -141,8 +140,8 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     is.cross.validation <- num.folds > 1
 
     ## loop over the cross-validation folds
-    fold <- NULL   # silence a note raised by R CMD check
-    cv <- foreach(fold=1:num.folds) %dopar% {
+    cv <- parallel::mclapply(X=1:num.folds, mc.preschedule=FALSE,
+                             FUN=function(fold) {
 
         ## create a proper training/test split
         if (is.cross.validation) {
@@ -205,7 +204,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
                     data=x, in.train=train, in.test=test)
         class(obj) <- "hsstan"
         return(obj)
-    }
+    })
 
     return(if (is.cross.validation) cv else cv[[1]])
 }

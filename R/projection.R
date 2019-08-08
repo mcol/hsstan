@@ -43,10 +43,12 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     if (is.logistic) {
 
         ## compute the projection for each sample
-        s <- NULL   # silence a note raised by R CMD check
-        wp <- foreach(s=1:S, .combine=cbind) %dopar% {
-            glm.fit(xp, fit[, s], family=quasibinomial())$coefficients
-        }
+        wp <- parallel::mclapply(X=1:S, mc.preschedule=FALSE,
+                                 FUN=function(z) {
+                                     glm.fit(xp, fit[, z],
+                                             family=quasibinomial())$coefficients
+                                 })
+        wp <- sapply(wp, identity)
 
         ## estimate the KL divergence between full and projected model
         fitp <- binomial()$linkinv(xp %*% wp)
@@ -88,17 +90,16 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 #'        submodel.
 #' @param is.logistic Set to \code{TRUE} for a logistic regression model.
 #'
-#' @importFrom foreach foreach %dopar%
 #' @keywords internal
 choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
     notchosen <- setdiff(1:ncol(x), chosen)
     if (!is.logistic) {
-        i <- NULL   # silence a note raised by R CMD check
-        kl <- foreach(i=1:length(notchosen), .combine=c) %dopar% {
-            ind <- sort(c(chosen, notchosen[i]))
-            lm_proj(x, fit, sigma2, ind, FALSE)$kl
-        }
-        idx.selected <- which.min(kl)
+        kl <- parallel::mclapply(X=1:length(notchosen), mc.preschedule=FALSE,
+                                 FUN=function(z) {
+                                     ind <- sort(c(chosen, notchosen[z]))
+                                     lm_proj(x, fit, sigma2, ind, FALSE)$kl
+                                 })
+        idx.selected <- which.min(unlist(kl))
         return(notchosen[idx.selected])
     }
 

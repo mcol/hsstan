@@ -1,6 +1,3 @@
-library(doParallel)
-registerDoParallel(cores=1)
-
 ## silence output and warnings
 SW <- function(expr) capture.output(suppressWarnings(expr))
 
