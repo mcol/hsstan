@@ -61,6 +61,9 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param chains Number of Markov chains to run (4 by default).
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
+#' @param qr Whether the QR decomposition should be used to decorrelate the
+#'        predictors (\code{TRUE} by default). This is silently set to
+#'        \code{FALSE} if there are more predictors than observations.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
@@ -96,7 +99,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
-                   chains=4, seed=123, adapt.delta=NULL) {
+                   chains=4, seed=123, qr=TRUE, adapt.delta=NULL) {
 
     model.terms <- validate.model(covs.model, penalized)
     x <- validate.data(x, model.terms)
@@ -125,6 +128,15 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     U <- P - length(penalized)
     num.folds <- max(length(folds), 1)
 
+    ## thin QR decomposition
+    if (P > N) qr <- FALSE
+    if (qr) {
+        qr.dec <- qr(X)
+        Q.qr <- qr.Q(qr.dec)
+        R.inv <- qr.solve(qr.dec, Q.qr) * sqrt(N - 1)
+        Q.qr <- Q.qr * sqrt(N - 1)
+    }
+
     ## whether it's a proper cross-validation
     is.cross.validation <- num.folds > 1
 
@@ -145,10 +157,10 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
             train <- test <- rep(TRUE, N)
         }
 
-        X_train <- X[train, ]
+        X_train <- if (qr) Q.qr[train, ] else X[train, ]
         y_train <- y[train]
         N_train <- nrow(X_train)
-        X_test <- X[test, ]
+        X_test <- if (qr) Q.qr[test, ] else X[test, ]
         y_test <- y[test]
         N_test <- nrow(X_test)
 
@@ -174,9 +186,22 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         par.idx <- grep("^beta_[up]", names(samples))
         stopifnot(length(par.idx) == ncol(X))
         names(samples)[par.idx] <- colnames(X)
+
+        if (qr) {
+            pars <- grep("beta_", samples@sim$pars_oi, value=TRUE)
+            stopifnot(pars[1] == "beta_u")
+            beta.tilde <- rstan::extract(samples, pars=pars,
+                                         inc_warmup=TRUE, permuted=FALSE)
+            B <- apply(beta.tilde, 1:2, FUN=function(z) R.inv %*% z)
+            for (chain in 1:chains) {
+                for (p in 1:P)
+                    samples@sim$samples[[chain]][[par.idx[p]]] <- B[p, , chain]
+            }
+        }
+
         betas <- get.coefficients(samples, colnames(X))
         obj <- list(stanfit=samples, betas=betas,
-                    model.terms=model.terms, family=family,
+                    model.terms=model.terms, family=family, qr=qr,
                     data=x, in.train=train, in.test=test)
         class(obj) <- "hsstan"
         return(obj)

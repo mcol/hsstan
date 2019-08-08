@@ -37,17 +37,17 @@ test_that("get.cv.performance works for non-crossvalidated models",
                  c("set", "test.llk", "r2"))
     expect_equal(out$set, "Non cross-validated")
     expect_equal(out$test.llk,
-                 -109.0076, tolerance=tol)
+                 -110.3405, tolerance=tol)
     expect_equal(out$r2,
-                 0.2807520, tolerance=tol)
+                 0.2214606, tolerance=tol)
 
     out <- get.cv.performance(hs.binom)
     expect_equal(colnames(out),
                  c("set", "test.llk", "auc"))
     expect_equal(out$test.llk,
-                 -33.98784, tolerance=tol)
+                 -32.66869, tolerance=tol)
     expect_equal(out$auc,
-                 0.736, tolerance=tol)
+                 0.800, tolerance=tol)
 })
 
 test_that("get.cv.performance works for cross-validated models",
@@ -57,17 +57,17 @@ test_that("get.cv.performance works for cross-validated models",
     expect_equal(out$set,
                  c(paste("Fold", 1:length(folds)), "Overall"))
     expect_equal(out$test.llk,
-                 c(-64.69576, -66.82234, -131.51811), tolerance=tol)
+                 c(-69.29462, -70.00014, -139.29476), tolerance=tol)
     expect_equal(out$r2,
-                 c(0.043298172, 0, 0.001573825), tolerance=tol)
+                 c(0.01770498, 0, 0), tolerance=tol)
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
 
     out <- get.cv.performance(cv.binom)
     expect_equal(out$test.llk,
-                 c(-23.38949, -24.67107, -48.06056), tolerance=tol)
+                 c(-23.51937, -27.46995, -50.98932), tolerance=tol)
     expect_equal(out$auc,
-                 c(0.5714286, 0.5779221, 0.5088000), tolerance=tol)
+                 c(0.5909091, 0.5649351, 0.5152000), tolerance=tol)
 })
 
 test_that("get.cv.performance works for one fold of a cross-validated model",

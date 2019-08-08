@@ -24,6 +24,14 @@ test_that("hsstan",
     expect_silent(validate.samples(cv.gauss[[1]]))
 })
 
+test_that("hsstan doesn't use the QR decomposition if P > N",
+{
+    SW({
+        hs.noqr <- hsstan(df[1:5, ], mod.gauss, pen, iter=100, qr=TRUE)
+    })
+    expect_false(hs.noqr$qr)
+})
+
 test_that("sample.stan",
 {
     SW({
