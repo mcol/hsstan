@@ -167,10 +167,12 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
     return(pp)
 }
 
-#' Approximate leave-one-out cross-validation
+#' Predictive information criteria for Bayesian models
 #'
 #' Compute an efficient approximate leave-one-out cross-validation
-#' using Pareto smoothed importance sampling (PSIS-LOO).
+#' using Pareto smoothed importance sampling (PSIS-LOO), or the widely
+#' applicable information criterion (WAIC), also known as the Watanabe-Akaike
+#' information criterion.
 #'
 #' @param x An object of class \code{hsstan}.
 #' @param cores Number of cores used for parallelisation (the value of
@@ -190,6 +192,18 @@ loo.hsstan <- function(x, cores=getOption("mc.cores")) {
     r.eff <- loo::relative_eff(exp(llk), chain_id=chain.id, cores=cores)
     loo <- suppressWarnings(loo::loo(llk, r_eff=r.eff, cores=cores))
     return(loo)
+}
+
+#' @rdname loo.hsstan
+#' @importFrom loo waic
+#' @method waic hsstan
+#' @aliases waic
+#' @export
+waic.hsstan <- function(x, cores=getOption("mc.cores")) {
+    validate.samples(x)
+    llk <- log_lik(x)
+    waic <- suppressWarnings(loo::waic(llk, cores=cores))
+    return(waic)
 }
 
 #' Bayesian and LOO-adjusted R-squared

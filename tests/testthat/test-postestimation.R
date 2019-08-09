@@ -62,6 +62,18 @@ test_that("loo",
                       c(-37.9220431, 8.9499717))
 })
 
+test_that("waic",
+{
+    out <- waic(hs.gauss)
+    expect_s3_class(out, c("waic", "loo"))
+    expect_equivalent(out$estimates[1:2, "Estimate"],
+                      c(-114.2679527, 7.0239806))
+
+    out <- waic(hs.binom)
+    expect_equivalent(out$estimates[1:2, "Estimate"],
+                      c(-37.6503056, 8.6782343))
+})
+
 test_that("bayes_R2",
 {
     expect_error(bayes_R2(hs.gauss, prob=1),
