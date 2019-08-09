@@ -173,22 +173,23 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' using Pareto smoothed importance sampling (PSIS-LOO).
 #'
 #' @param x An object of class \code{hsstan}.
-#' @param save.psis Whether intermediate results should be saved in the
-#'        returned object (\code{FALSE} by default).
 #' @param cores Number of cores used for parallelisation (the value of
 #'        the \code{mc.cores} option by default).
 #'
 #' @return
 #' A \code{loo} object.
 #'
-#' @importMethodsFrom rstan loo
+#' @importFrom loo loo
 #' @method loo hsstan
 #' @aliases loo
-#' @export loo
 #' @export
-loo.hsstan <- function(x, save.psis=FALSE, cores=getOption("mc.cores")) {
+loo.hsstan <- function(x, cores=getOption("mc.cores")) {
     validate.samples(x)
-    suppressWarnings(rstan::loo(x$stanfit, save_psis=save.psis, cores=cores))
+    llk <- log_lik(x)
+    chain.id <- rep(1:ncol(x$stanfit), each=nrow(x$stanfit))
+    r.eff <- loo::relative_eff(exp(llk), chain_id=chain.id, cores=cores)
+    loo <- suppressWarnings(loo::loo(llk, r_eff=r.eff, cores=cores))
+    return(loo)
 }
 
 #' Bayesian and LOO-adjusted R-squared
