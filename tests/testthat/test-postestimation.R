@@ -54,6 +54,12 @@ test_that("loo",
 {
     out <- loo(hs.gauss)
     expect_s3_class(out, "loo")
+    expect_equivalent(out$estimates[1:2, "Estimate"],
+                      c(-114.3693922, 7.1254201))
+
+    out <- loo(hs.binom)
+    expect_equivalent(out$estimates[1:2, "Estimate"],
+                      c(-37.9220431, 8.9499717))
 })
 
 test_that("bayes_R2",
