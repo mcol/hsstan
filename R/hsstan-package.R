@@ -31,10 +31,10 @@
 #' Stan Development Team (2018). RStan: the R interface to Stan. R package version 2.17.3. http://mc-stan.org
 NULL
 
-.onLoad <- function(libname, pkgname) {
+.onLoad <- function(libname, pkgname) { # nocov start
   modules <- paste0("stan_fit4", names(stanmodels), "_mod")
   for (m in modules) loadModule(m, what = TRUE)
-}
+} # nocov end
 
 #' @importFrom utils packageVersion
 .onAttach <- function(libname, pkgname) {
