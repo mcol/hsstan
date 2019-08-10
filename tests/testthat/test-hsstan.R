@@ -1,9 +1,10 @@
 test_that("hsstan",
 {
-    expect_error(hsstan(df, mod.gauss, chains=0),
-                 "'chains' must be a positive integer")
     expect_error(hsstan(df, mod.gauss, adapt.delta=1),
                  "'adapt.delta' must be less than 1")
+    expect_message(out <- hsstan(df, mod.gauss, chains=0),
+                  "the number of chains is less than 1")
+    expect_null(out)
 
     expect_s3_class(hs.gauss,
                     "hsstan")

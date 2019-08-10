@@ -58,7 +58,6 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param folds List of cross-validation folds, where each element contains
 #'        the indices of the test observations. If \code{NULL} (default), no
 #'        cross-validation is performed.
-#' @param chains Number of Markov chains to run (4 by default).
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
 #' @param qr Whether the QR decomposition should be used to decorrelate the
@@ -90,6 +89,10 @@ get.coefficients <- function(samples, coeff.names) {
 #'        \code{regularized=FALSE}).
 #' @param slab.df Number of degrees of freedom of the regularization parameter
 #'        (ignored if \code{regularized=FALSE}).
+#' @param ... Further arguments passed to \code{\link[rstan]{sampling}},
+#'        such as \code{chains} (4 by default), \code{cores} (the value
+#'        of \code{options("mc.cores")} by default), \code{refresh}
+#'        (\code{iter / 10} by default).
 #'
 #' @importFrom rstan stan_model
 #' @importFrom stats gaussian model.matrix reformulate
@@ -98,15 +101,13 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
                    iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
-                   chains=4, seed=123, qr=TRUE, adapt.delta=NULL) {
+                   qr=TRUE, seed=123, adapt.delta=NULL, ...) {
 
     model.terms <- validate.model(covs.model, penalized)
     x <- validate.data(x, model.terms)
     y <- x[[model.terms$outcome]]
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
-    if (chains < 1)
-        stop("'chains' must be a positive integer.")
 
     ## choose the model to be fitted
     model <- ifelse(length(penalized) == 0, "base", "hs")
@@ -177,9 +178,10 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
 
         ## run the stan model
         samples <- rstan::sampling(stanmodels[[model]], data=data.input,
-                                   iter=iter, warmup=warmup,
-                                   chains=chains, seed=seed,
+                                   iter=iter, warmup=warmup, seed=seed, ...,
                                    control=list(adapt_delta=adapt.delta))
+        if (is.na(nrow(samples)))
+            return(NULL)
 
         ## assign proper names
         par.idx <- grep("^beta_[up]", names(samples))
@@ -192,6 +194,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
             beta.tilde <- rstan::extract(samples, pars=pars,
                                          inc_warmup=TRUE, permuted=FALSE)
             B <- apply(beta.tilde, 1:2, FUN=function(z) R.inv %*% z)
+            chains <- ncol(beta.tilde)
             for (chain in 1:chains) {
                 for (p in 1:P)
                     samples@sim$samples[[chain]][[par.idx[p]]] <- B[p, , chain]
