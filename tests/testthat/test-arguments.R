@@ -1,9 +1,10 @@
+N <- 10
 P <- 6
-x <- data.frame(matrix(rnorm(10 * P), ncol=P))
+x <- data.frame(matrix(rnorm(N * P), ncol=P))
 x[1, P - 1] <- NA
 colnames(x)[c(P - 1, P)] <- c("X.NA", "y")
-y.gauss <- rnorm(10)
-y.binom <- rbinom(10, 1, 0.5)
+y.gauss <- rnorm(N)
+y.binom <- rbinom(N, 1, 0.5)
 y.factr <- factor(y.binom, labels=c("No", "Yes"))
 
 
@@ -77,7 +78,7 @@ test_that("model data",
 {
     expect_error(validate.data(NULL, y ~ 1),
                  "'x' must be a data frame or a matrix")
-    expect_error(validate.data(1:10, y ~ 1),
+    expect_error(validate.data(1:N, y ~ 1),
                  "'x' must be a data frame or a matrix")
     expect_equal(validate.data(as.matrix(x), validate.model(y ~ X1, "X3")),
                  x)
