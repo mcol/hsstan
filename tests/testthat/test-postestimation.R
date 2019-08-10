@@ -8,7 +8,7 @@ test_that("log_lik",
                  log_lik(hs.binom, newdata=df))
 
     expect_equal(log_lik(cv.gauss[[1]]),
-                 log_lik(cv.gauss[[1]], newdata=df[folds[[2]], ]))
+                 log_lik(cv.gauss[[1]], newdata=df[folds == 2, ]))
 })
 
 test_that("posterior_interval",

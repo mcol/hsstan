@@ -53,9 +53,9 @@ test_that("get.cv.performance works for non-crossvalidated models",
 test_that("get.cv.performance works for cross-validated models",
 {
     out <- get.cv.performance(cv.gauss, out.csv="out.csv")
-    expect_equal(nrow(out), length(folds) + 1)
+    expect_equal(nrow(out), max(folds) + 1)
     expect_equal(out$set,
-                 c(paste("Fold", 1:length(folds)), "Overall"))
+                 c(paste("Fold", 1:max(folds)), "Overall"))
     expect_equal(out$test.llk,
                  c(-69.29462, -70.00014, -139.29476), tolerance=tol)
     expect_equal(out$r2,

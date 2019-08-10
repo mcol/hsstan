@@ -144,6 +144,32 @@ test_that("valid family inputs",
                  "gaussian")
 })
 
+test_that("validate.folds",
+{
+    expect_error(validate.folds(c(1:N, NA), N),
+                 "'folds' contains missing values")
+    expect_error(validate.folds(list(1:N), N),
+                 "'folds' must be an integer vector")
+    expect_error(validate.folds(c(1:9, 10.5), N),
+                 "'folds' must be an integer vector")
+    expect_error(validate.folds(1:N, N + 1),
+                 "'folds' should have length")
+    expect_error(validate.folds(rep(2, N), N),
+                 "'folds' must contain all indices up to")
+    expect_error(validate.folds(sample(2:4, N, replace=TRUE), N),
+                 "")
+
+    folds <- rep(1:3, length.out=N)
+    expect_equal(validate.folds(NULL, N),
+                 rep(1, N))
+    expect_equal(validate.folds(rep(1, N), N),
+                 rep(1, N))
+    expect_equal(validate.folds(folds, N),
+                 folds)
+    expect_type(validate.folds(folds * 1.0, N),
+                "integer")
+})
+
 test_that("validate.adapt.delta",
 {
     expect_error(validate.adapt.delta("a"),

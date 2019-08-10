@@ -18,7 +18,7 @@ unp <- paste0("X", 1:U)
 pen <- setdiff(paste0("X", 1:P), unp)
 mod.gauss <- reformulate(unp, "y.gauss")
 mod.binom <- reformulate(unp, "y.binom")
-folds <- list(1:25, 26:N)
+folds <- c(rep(1, N / 2), rep(2, N / 2))
 iters <- 500
 chains <- 2
 

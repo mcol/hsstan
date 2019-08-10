@@ -55,9 +55,9 @@ get.coefficients <- function(samples, coeff.names) {
 #'        covariates is fitted.
 #' @param family Type of model fitted: either \code{gaussian()} for linear
 #'        regression (default) or \code{binomial()} for logistic regression.
-#' @param folds List of cross-validation folds, where each element contains
-#'        the indices of the test observations. If \code{NULL} (default), no
-#'        cross-validation is performed.
+#' @param folds Integer vector with one element per observation indicating the
+#'        cross-validation fold in which the observation should be withdrawn.
+#'        If \code{NULL} (default), no cross-validation is performed.
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
 #' @param qr Whether the QR decomposition should be used to decorrelate the
@@ -126,7 +126,9 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     N <- nrow(X)
     P <- ncol(X)
     U <- P - length(penalized)
-    num.folds <- max(length(folds), 1)
+    folds <- validate.folds(folds, nrow(x))
+    num.folds <- max(folds)
+    is.cross.validation <- num.folds > 1
 
     ## thin QR decomposition
     if (P > N) qr <- FALSE
@@ -137,16 +139,13 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         Q.qr <- Q.qr * sqrt(N - 1)
     }
 
-    ## whether it's a proper cross-validation
-    is.cross.validation <- num.folds > 1
-
     ## loop over the cross-validation folds
     cv <- parallel::mclapply(X=1:num.folds, mc.preschedule=FALSE,
                              FUN=function(fold) {
 
         ## create a proper training/test split
         if (is.cross.validation) {
-            test <- 1:N %in% folds[[fold]]
+            test <- folds == fold
             train <- !test
         }
 
@@ -249,5 +248,12 @@ sample.stan <- function(x, y, covariates, biomarkers=NULL,
 #' @export
 sample.stan.cv <- function(x, y, covariates, biomarkers=NULL, folds,
                            logit=FALSE, iter=1000, ...) {
+    ## convert from deprecated folds format
+    if (is.list(folds)) {
+        new.folds <- integer(nrow(x))
+        for (i in 1:length(folds))
+            new.folds[folds[[i]]] <- i
+        folds <- new.folds
+    }
     sample.stan(x, y, covariates, biomarkers, logit, folds=folds, iter=iter, ...)
 }

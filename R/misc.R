@@ -226,6 +226,31 @@ validate.family <- function(family, y) {
     return(family)
 }
 
+#' Validate the cross-validation folds
+#'
+#' @param folds Folds to be checked or \code{NULL}.
+#' @param N Number of observations.
+#'
+#' @return
+#' An integer vector with one element per observation indicating the
+#' cross-validation fold in which the observation should be withdrawn.
+#'
+#' @noRd
+validate.folds <- function(folds, N) {
+    if (is.null(folds))
+        return(rep(1, N))
+    if (anyNA(folds))
+        stop("'folds' contains missing values.")
+    if (!is.numeric(folds) || any(folds != as.integer(folds)))
+        stop("'folds' must be an integer vector.")
+    if (length(folds) != N)
+        stop("'folds' should have length ", N, ".")
+    K <- length(unique(folds))
+    if (!all(1:K %in% folds))
+        stop("'folds' must contain all indices up to ", K, ".")
+    folds <- as.integer(folds)
+}
+
 #' Validate adapt.delta
 #'
 #' Check that an adaptation acceptance probability is valid.

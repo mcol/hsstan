@@ -54,8 +54,9 @@ test_that("sample.stan",
 test_that("sample.stan.cv",
 {
     SW({
+        old.folds <- lapply(1:max(folds), function(z) which(folds == z))
         sv.binom <- sample.stan.cv(df, df$y.binom, unp, pen, logit=TRUE,
-                                   iter=iters, chains=chains, folds=folds)
+                                   iter=iters, chains=chains, folds=old.folds)
     })
     expect_equal(names(cv.binom[[1]]),
                  names(sv.binom[[1]]))
