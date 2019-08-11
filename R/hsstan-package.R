@@ -41,7 +41,7 @@ NULL
 
     ## number of cores used by default for sampling from the chains
     if (.Platform$OS.type != "windows")
-        options(mc.cores=ceiling(parallel::detectCores() / 2))
+        options(mc.cores=min(ceiling(parallel::detectCores() / 2), 4))
     else
         options(mc.cores=1) # nocov
 
