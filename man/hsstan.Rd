@@ -4,32 +4,31 @@
 \alias{hsstan}
 \title{Fit a plain or cross-validated Stan model}
 \usage{
-hsstan(x, y, covariates, biomarkers = NULL, family = gaussian,
+hsstan(x, covs.model, penalized = NULL, family = gaussian,
   folds = NULL, iter = ifelse(is.null(folds), 2000, 1000),
   warmup = iter/2, scale.u = 2, regularized = TRUE,
   nu = ifelse(regularized, 1, 3), par.ratio = 0.05, global.df = 1,
-  slab.scale = 2, slab.df = 4, store.samples = is.null(folds),
-  seed = 123, adapt.delta = NULL, model.type = c("mc", "vb"))
+  slab.scale = 2, slab.df = 4, qr = TRUE, seed = 123,
+  adapt.delta = NULL, ...)
 }
 \arguments{
-\item{x}{Data frame of predictors.}
+\item{x}{Data frame containing outcome, covariates and penalized predictors.
+Continuous predictors and outcome variable should be standardized
+before fitting the models as priors assume them to have mean zero and
+have the same scale.}
 
-\item{y}{Vector of outcomes. For a logistic regression model, this is
-expected to contain only \code{0-1} entries.}
+\item{covs.model}{Formula containing the unpenalized covariates.}
 
-\item{covariates}{Names of the variables to be used as (unpenalized)
-predictors.}
-
-\item{biomarkers}{Names of the variables to be used as penalized predictors.
-If it is specified as an empty vector, a model with only unpenalized
-covariates is used.}
+\item{penalized}{Names of the variables to be used as penalized predictors.
+If \code{NULL} or an empty vector, a model with only unpenalized
+covariates is fitted.}
 
 \item{family}{Type of model fitted: either \code{gaussian()} for linear
 regression (default) or \code{binomial()} for logistic regression.}
 
-\item{folds}{List of cross-validation folds, where each element contains
-the indices of the test observations. If \code{NULL} (default), no
-cross-validation is performed.}
+\item{folds}{Integer vector with one element per observation indicating the
+cross-validation fold in which the observation should be withdrawn.
+If \code{NULL} (default), no cross-validation is performed.}
 
 \item{iter}{Total number of iterations in each chain, including warmup
 (by default, 1000 iterations for cross-validation and 2000 otherwise).}
@@ -62,27 +61,24 @@ parameter (ignored if \code{regularized=FALSE}).}
 \item{slab.df}{Number of degrees of freedom of the regularization parameter
 (ignored if \code{regularized=FALSE}).}
 
-\item{store.samples}{Whether the posterior samples should be saved
-(by default, \code{FALSE} for cross-validation and \code{TRUE}
-otherwise).}
+\item{qr}{Whether the QR decomposition should be used to decorrelate the
+predictors (\code{TRUE} by default). This is silently set to
+\code{FALSE} if there are more predictors than observations.}
 
-\item{seed}{Integer defining the seed for the pseudo-random number generator.}
+\item{seed}{Optional integer defining the seed for the pseudo-random number
+generator.}
 
 \item{adapt.delta}{Target average proposal acceptance probability for
 adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
 base models.}
 
-\item{model.type}{Either \code{"mc"} for Hamiltonian Monte Carlo, or
-\code{"vb"} for variational Bayes.}
+\item{...}{Further arguments passed to \code{\link[rstan]{sampling}},
+such as \code{chains} (4 by default), \code{cores} (the value
+of \code{options("mc.cores")} by default), \code{refresh}
+(\code{iter / 10} by default).}
 }
 \description{
-Runs either with Hamiltonian Monte Carlo or variational Bayes over the
-cross-validation folds (if specified) or over all the data.
-}
-\details{
-The continuous predictors and outcome variable are standardized before
-fitting the models. In case of cross-validation, the test fold is
-standardized according to mean and standard deviation of the corresponding
-training fold.
+Run the No-U-Turn Sampler (NUTS) as implemented in Stan over all the data
+or within the cross-validation folds.
 }

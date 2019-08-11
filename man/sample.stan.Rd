@@ -8,7 +8,7 @@
 sample.stan(x, y, covariates, biomarkers = NULL, logit = FALSE, ...)
 
 sample.stan.cv(x, y, covariates, biomarkers = NULL, folds,
-  logit = FALSE, ...)
+  logit = FALSE, iter = 1000, ...)
 }
 \arguments{
 \item{x}{Data frame of predictors.}
@@ -28,9 +28,12 @@ logistic regression.}
 
 \item{...}{Further options passed to \code{hsstan}.}
 
-\item{folds}{List of cross-validation folds, where each element contains
-the indices of the test observations. If \code{NULL} (default), no
-cross-validation is performed.}
+\item{folds}{Integer vector with one element per observation indicating the
+cross-validation fold in which the observation should be withdrawn.
+If \code{NULL} (default), no cross-validation is performed.}
+
+\item{iter}{Total number of iterations in each chain, including warmup
+(by default, 1000 iterations for cross-validation and 2000 otherwise).}
 }
 \description{
 Deprecated functions to fit hierarchical shrinkage models
@@ -42,6 +45,3 @@ Deprecated functions to fit hierarchical shrinkage models
 deprecated.
 }
 
-\seealso{
-\code{\link{hsstan}}
-}

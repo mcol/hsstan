@@ -7,7 +7,7 @@
 projsel(samples, max.num.pred = 30, out.csv = NULL)
 }
 \arguments{
-\item{samples}{Object produced by \code{\link{sample.stan}}.}
+\item{samples}{Object produced by \code{\link{hsstan}}.}
 
 \item{max.num.pred}{Maximum number of predictors after which the selection
 procedure should stop.}

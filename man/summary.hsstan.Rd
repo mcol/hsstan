@@ -11,8 +11,8 @@
 \item{object}{An object of class \code{hsstan}.}
 
 \item{pars}{Vector of parameter names to be extracted. If \code{NULL}
-(default) then this refers to the set of covariates and biomarkers
-(if available).}
+(default) then this refers to the set of predictors used in the
+model.}
 
 \item{prob}{Width of the posterior intervals (0.95, by default).}
 

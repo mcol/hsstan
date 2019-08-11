@@ -2,7 +2,7 @@
 % Please edit documentation in R/projection.R
 \name{choose.next}
 \alias{choose.next}
-\title{Return the next variable to be added to the current submodel}
+\title{Next variable to enter the current submodel}
 \usage{
 choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
 }
@@ -21,7 +21,7 @@ submodel.}
 \item{is.logistic}{Set to \code{TRUE} for a logistic regression model.}
 }
 \description{
-Returns the index of the variable that should be added to the current model
+Return the index of the variable that should be added to the current model
 according to the smallest KL-divergence (linear regression) or the largest
 score test (logistic regression).
 }
