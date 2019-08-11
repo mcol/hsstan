@@ -157,7 +157,7 @@ test_that("validate.folds",
     expect_error(validate.folds(rep(2, N), N),
                  "'folds' must contain all indices up to")
     expect_error(validate.folds(sample(2:4, N, replace=TRUE), N),
-                 "")
+                 "'folds' must contain all indices up to")
 
     folds <- rep(1:3, length.out=N)
     expect_equal(validate.folds(NULL, N),
