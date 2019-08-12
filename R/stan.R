@@ -195,6 +195,9 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #' @param x An object of class \code{hsstan}.
 #' @param folds Integer vector with one element per observation indicating the
 #'        cross-validation fold in which the observation should be withdrawn.
+#' @param iter Total number of iterations in each chain, including warmup. By
+#'        default this is set to the number of iterations used when fitting
+#'        the \code{hsstan} object.
 #' @param store.fits If \code{TRUE} (default), the \code{fits} field is added
 #'        to the returned object to store the cross-validated \code{hsstan}
 #'        objects and the indices of the omitted observations for each fold, and
@@ -215,20 +218,22 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #' @aliases kfold
 #' @export kfold
 #' @export
-kfold.hsstan <- function(x, folds, store.fits=TRUE,
+kfold.hsstan <- function(x, folds, iter=NULL, store.fits=TRUE,
                          cores=getOption("mc.cores", 1), ...) {
     data <- x$data
     N <- nrow(data)
     folds <- validate.folds(folds, N)
     num.folds <- max(folds)
+    if (is.null(iter))
+        iter <- x$stanfit@stan_args[[1]]$iter
 
     ## collect the list of calls to be evaluated in parallel
     calls <- list()
     for (fold in 1:num.folds) {
         test.idx <- which(folds == fold)
         fit.call <- stats::update(object=x, x=data[-test.idx, , drop=FALSE],
-                                  cores=1, refresh=0, open_progress=FALSE,
-                                  evaluate=FALSE)
+                                  iter=iter, cores=1, refresh=0,
+                                  open_progress=FALSE, evaluate=FALSE)
         fit.call$x <- eval(fit.call$x)
         calls[[fold]] <- fit.call
     }
