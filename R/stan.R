@@ -40,10 +40,10 @@ get.coefficients <- function(samples, coeff.names) {
     return(list(unpenalized=beta.u, penalized=beta.p))
 }
 
-#' Fit a plain or cross-validated Stan model
+#' Hierarchical shrinkage models
 #'
-#' Run the No-U-Turn Sampler (NUTS) as implemented in Stan over all the data
-#' or within the cross-validation folds.
+#' Run the No-U-Turn Sampler (NUTS) as implemented in Stan to fit a hierarchical
+#' shrinkage model.
 #'
 #' @param x Data frame containing outcome, covariates and penalized predictors.
 #'        Continuous predictors and outcome variable should be standardized
@@ -55,9 +55,6 @@ get.coefficients <- function(samples, coeff.names) {
 #'        covariates is fitted.
 #' @param family Type of model fitted: either \code{gaussian()} for linear
 #'        regression (default) or \code{binomial()} for logistic regression.
-#' @param folds Integer vector with one element per observation indicating the
-#'        cross-validation fold in which the observation should be withdrawn.
-#'        If \code{NULL} (default), no cross-validation is performed.
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
 #' @param qr Whether the QR decomposition should be used to decorrelate the
@@ -68,7 +65,7 @@ get.coefficients <- function(samples, coeff.names) {
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
 #'        base models.
 #' @param iter Total number of iterations in each chain, including warmup
-#'        (by default, 1000 iterations for cross-validation and 2000 otherwise).
+#'        (2000 by default).
 #' @param warmup Number of warmup iterations per chain (by default, half the
 #'        total number of iterations).
 #' @param scale.u Prior scale (standard deviation) for the unpenalised
@@ -97,11 +94,10 @@ get.coefficients <- function(samples, coeff.names) {
 #' @seealso
 #' \code{\link{kfold.hsstan}} for cross-validating a fitted object.
 #
-#' @importFrom rstan stan_model
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export
-hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
-                   iter=ifelse(is.null(folds), 2000, 1000), warmup=iter / 2,
+hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
+                   iter=2000, warmup=floor(iter / 2),
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
                    qr=TRUE, seed=123, adapt.delta=NULL, ...) {
@@ -135,9 +131,6 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     N <- nrow(X)
     P <- ncol(X)
     U <- P - length(penalized)
-    folds <- validate.folds(folds, nrow(x))
-    num.folds <- max(folds)
-    is.cross.validation <- num.folds > 1
 
     ## thin QR decomposition
     if (P > N) qr <- FALSE
@@ -148,37 +141,13 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         Q.qr <- Q.qr * sqrt(N - 1)
     }
 
-    ## loop over the cross-validation folds
-    cv <- parallel::mclapply(X=1:num.folds, mc.preschedule=FALSE,
-                             FUN=function(fold) {
+    ## global scale for regularized horseshoe prior
+    global.scale <- if (regularized) par.ratio / sqrt(N) else 1
 
-        ## create a proper training/test split
-        if (is.cross.validation) {
-            test <- folds == fold
-            train <- !test
-        }
-
-        ## use all available data for both training and testing: this
-        ## effectively computes the fit of the model (y_pred) for all
-        ## observations
-        else {
-            train <- test <- rep(TRUE, N)
-        }
-
-        X_train <- if (qr) Q.qr[train, ] else X[train, ]
-        y_train <- y[train]
-        N_train <- nrow(X_train)
-        X_test <- if (qr) Q.qr[test, ] else X[test, ]
-        y_test <- y[test]
-        N_test <- nrow(X_test)
-
-        ## global scale for regularized horseshoe prior
-        global.scale <- if (regularized) par.ratio / sqrt(N_train) else 1
-
+    ## core block
+    {
         ## parameters not used by a model are ignored
-        data.input <- list(N_train=N_train, N_test=N_test,
-                           y_train=y_train, y_test=y_test,
-                           X_train=X_train, X_test=X_test,
+        data.input <- list(X=if (qr) Q.qr else X, y=y, N=N,
                            P=P, U=U, scale_u=scale.u,
                            regularized=regularized, nu=nu,
                            global_scale=global.scale, global_df=global.df,
@@ -211,13 +180,11 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
 
         betas <- get.coefficients(samples, colnames(X))
         obj <- list(stanfit=samples, betas=betas, call=call,
-                    model.terms=model.terms, family=family, qr=qr,
-                    data=x, in.train=train, in.test=test)
+                    data=x, model.terms=model.terms, family=family, qr=qr)
         class(obj) <- "hsstan"
-        return(obj)
-    })
+    }
 
-    return(if (is.cross.validation) cv else cv[[1]])
+    return(obj)
 }
 
 #' K-fold cross-validation

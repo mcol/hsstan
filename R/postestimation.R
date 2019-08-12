@@ -39,7 +39,7 @@
 #' @export
 log_lik.hsstan <- function(object, newdata=NULL, ...) {
     if (is.null(newdata))
-        newdata <- object$data[object$in.train, ]
+        newdata <- object$data
     y <- validate.outcome(newdata[[object$model.terms$outcome]])
     mu <- posterior_linpred(object, newdata, transform=TRUE)
     if (!is.logistic(object))
@@ -273,7 +273,7 @@ loo_R2 <- function(object, ...) {
 loo_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     validate.samples(object)
     validate.probability(prob)
-    y <- object$data[object$in.train, object$model.terms$outcome]
+    y <- object$data[[object$model.terms$outcome]]
     mu <- posterior_linpred(object, transform=TRUE)
     ll <- log_lik(object)
     S <- nrow(mu)

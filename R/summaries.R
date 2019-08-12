@@ -146,7 +146,7 @@ get.cv.performance <- function(obj, out.csv=NULL) {
 
     if (num.folds == 1) {
         res <- res[1, ]
-        if (all(hs.fold$in.train))
+        if (!inherits(obj, c("kfold", "loo")))
             res$set <- "Non cross-validated"
     }
 

@@ -19,23 +19,14 @@ data {
   // number of unpenalized columns in model matrix
   int U;
 
-  // number of training observations
-  int N_train;
+  // number of observations
+  int N;
 
-  // number of test observations
-  int N_test;
-
-  // X matrix for training data
-  matrix[N_train, P] X_train;
-
-  // X matrix for test data
-  matrix[N_test, P] X_test;
+  // design matrix
+  matrix[N, P] X;
 
   // continuous response variable
-  vector[N_train] y_train;
-
-  // continuous response variable for test data
-  vector[N_test] y_test;
+  vector[N] y;
 
   // prior standard deviation for the unpenalised variables
   real<lower=0> scale_u;
@@ -91,7 +82,7 @@ transformed parameters {
 model {
 
   // linear predictor
-  vector[N_train] mu = X_train[, 1:U] * beta_u + X_train[, (U+1):P] * beta_p;
+  vector[N] mu = X[, 1:U] * beta_u + X[, (U+1):P] * beta_p;
 
   // half t-priors for lambdas and tau
   z ~ std_normal();
@@ -110,5 +101,5 @@ model {
   sigma ~ inv_gamma(1, 1);
 
   // likelihood
-  y_train ~ normal(mu, sigma);
+  y ~ normal(mu, sigma);
 }
