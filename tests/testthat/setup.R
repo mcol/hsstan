@@ -1,5 +1,5 @@
 ## silence output and warnings
-SW <- function(expr) capture.output(suppressWarnings(expr))
+SW <- function(expr) capture.output(suppressMessages(suppressWarnings(expr)))
 
 ## dataset
 set.seed(1)
@@ -37,6 +37,8 @@ SW({
 
 message("Running cross-validated hsstan models...")
 SW({
-    cv.gauss <- hs(mod.gauss, gaussian, folds=folds)
-    cv.binom <- hs(mod.binom, binomial, folds=folds)
+    cv.gauss <- kfold(hs.gauss, folds=folds)
+    cv.binom <- kfold(hs.binom, folds=folds)
+    cv.nofit <- cv.gauss
+    cv.nofit$fits <- cv.nofit$data <- NULL
 })

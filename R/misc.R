@@ -342,3 +342,18 @@ is.logistic <- function(obj) {
 collapse <- function(x) {
     paste0("'", x, "'", collapse=", ")
 }
+
+#' Log of sum of exponentials
+#'
+#' @noRd
+logSumExp <- function(x) {
+    xmax <- max(x)
+    xmax + log(sum(exp(x - xmax)))
+}
+
+#' Log of average of exponentials
+#'
+#' @noRd
+logMeanExp <- function(x) {
+    logSumExp(x) - log(length(x))
+}

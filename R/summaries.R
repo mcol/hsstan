@@ -97,22 +97,32 @@ get.cv.performance <- function(obj, out.csv=NULL) {
     auc <- function(y.pred, y.obs)
         as.numeric(roc(y.obs, y.pred, direction="<", quiet=TRUE)$auc)
 
-    if (inherits(obj, "hsstan"))
-        obj <- list(obj)
-    num.folds <- length(obj)
+    if (inherits(obj, "hsstan")) {
+        obj <- list(fits=array(list(fit=obj, test.idx=1:nrow(obj$data)), c(1, 2)),
+                    data=obj$data)
+        colnames(obj$fits) <- c("fit", "test.idx")
+    } else if (inherits(obj, c("kfold", "loo"))) {
+        if (is.null(obj[["fits"]]))
+            stop("No fitted models found, run 'kfold' with store.fits=TRUE.")
+    } else {
+        stop("Not an 'hsstan' or 'kfold' object.")
+    }
+
+    num.folds <- nrow(obj$fits)
     y.obs.all <- y.pred.all <- NULL
     llk <- perf <- rep(NA, num.folds)
     llk.all <- 0
-    is.logistic <- is.logistic(obj[[1]])
+    is.logistic <- is.logistic(obj$fits[[1]])
     perf.fun <- ifelse(is.logistic, auc, r2)
 
     ## loop over the folds
     for (fold in 1:num.folds) {
-        hs.fold <- obj[[fold]]
-        y.obs <- hs.fold$data[hs.fold$in.test, hs.fold$model.terms$outcome]
+        hs.fold <- obj$fits[[fold]]
+        test.idx <- obj$fits[, "test.idx"][[fold]]
+        y.obs <- obj$data[test.idx, hs.fold$model.terms$outcome]
 
         ## retrieve the fitted values on test data
-        newdata <- hs.fold$data[hs.fold$in.test, ]
+        newdata <- obj$data[test.idx, ]
         y.pred <- colMeans(posterior_linpred(hs.fold, newdata=newdata,
                                              transform=TRUE))
         llk[fold] <- sum(colMeans(log_lik(hs.fold, newdata=newdata)))

@@ -17,12 +17,6 @@ test_that("hsstan",
     expect_equal(names(hs.gauss$betas$penalized),
                  hs.gauss$model.terms$penalized)
     expect_length(hs.gauss$betas, 2)
-
-    expect_is(cv.gauss, "list")
-    expect_length(cv.gauss, 2)
-    expect_s3_class(cv.gauss[[1]],
-                    "hsstan")
-    expect_silent(validate.samples(cv.gauss[[1]]))
 })
 
 test_that("hsstan doesn't use the QR decomposition if P > N",
@@ -31,6 +25,42 @@ test_that("hsstan doesn't use the QR decomposition if P > N",
         hs.noqr <- hsstan(df[1:5, ], mod.gauss, pen, iter=100, qr=TRUE)
     })
     expect_false(hs.noqr$qr)
+})
+
+test_that("kfold",
+{
+    expect_s3_class(cv.gauss,
+                    c("kfold", "loo"))
+    expect_output(print(cv.gauss),
+                  "Based on 2-fold cross-validation")
+    expect_named(cv.gauss,
+                 c("estimates", "pointwise", "fits", "data"))
+    expect_equal(rownames(cv.gauss$estimates),
+                 c("elpd_kfold", "p_kfold", "kfoldic"))
+    expect_equal(colnames(cv.gauss$estimates),
+                 c("Estimate", "SE"))
+    expect_equal(nrow(cv.gauss$pointwise),
+                 N)
+    expect_equal(colnames(cv.gauss$pointwise),
+                 c("elpd_kfold", "p_kfold", "kfoldic"))
+    expect_true(all(is.na(cv.gauss$pointwise[, "p_kfold"])))
+
+    expect_named(cv.binom,
+                 c("estimates", "pointwise", "fits", "data"))
+    for (i in 1:max(folds))
+        expect_s3_class(cv.binom$fits[[i]],
+                        "hsstan")
+    expect_silent(validate.samples(cv.binom$fits[[1]]))
+    expect_length(cv.binom$fits,
+                  max(folds) * 2)
+    expect_equal(cv.binom$fits[[max(folds) + 1]],
+                 which(folds == 1))
+})
+
+test_that("kfold with store.fits=FALSE",
+{
+    expect_named(cv.nofit,
+                 c("estimates", "pointwise"))
 })
 
 test_that("sample.stan",
@@ -45,7 +75,7 @@ test_that("sample.stan",
                  dim(hs.gauss$data) + c(0, 1))
     expect_equal(ss.gauss$model.terms[3:4],
                  hs.gauss$model.terms[3:4])
-    skip.check <- c("stanfit", "data", "model.terms")
+    skip.check <- c("stanfit", "data", "model.terms", "call")
     for (field in setdiff(names(hs.gauss), skip.check))
         expect_equal(ss.gauss[[field]],
                      hs.gauss[[field]])
@@ -54,18 +84,20 @@ test_that("sample.stan",
 test_that("sample.stan.cv",
 {
     SW({
+        ## the QR decomposition happens at different times (before training/test
+        ## split in sample.stan.cv(), after it in hsstan() using kfold())
         old.folds <- lapply(1:max(folds), function(z) which(folds == z))
-        sv.binom <- sample.stan.cv(df, df$y.binom, unp, pen, logit=TRUE,
+        sv.binom <- sample.stan.cv(df, df$y.binom, unp, pen, logit=TRUE, qr=FALSE,
                                    iter=iters, chains=chains, folds=old.folds)
+        hs.bnoqr <- hs(mod.binom, binomial, qr=FALSE)
+        cv.bnoqr <- kfold(hs.bnoqr, folds=folds)
     })
-    expect_equal(names(cv.binom[[1]]),
-                 names(sv.binom[[1]]))
-    expect_equal(dim(sv.binom[[1]]$data), # sample.stan adds the hsstan_y_ column
-                 dim(cv.binom[[1]]$data) + c(0, 1))
+    expect_equal(names(sv.binom[[1]]),
+                 names(cv.bnoqr$fit[[1]]))
+    expect_equal(ncol(sv.binom[[1]]$data), # sample.stan adds the hsstan_y_ column
+                 ncol(cv.bnoqr$fit[[1]]$data) + 1)
     expect_equal(sv.binom[[1]]$model.terms[3:4],
-                 cv.binom[[1]]$model.terms[3:4])
-    skip.check <- c("stanfit", "data", "model.terms")
-    for (field in setdiff(names(cv.binom[[1]]), skip.check))
-        expect_equal(cv.binom[[1]][[field]],
-                     sv.binom[[1]][[field]])
+                 cv.bnoqr$fits[[1]]$model.terms[3:4])
+    expect_equal(sv.binom[[1]]$betas,
+                 cv.bnoqr$fits[[1]]$betas)
 })

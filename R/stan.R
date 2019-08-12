@@ -94,6 +94,9 @@ get.coefficients <- function(samples, coeff.names) {
 #'        of \code{options("mc.cores")} by default), \code{refresh}
 #'        (\code{iter / 10} by default).
 #'
+#' @seealso
+#' \code{\link{kfold.hsstan}} for cross-validating a fitted object.
+#
 #' @importFrom rstan stan_model
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export
@@ -108,6 +111,12 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     y <- x[[model.terms$outcome]]
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
+
+    ## retrieve the call and its actual argument values
+    call <- match.call(expand.dots=TRUE)
+    args <- c(as.list(environment()), list(...))
+    for (nm in names(call)[-c(1:2)]) # exclude "" and "x"
+        call[[nm]] <- args[[nm]]
 
     ## choose the model to be fitted
     model <- ifelse(length(penalized) == 0, "base", "hs")
@@ -201,7 +210,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
         }
 
         betas <- get.coefficients(samples, colnames(X))
-        obj <- list(stanfit=samples, betas=betas,
+        obj <- list(stanfit=samples, betas=betas, call=call,
                     model.terms=model.terms, family=family, qr=qr,
                     data=x, in.train=train, in.test=test)
         class(obj) <- "hsstan"
@@ -209,6 +218,87 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
     })
 
     return(if (is.cross.validation) cv else cv[[1]])
+}
+
+#' K-fold cross-validation
+#'
+#' Perform K-fold cross-validation using the same settings used when fitting
+#' the model on the whole data.
+#'
+#' @param x An object of class \code{hsstan}.
+#' @param folds Integer vector with one element per observation indicating the
+#'        cross-validation fold in which the observation should be withdrawn.
+#' @param store.fits If \code{TRUE} (default), the \code{fits} field is added
+#'        to the returned object to store the cross-validated \code{hsstan}
+#'        objects and the indices of the omitted observations for each fold, and
+#'        the \code{data} field to hold the complete dataset.
+#' @param cores Number of cores to use for parallelization (the value of
+#'        \code{options("mc.cores")} by default). The cross-validation folds will
+#'        be distributed to the available cores, and the Markov chains for each
+#'        model will be run sequentially.
+#' @param ... Currently ignored.
+#'
+#' @return
+#' An object with classes "kfold" and "loo" that has a similar structure as
+#' the objects returned by \code{\link{loo}} and \code{\link{waic}} and is
+#' compatible with the \code{\link{loo_compare}} function for comparing models.
+#'
+#' @importFrom loo kfold
+#' @aliases kfold
+#' @method kfold hsstan
+#' @export
+kfold.hsstan <- function(x, folds, store.fits=TRUE,
+                         cores=getOption("mc.cores", 1), ...) {
+    data <- x$data
+    N <- nrow(data)
+    folds <- validate.folds(folds, N)
+    num.folds <- max(folds)
+
+    ## collect the list of calls to be evaluated in parallel
+    calls <- list()
+    for (fold in 1:num.folds) {
+        test.idx <- which(folds == fold)
+        fit.call <- stats::update(object=x, x=data[-test.idx, , drop=FALSE],
+                                  cores=1, refresh=0, open_progress=FALSE,
+                                  evaluate=FALSE)
+        fit.call$x <- eval(fit.call$x)
+        calls[[fold]] <- fit.call
+    }
+
+    ## evaluate the models
+    message("Fitting ", num.folds, " models using ",
+            min(cores, num.folds), " cores")
+    cv <- parallel::mclapply(mc.cores=cores, mc.preschedule=FALSE,
+                             X=1:num.folds, FUN=function(fold) {
+        fit <- eval(calls[[fold]])
+
+        ## log pointwise predictive densities (pointwise test log-likelihood)
+        lppd <- log_lik(fit, newdata=data[which(folds == fold), , drop=FALSE])
+        return(list(lppd=lppd, fit=if (store.fits) fit else NULL))
+    })
+
+    ## expected log predictive densities
+    elpds.unord <- unlist(lapply(cv, function(z) apply(z$lppd, 2, logMeanExp)))
+    obs.idx <- unlist(lapply(1:num.folds, function(z) which(folds == z)))
+    elpds <- elpds.unord[obs.idx]
+
+    pointwise <- cbind(elpd_kfold=elpds, p_kfold=NA, kfoldic=-2 * elpds)
+    estimates <- colSums(pointwise)
+    se.est <- sqrt(N * apply(pointwise, 2, var))
+    out <- list(estimates=cbind(Estimate=estimates, SE=se.est),
+                pointwise=pointwise)
+    rownames(out$estimates) <- colnames(pointwise)
+    if (store.fits) {
+        fits <- array(list(), c(num.folds, 2), list(NULL, c("fit", "test.idx")))
+        for (fold in 1:num.folds)
+            fits[fold, ] <- list(fit=cv[[fold]][["fit"]],
+                                 test.idx=which(folds == fold))
+        out$fits <- fits
+        out$data <- data
+    }
+    attr(out, "K") <- num.folds
+    class(out) <- c("kfold", "loo")
+    return(out)
 }
 
 #' Deprecated functions to fit hierarchical shrinkage models

@@ -71,9 +71,10 @@ test_that("projsel for binomial family",
 test_that("projsel for a cross-validated object",
 {
     SW({
-        sel.gauss <- projsel(cv.gauss[[1]])
+        sel.gauss <- projsel(cv.gauss$fits[[1]])
     })
 
     expect_equal(sel.gauss$elpd[length(pen) + 1],
-                 sum(colMeans(log_lik(cv.gauss[[1]], newdata=df[folds == 1, ]))))
+                 sum(colMeans(log_lik(cv.gauss$fits[[1]],
+                                      newdata=df[folds == 2, ]))))
 })

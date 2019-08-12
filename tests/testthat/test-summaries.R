@@ -31,6 +31,9 @@ test_that("print.hsstan",
 
 test_that("get.cv.performance works for non-crossvalidated models",
 {
+    expect_error(get.cv.performance(df),
+                 "Not an 'hsstan' or 'kfold' object")
+
     out <- get.cv.performance(hs.gauss)
     expect_is(out, "data.frame")
     expect_equal(colnames(out),
@@ -52,33 +55,25 @@ test_that("get.cv.performance works for non-crossvalidated models",
 
 test_that("get.cv.performance works for cross-validated models",
 {
+    expect_error(get.cv.performance(cv.nofit),
+                 "No fitted models found, run 'kfold' with store.fits=TRUE")
+
     out <- get.cv.performance(cv.gauss, out.csv="out.csv")
     expect_equal(nrow(out), max(folds) + 1)
     expect_equal(out$set,
                  c(paste("Fold", 1:max(folds)), "Overall"))
     expect_equal(out$test.llk,
-                 c(-69.29462, -70.00014, -139.29476), tolerance=tol)
+                 c(-70.65401, -69.45868, -140.11268), tolerance=tol)
     expect_equal(out$r2,
-                 c(0.01770498, 0, 0), tolerance=tol)
+                 c(0.01211091, 0, 0), tolerance=tol)
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
 
     out <- get.cv.performance(cv.binom)
     expect_equal(out$test.llk,
-                 c(-23.51937, -27.46995, -50.98932), tolerance=tol)
+                 c(-23.85154, -28.07295, -51.92450), tolerance=tol)
     expect_equal(out$auc,
-                 c(0.5909091, 0.5649351, 0.5152000), tolerance=tol)
-})
-
-test_that("get.cv.performance works for one fold of a cross-validated model",
-{
-    out <- get.cv.performance(cv.gauss[[1]])
-    expect_equal(out$set,
-                 "Fold 1")
-    expect_equal(out$test.llk,
-                 get.cv.performance(cv.gauss)$test.llk[1])
-    expect_equal(out$r2,
-                 get.cv.performance(cv.gauss)$r2[1])
+                 c(0.6298701, 0.5584416, 0.5328000), tolerance=tol)
 })
 
 test_that("sampler.stats",
