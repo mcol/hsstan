@@ -244,8 +244,9 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian, folds=NULL,
 #' compatible with the \code{\link{loo_compare}} function for comparing models.
 #'
 #' @importFrom loo kfold
-#' @aliases kfold
 #' @method kfold hsstan
+#' @aliases kfold
+#' @export kfold
 #' @export
 kfold.hsstan <- function(x, folds, store.fits=TRUE,
                          cores=getOption("mc.cores", 1), ...) {
