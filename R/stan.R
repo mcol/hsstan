@@ -86,6 +86,8 @@ get.coefficients <- function(samples, coeff.names) {
 #'        \code{regularized=FALSE}).
 #' @param slab.df Number of degrees of freedom of the regularization parameter
 #'        (ignored if \code{regularized=FALSE}).
+#' @param keep.hs.pars Whether the parameters for the horseshoe prior should be
+#'        kept in the \code{stanfit} object returned (\code{FALSE} by default).
 #' @param ... Further arguments passed to \code{\link[rstan]{sampling}},
 #'        such as \code{chains} (4 by default), \code{cores} (the value
 #'        of \code{options("mc.cores")} by default), \code{refresh}
@@ -100,13 +102,19 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
                    iter=2000, warmup=floor(iter / 2),
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
-                   qr=TRUE, seed=123, adapt.delta=NULL, ...) {
+                   qr=TRUE, seed=123, adapt.delta=NULL,
+                   keep.hs.pars=FALSE, ...) {
 
     model.terms <- validate.model(covs.model, penalized)
     x <- validate.data(x, model.terms)
     y <- x[[model.terms$outcome]]
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
+
+    ## parameter names not to include by default in the stanfit object
+    hs.pars <- c("r1_local", "r2_local", "r1_global", "r2_global", "z", "c2")
+    if (keep.hs.pars)
+        hs.pars <- NA
 
     ## retrieve the call and its actual argument values
     call <- match.call(expand.dots=TRUE)
@@ -156,6 +164,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
         ## run the stan model
         samples <- rstan::sampling(stanmodels[[model]], data=data.input,
                                    iter=iter, warmup=warmup, seed=seed, ...,
+                                   pars=hs.pars, include=keep.hs.pars,
                                    control=list(adapt_delta=adapt.delta))
         if (is.na(nrow(samples)))
             return(NULL)

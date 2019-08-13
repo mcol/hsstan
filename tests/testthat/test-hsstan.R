@@ -10,6 +10,7 @@ test_that("hsstan",
                     "hsstan")
     expect_s4_class(hs.gauss$stanfit,
                     "stanfit")
+    expect_false("r1_local[1]" %in% names(hs.gauss$stanfit))
     expect_equal(hs.gauss$family,
                  gaussian())
     expect_equal(names(hs.gauss$betas$unpenalized),
@@ -22,9 +23,12 @@ test_that("hsstan",
 test_that("hsstan doesn't use the QR decomposition if P > N",
 {
     SW({
-        hs.noqr <- hsstan(df[1:5, ], mod.gauss, pen, iter=100, qr=TRUE)
+        hs.noqr <- hsstan(df[1:5, ], mod.gauss, pen, iter=100, qr=TRUE,
+                          keep.hs.pars=TRUE)
     })
     expect_false(hs.noqr$qr)
+    expect_match(names(hs.noqr$stanfit),
+                 "r1_local", all=FALSE)
 })
 
 test_that("kfold",
