@@ -43,7 +43,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     if (is.logistic) {
 
         ## compute the projection for each sample
-        wp <- parallel::mclapply(X=1:S, mc.preschedule=FALSE,
+        wp <- parallel::mclapply(X=1:S, mc.preschedule=TRUE,
                                  FUN=function(z) {
                                      glm.fit(xp, fit[, z],
                                              family=quasibinomial())$coefficients
@@ -94,7 +94,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
     notchosen <- setdiff(1:ncol(x), chosen)
     if (!is.logistic) {
-        kl <- parallel::mclapply(X=1:length(notchosen), mc.preschedule=FALSE,
+        kl <- parallel::mclapply(X=1:length(notchosen), mc.preschedule=TRUE,
                                  FUN=function(z) {
                                      ind <- sort(c(chosen, notchosen[z]))
                                      lm_proj(x, fit, sigma2, ind, FALSE)$kl
