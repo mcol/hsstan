@@ -40,10 +40,10 @@ NULL
 .onAttach <- function(libname, pkgname) {
 
     ## number of cores used by default for sampling from the chains
-    if (.Platform$OS.type != "windows")
-        options(mc.cores=min(ceiling(parallel::detectCores() / 2), 4))
-    else
+    if (.Platform$OS.type == "windows")
         options(mc.cores=1) # nocov
+    else if (is.null(options()$mc.cores))
+        options(mc.cores=min(ceiling(parallel::detectCores() / 2), 4)) # nocov
 
     packageStartupMessage("hsstan ", packageVersion("hsstan"), ":")
     if (.Platform$OS.type != "windows")
