@@ -45,8 +45,9 @@ NULL
     else if (is.null(options()$mc.cores))
         options(mc.cores=min(ceiling(parallel::detectCores() / 2), 4)) # nocov
 
-    packageStartupMessage("hsstan ", packageVersion("hsstan"), ":")
+    msg <- paste("hsstan", packageVersion("hsstan"))
     if (.Platform$OS.type != "windows")
-        packageStartupMessage("  - Defaulting to ", options("mc.cores"),
-                              " cores: use 'options(mc.cores=<cores>)' to change")
+        msg <- paste0(msg, ": using ", options("mc.cores"),
+                      " cores, set 'options(mc.cores)' to change.")
+    packageStartupMessage(msg)
 }
