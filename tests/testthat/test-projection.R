@@ -21,7 +21,7 @@ test_that("projsel for gaussian family",
     expect_equal(nrow(sel.gauss),
                  length(pen) + 1)
     expect_equal(sel.gauss$var[1],
-                 "Initial set of covariates")
+                 "Unpenalized covariates")
     expect_equal(sel.gauss$var[-1],
                  paste0("X", c(9, 4, 8, 5, 7, 6, 10)))
     expect_equal(sel.gauss$kl[1],

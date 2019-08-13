@@ -166,31 +166,29 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     ## U is number of unpenalized variables (always chosen) including intercept
     P <- length(c(samples$betas$unpenalized, samples$betas$penalized))
     U <- length(samples$betas$unpenalized)
-    kl <- elpd <- rep(0, P - U + 1)
-    cat(sprintf("%58s  %8s %9s\n", "Model", "KL", "ELPD"))
+    kl.elpd <- NULL
+    cat(sprintf("%58s  %8s %11s\n", "Model", "KL", "ELPD"))
+    report.iter <- function(msg, kl, elpd)
+        cat(sprintf("%58s  %8.5f  %8.5f\n", substr(msg, 1, 55), kl, elpd))
 
     ## start from the model having only unpenalized variables
     chosen <- 1:U
     notchosen <- setdiff(1:P, chosen)
     sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
     fitp <- sub$fit
-    kl[1] <- sub$kl
-    elpd[1] <- sub$elpd
-    cat(sprintf("%58s  %8.5f  %8.5f\n",
-                "Initial set of covariates", kl[1], elpd[1]))
+    kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
+    report.iter("Unpenalized covariates", sub$kl, sub$elpd)
 
     ## add variables one at a time
-    for (k in 2:(P - U + 1)) {
+    for (k in 1:(P - U)) {
         sel.idx <- choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
         chosen <- c(chosen, sel.idx)
 
         ## evaluate current submodel according to projected parameters
         sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
         fitp <- sub$fit
-        kl[k] <- sub$kl
-        elpd[k] <- sub$elpd
-        cat(sprintf(" + %55s  %8.5f  %8.5f\n",
-                    colnames(x)[chosen[U + k - 1]], kl[k], elpd[k]))
+        kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
+        report.iter(colnames(x)[sel.idx], sub$kl, sub$elpd)
 
         if (length(chosen) - U == max.num.pred)
             break
@@ -199,15 +197,10 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     ## evaluate the full model
     full <- fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
 
-    ## remove trailing zeros
-    len <- length(chosen) - U + 1
-    kl <- kl[1:len]
-    elpd <- elpd[1:len]
-    delta.elpd <- elpd - full$elpd
-
-    res <- data.frame(var=c("Initial set of covariates",
+    res <- data.frame(var=c("Unpenalized covariates",
                             colnames(x)[setdiff(chosen, 1:U)]),
-                      kl=kl, elpd=elpd, delta.elpd=delta.elpd,
+                      kl=kl.elpd[, 1], elpd=kl.elpd[, 2],
+                      delta.elpd=kl.elpd[, 2] - full$elpd,
                       stringsAsFactors=FALSE)
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)
