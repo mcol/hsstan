@@ -19,20 +19,20 @@ test_that("projsel for gaussian family",
     expect_equal(colnames(sel.gauss),
                  c("var", "kl", "elpd", "delta.elpd"))
     expect_equal(nrow(sel.gauss),
-                 length(pen) + 1)
-    expect_equal(sel.gauss$var[1],
-                 "Unpenalized covariates")
-    expect_equal(sel.gauss$var[-1],
+                 length(pen) + 2)
+    expect_equal(sel.gauss$var[1:2],
+                 c("Intercept only", "Unpenalized covariates"))
+    expect_equal(sel.gauss$var[-c(1:2)],
                  paste0("X", c(9, 4, 8, 5, 7, 6, 10)))
-    expect_equal(sel.gauss$kl[1],
+    expect_equal(sel.gauss$kl[2],
                  0.024897581, tolerance=tol)
-    expect_equal(sel.gauss$kl[length(pen) + 1],
+    expect_equal(tail(sel.gauss$kl, n=1),
                  0)
-    expect_equal(sel.gauss$elpd[1],
+    expect_equal(sel.gauss$elpd[2],
                  -111.717561, tolerance=tol)
-    expect_equal(sel.gauss$elpd[length(pen) + 1],
+    expect_equal(tail(sel.gauss$elpd, n=1),
                  -110.340511, tolerance=tol)
-    expect_equal(sel.gauss$delta.elpd[1],
+    expect_equal(sel.gauss$delta.elpd[2],
                  -1.37705019, tolerance=tol)
     expect_true(all(diff(sel.gauss$kl) < 0))
     expect_true(file.exists("out.csv"))
@@ -52,18 +52,18 @@ test_that("projsel for binomial family",
     })
 
     expect_equal(nrow(sel.binom),
-                 num.sel + 1)
-    expect_equal(sel.binom$var[-1],
+                 num.sel + 2)
+    expect_equal(sel.binom$var[-c(1:2)],
                  paste0("X", c(6, 9, 5, 8)))
-    expect_equal(sel.binom$kl[1],
+    expect_equal(sel.binom$kl[2],
                  0.054780181, tolerance=tol)
-    expect_equal(sel.binom$kl[num.sel + 1],
+    expect_equal(tail(sel.binom$kl, n=1),
                  0.008075134, tolerance=tol)
-    expect_equal(sel.binom$elpd[1],
+    expect_equal(sel.binom$elpd[2],
                  -35.2036857, tolerance=tol)
-    expect_equal(sel.binom$elpd[num.sel + 1],
+    expect_equal(tail(sel.binom$elpd, n=1),
                  -32.8004470, tolerance=tol)
-    expect_equal(sel.binom$delta.elpd[1],
+    expect_equal(sel.binom$delta.elpd[2],
                  -2.53499502, tolerance=tol)
     expect_true(all(diff(sel.binom$kl) < 0))
 })
@@ -74,7 +74,7 @@ test_that("projsel for a cross-validated object",
         sel.gauss <- projsel(cv.gauss$fits[[1]])
     })
 
-    expect_equal(sel.gauss$elpd[length(pen) + 1],
+    expect_equal(tail(sel.gauss$elpd, n=1),
                  sum(colMeans(log_lik(cv.gauss$fits[[1]],
                                       newdata=df[folds == 2, ]))))
 })

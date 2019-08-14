@@ -48,7 +48,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
                                      glm.fit(xp, fit[, z],
                                              family=quasibinomial())$coefficients
                                  })
-        wp <- sapply(wp, identity)
+        wp <- matrix(unlist(wp, use.names=FALSE), ncol=S)
 
         ## estimate the KL divergence between full and projected model
         fitp <- binomial()$linkinv(xp %*% wp)
@@ -171,6 +171,11 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     report.iter <- function(msg, kl, elpd)
         cat(sprintf("%58s  %8.5f  %8.5f\n", substr(msg, 1, 55), kl, elpd))
 
+    ## start from the intercept only model
+    sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
+    kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
+    report.iter("Intercept only", sub$kl, sub$elpd)
+
     ## start from the model having only unpenalized variables
     chosen <- 1:U
     notchosen <- setdiff(1:P, chosen)
@@ -197,7 +202,8 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     ## evaluate the full model
     full <- fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
 
-    res <- data.frame(var=c("Unpenalized covariates",
+    res <- data.frame(var=c("Intercept only",
+                            "Unpenalized covariates",
                             colnames(x)[setdiff(chosen, 1:U)]),
                       kl=kl.elpd[, 1], elpd=kl.elpd[, 2],
                       delta.elpd=kl.elpd[, 2] - full$elpd,
