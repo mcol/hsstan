@@ -177,6 +177,7 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' @param x An object of class \code{hsstan}.
 #' @param cores Number of cores used for parallelisation (the value of
 #'        the \code{mc.cores} option by default).
+#' @param ... Currently ignored.
 #'
 #' @return
 #' A \code{loo} object.
@@ -184,8 +185,9 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' @importFrom loo loo
 #' @method loo hsstan
 #' @aliases loo
+#' @export loo
 #' @export
-loo.hsstan <- function(x, cores=getOption("mc.cores")) {
+loo.hsstan <- function(x, cores=getOption("mc.cores"), ...) {
     validate.samples(x)
     llk <- log_lik(x)
     chain.id <- rep(1:ncol(x$stanfit), each=nrow(x$stanfit))
@@ -198,8 +200,9 @@ loo.hsstan <- function(x, cores=getOption("mc.cores")) {
 #' @importFrom loo waic
 #' @method waic hsstan
 #' @aliases waic
+#' @export waic
 #' @export
-waic.hsstan <- function(x, cores=getOption("mc.cores")) {
+waic.hsstan <- function(x, cores=getOption("mc.cores"), ...) {
     validate.samples(x)
     llk <- log_lik(x)
     waic <- suppressWarnings(loo::waic(llk, cores=cores))
