@@ -215,7 +215,11 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
     return(res)
 }
 
-#' Plot of the incremental contribution of each predictor
+#' Plot of relative explanatory power of predictors
+#'
+#' The relative explanatory power of predictors is computed according to the KL
+#' divergence from the full model to each submodel, scaled in such a way that
+#' the baseline set of covariates are at 0, while the full model is at 1.
 #'
 #' A function of name \code{getfullname} to match variable names to full
 #' names is searched on the current workspace, and if found it is used to
@@ -224,10 +228,10 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @param x A data frame created by \code{\link{projsel}}.
 #' @param title Title of the plot. If \code{NULL}, no title is displayed.
 #' @param max.labels Maximum number of points to be labelled. If \code{NULL},
-#'        all those present in the \var{sel} file are displayed.
-#' @param font.size Font size used to scale all text in the plot.
+#'        all those present in the \code{x} file are displayed.
+#' @param font.size Size of the textual elements (labels and axes).
 #' @param hadj,vadj Horizontal and vertical adjustment for the labels.
-#' @param ... Other options to plot() (currently ignored).
+#' @param ... Currently ignored.
 #'
 #' @return
 #' A \pkg{ggplot2} object showing the relative incremental contribution of each
@@ -237,20 +241,23 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
 #' @method plot projsel
 #' @export
 plot.projsel <- function(x, title=NULL, max.labels=NULL, font.size=12,
-                         hadj=0.05, vadj=0.02, ...) {
+                         hadj=0.05, vadj=0, ...) {
 
     ## get full variable names if possible
     sel <- x
-    labs <- tryCatch(get("getfullname")(as.character(sel$var)),
-                     error=function(e) as.character(sel$var))
+    labs <- tryCatch(get("getfullname")(sel$var),
+                     error=function(e) sel$var)
     labs <- gsub(" \\(.*\\)$", "", labs)
     if (!is.null(max.labels)) {
         labs[-c(1:(max.labels + 1))] <- ""
     }
 
-    geom.text.size <- font.size * 5 / 14
+    ## convert from points to millimetres
+    geom.text.size <- font.size * 25.4 / 72
 
+    ## relative explanatory power
     sel$rel <- 1 - sel$kl / sel$kl[1]
+
     x <- seq(nrow(sel)) - 1
     text_idx <- x < mean(x) | x - floor(x / 2) * 2 == 1
     p <- ggplot(data=sel, aes(x=x, y=rel, label=labs)) +
