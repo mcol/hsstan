@@ -254,12 +254,8 @@ bayes_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     else
         sigma2 <- drop(as.matrix(object$stanfit, pars="sigma"))^2
     R2 <- var.mu / (var.mu + sigma2)
-    if (summary) {
-        low <- (1 - prob) / 2
-        upp <- 1 - low
-        R2 <- c(mean=mean(R2), sd=stats::sd(R2),
-                stats::quantile(R2, c(low, upp)))
-    }
+    if (summary)
+        R2 <- vector.summary(R2, prob)
     return(R2)
 }
 
@@ -306,11 +302,7 @@ loo_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     R2[R2 < -1] <- -1
     R2[R2 > 1] <- 1
 
-    if (summary) {
-        low <- (1 - prob) / 2
-        upp <- 1 - low
-        R2 <- c(mean=mean(R2), sd=stats::sd(R2),
-                stats::quantile(R2, c(low, upp)))
-    }
+    if (summary)
+        R2 <- vector.summary(R2, prob)
     return(R2)
 }

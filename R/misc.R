@@ -316,6 +316,21 @@ get.pars <- function(object, pars) {
     return(pars)
 }
 
+#' Summarize a vector
+#'
+#' @param x A numerical vector.
+#' @param prob Width of the interval between quantiles.
+#'
+#' @return
+#' The mean, standard deviation and quantiles for the input vector.
+#'
+#' @noRd
+vector.summary <- function(x, prob) {
+    lower <- (1 - prob) / 2
+    upper <- 1 - lower
+    c(mean=mean(x), sd=stats::sd(x), stats::quantile(x, c(lower, upper)))
+}
+
 #' Check whether the model fitted is a logistic regression model.
 #'
 #' @param obj An object of class \code{hsstan}.
