@@ -167,6 +167,74 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
     return(pp)
 }
 
+#' Posterior measures of performance
+#'
+#' Compute the log-likelihood and a relevant measure of performance (R-squared
+#' or AUC) from the posterior samples.
+#'
+#' @param obj An object of class \code{hsstan} or \code{kfold}.
+#' @param prob Width of the posterior interval (0.95, by default). It is
+#'        ignored if \code{summary=FALSE}.
+#' @param summary Whether a summary of the distribution of the performance
+#'        measure should be returned rather than the pointwise values
+#'        (\code{TRUE} by default).
+#' @param cores Number of cores to use for parallelization (the value of
+#'        \code{options("mc.cores")} by default).
+#'
+#' @return
+#' The mean, standard deviation and posterior interval of the performance
+#' measure (R-squared or AUC) if \code{summary=TRUE}, or a vector of values
+#' of the performance measure with length equal to the size of the posterior
+#' sample if \code{summary=FALSE}. Attribute \code{type} reports whether the
+#' performance measures are cross-validated or not.
+#'
+#' @export
+posterior_performance <- function(obj, prob=0.95, summary=TRUE,
+                                  cores=getOption("mc.cores", 1)) {
+
+    r2 <- function(y.obs, y.pred)
+        max(stats::cor(y.obs, y.pred), 0)^2
+    auc <- function(y.obs, y.pred)
+        as.numeric(pROC::roc(y.obs, y.pred, direction="<", quiet=TRUE)$auc)
+
+    if (inherits(obj, "hsstan")) {
+        obj <- list(fits=array(list(fit=obj, test.idx=1:nrow(obj$data)), c(1, 2)),
+                    data=obj$data)
+        colnames(obj$fits) <- c("fit", "test.idx")
+    } else if (inherits(obj, c("kfold", "loo"))) {
+        if (is.null(obj[["fits"]]))
+            stop("No fitted models found, run 'kfold' with store.fits=TRUE.")
+    } else
+        stop("Not an 'hsstan' or 'kfold' object.")
+
+    validate.samples(obj$fits[[1]])
+    validate.probability(prob)
+    logistic <- is.logistic(obj$fits[[1]])
+    perf.fun <- ifelse(logistic, auc, r2)
+    num.folds <- nrow(obj$fits)
+
+    ## loop over the folds
+    y <- mu <- llk <- NULL
+    for (fold in 1:num.folds) {
+        hs <- obj$fits[[fold]]
+        test.idx <- obj$fits[, "test.idx"][[fold]]
+        newdata <- obj$data[test.idx, ]
+        y <- c(y, obj$data[test.idx, hs$model.terms$outcome])
+        mu <- cbind(mu, posterior_linpred(hs, newdata=newdata, transform=TRUE))
+        llk <- cbind(llk, log_lik(hs, newdata=newdata))
+    }
+    out <- parallel::mclapply(mc.cores=cores, mc.preschedule=TRUE,
+                              X=1:nrow(mu), FUN=function(z) {
+                                  perf.fun(y, mu[z, ])
+                              })
+    out <- cbind(perf=unlist(out), llk=rowSums(llk))
+    colnames(out)[1] <- ifelse(logistic, "auc", "r2")
+    if (summary)
+        out <- posterior_summary(out, prob)
+    attr(out, "type") <- paste0(if(num.folds == 1) "non ", "cross-validated")
+    return(out)
+}
+
 #' Predictive information criteria for Bayesian models
 #'
 #' Compute an efficient approximate leave-one-out cross-validation
@@ -248,7 +316,7 @@ bayes_R2.hsstan <- function(object, prob=0.95, summary=TRUE, ...) {
     validate.samples(object)
     validate.probability(prob)
     mu <- posterior_linpred(object, transform=TRUE)
-    var.mu <- apply(mu, 1, var)
+    var.mu <- apply(mu, 1, stats::var)
     if (is.logistic(object))
         sigma2 <- rowMeans(mu * (1 - mu))
     else

@@ -266,7 +266,7 @@ kfold.hsstan <- function(x, folds, iter=NULL, store.fits=TRUE,
 
     pointwise <- cbind(elpd_kfold=elpds, p_kfold=NA, kfoldic=-2 * elpds)
     estimates <- colSums(pointwise)
-    se.est <- sqrt(N * apply(pointwise, 2, var))
+    se.est <- sqrt(N * apply(pointwise, 2, stats::var))
     out <- list(estimates=cbind(Estimate=estimates, SE=se.est),
                 pointwise=pointwise)
     rownames(out$estimates) <- colnames(pointwise)

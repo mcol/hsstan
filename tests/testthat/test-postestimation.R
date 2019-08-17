@@ -52,6 +52,51 @@ test_that("posterior_predict",
                  posterior_predict(hs.binom, seed=1, newdata=df))
 })
 
+test_that("posterior_performance",
+{
+    expect_error(posterior_performance(x),
+                 "Not an 'hsstan' or 'kfold' object")
+    expect_error(posterior_performance(cv.nofit),
+                 "No fitted models found, run 'kfold' with store.fits=TRUE")
+
+    out <- posterior_performance(cv.gauss)
+    expect_is(out,
+              "matrix")
+    expect_equal(rownames(out),
+                 c("r2", "llk"))
+    expect_equal(colnames(out),
+                 c("mean", "sd", "2.5%", "97.5%"))
+    expect_named(attributes(out),
+                 c("dim", "dimnames", "type"))
+    expect_equal(attributes(out)$type,
+                 "cross-validated")
+    expect_equivalent(out["r2", ],
+                      c(0.00583392, 0.01399066, 0.00000000, 0.04519003))
+    expect_equivalent(out["llk", ],
+                      c(-140.11268470, 19.88771380, -196.77037858, -119.35323679))
+
+    out <- posterior_performance(hs.binom, prob=0.89)
+    expect_equal(rownames(out),
+                 c("auc", "llk"))
+    expect_equal(colnames(out),
+                 c("mean", "sd", "5.5%", "94.5%"))
+    expect_equal(attributes(out)$type,
+                 "non cross-validated")
+    expect_equivalent(out["auc", ],
+                      c(0.67645760, 0.08549299, 0.54400000, 0.80320000))
+    expect_equivalent(out["llk", ],
+                      c(-32.6686907, 3.23637201, -37.14028896, -27.10027209))
+
+    out <- posterior_performance(cv.binom, summary=FALSE)
+    expect_equal(nrow(out),
+                 nsamples(cv.binom$fits[[1]]))
+    expect_equal(ncol(out), 2)
+    expect_equal(attributes(out)$type,
+                 "cross-validated")
+    expect_equivalent(posterior_summary(out),
+                      posterior_performance(cv.binom))
+})
+
 test_that("loo",
 {
     out <- loo(hs.gauss)
