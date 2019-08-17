@@ -29,6 +29,24 @@ test_that("print.hsstan",
     expect_output(print(hs.gauss))
 })
 
+test_that("posterior_summary",
+{
+    out <- posterior_summary(1:100)
+    expect_is(out,
+              "matrix")
+    expect_equal(nrow(out), 1)
+    expect_equal(colnames(out),
+                 c("mean", "sd", "2.5%", "97.5%"))
+    expect_equal(as.numeric(out),
+                 c(50.5, 29.01149198, 3.475, 97.525))
+
+    out <- posterior_summary(hs.binom)
+    expect_equal(rownames(out),
+                 names(c(hs.binom$betas$unpenalized, hs.binom$betas$penalized)))
+    expect_equal(out[, "mean"],
+                 c(hs.binom$betas$unpenalized, hs.binom$betas$penalized))
+})
+
 test_that("get.cv.performance works for non-crossvalidated models",
 {
     expect_error(get.cv.performance(df),

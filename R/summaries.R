@@ -74,6 +74,51 @@ print.hsstan <- function(x, ...) {
     print(summary(x, ...))
 }
 
+#' Posterior summary
+#'
+#' Produce a summary of the posterior samples for the quantities of interest.
+#'
+#' @param x An object containing or representing posterior samples. If \code{x}
+#'        is a matrix, it should have size \code{S} by \code{Q}, where \code{S}
+#'        is the number of posterior samples, and \code{Q} is the number of
+#'        quantities of interest.
+#' @param prob Width of the posterior intervals (0.95, by default).
+#' @param ... Further arguments passed to or from other methods.
+#'
+#' @return
+#' A matrix with columns containing mean, standard deviation and posterior
+#' intervals for the given quantities.
+#'
+#' @seealso
+#' \code{\link{summary.hsstan}} to produce summaries of \code{hsstan} objects
+#' that include the number of effective samples and the split-Rhat diagnostic.
+#'
+#' @export
+posterior_summary <- function(x, prob, ...) {
+    UseMethod("posterior_summary")
+}
+
+#' @rdname posterior_summary
+#' @export
+posterior_summary.default <- function(x, prob=0.95, ...) {
+    validate.probability(prob)
+    if (NCOL(x) == 1)
+        x <- as.matrix(x)
+    t(apply(x, 2, vector.summary, prob))
+}
+
+#' @rdname posterior_summary
+#' @param pars Vector of parameter names to be extracted. If \code{NULL}
+#'        (default) then this refers to the set of predictors used in the
+#'        model.
+#'
+#' @export
+posterior_summary.hsstan <- function(x, prob=0.95, pars=NULL, ...) {
+    validate.samples(x)
+    pars <- get.pars(x, pars)
+    posterior_summary(as.matrix(x$stanfit, pars=pars), prob, ...)
+}
+
 #' Performance measures
 #'
 #' Extract measures of performance from plain or cross-validated results.
