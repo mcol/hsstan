@@ -199,8 +199,9 @@ projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
             break
     }
 
-    ## evaluate the full model
-    full <- fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
+    ## evaluate the full model if selection stopped before reaching it
+    full <- if (length(chosen) == P)
+        sub else fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
 
     res <- data.frame(var=c("Intercept only",
                             "Unpenalized covariates",
