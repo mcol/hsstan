@@ -2,5 +2,4 @@
 .Rdata
 .Rhistory
 .tar.gz
-analyses
-stanhelpers.R
+tests
