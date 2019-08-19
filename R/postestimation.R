@@ -45,8 +45,8 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
     if (!is.logistic(object))
         sigma <- as.matrix(object$stanfit, pars="sigma")
     llkfun <- ifelse(is.logistic(object),
-                     function(x) dbinom(y[x], 1, mu[, x], log=TRUE),
-                     function(x) dnorm(y[x], mu[, x], sigma, log=TRUE))
+                     function(x) stats::dbinom(y[x], 1, mu[, x], log=TRUE),
+                     function(x) stats::dnorm(y[x], mu[, x], sigma, log=TRUE))
     llk <- cbind(sapply(1:ncol(mu), llkfun))
     return(llk)
 }
