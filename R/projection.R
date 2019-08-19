@@ -112,90 +112,89 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
     return(notchosen[idx.selected])
 }
 
+#' Compute the fit of a submodel
+#'
+#' @param x Design matrix.
+#' @param sigma2 Residual variance (1 for logistic regression).
+#' @param mu Matrix of fitted values for the full model.
+#' @param chosen Vector of indices of the columns of \var{x} in the current
+#'        submodel.
+#' @param xt Design matrix for test data.
+#' @param yt Outcome variable for test data.
+#' @param logistic Set to \code{TRUE} for a logistic regression model.
+#'
+#' @keywords internal
+fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
+
+    ## projected parameters
+    submodel <- lm_proj(x, mu, sigma2, chosen, logistic)
+    eta <- xt %*% submodel$w
+
+    ## expected log predictive density on test set
+    if (logistic)
+        pd <- stats::dbinom(yt, 1, binomial()$linkinv(eta), log=TRUE)
+    else
+        pd <- t(cbind(sapply(1:nrow(eta),
+                             function(z) stats::dnorm(yt[z], eta[z, ],
+                                                      sqrt(sigma2), log=TRUE))))
+    elpd <- sum(rowMeans(pd))
+
+    return(list(fit=submodel$fit, kl=submodel$kl, elpd=elpd))
+}
+
 #' Forward selection minimizing KL-divergence in projection
 #'
-#' @param samples Object produced by \code{\link{hsstan}}.
+#' @param obj Object produced by \code{\link{hsstan}}.
 #' @param max.num.pred Maximum number of predictors after which the selection
 #'        procedure should stop.
 #' @param out.csv If not \code{NULL}, the name of a CSV file to save the
 #'        output to.
 #'
-#' @importFrom stats dbinom dnorm
 #' @importFrom utils write.csv
 #' @export
-projsel <- function(samples, max.num.pred=30, out.csv=NULL) {
-
-    fit.submodel <- function(x, sigma2, fit, chosen, xt, yt, is.logistic) {
-
-        ## projected parameters
-        submodel <- lm_proj(x, fit, sigma2, chosen, is.logistic)
-        eta <- xt %*% submodel$w
-
-        ## expected log predictive density on test set
-        if (is.logistic) {
-            pd <- dbinom(yt, 1, binomial()$linkinv(eta), log=TRUE)
-        }
-        else {
-            pd <- t(cbind(sapply(1:nrow(eta),
-                                 function(z) dnorm(yt[z], eta[z, ],
-                                                   sqrt(sigma2), log=TRUE))))
-        }
-        elpd <- sum(rowMeans(pd))
-
-        return(list(fit=submodel$fit, kl=submodel$kl, elpd=elpd))
-    }
-
-    validate.hsstan(samples)
-    validate.samples(samples)
-
-    ## check that the model contains penalized predictors
-    if (length(samples$model.terms$penalized) == 0) {
+projsel <- function(obj, max.num.pred=30, out.csv=NULL) {
+    validate.hsstan(obj)
+    validate.samples(obj)
+    if (length(obj$model.terms$penalized) == 0)
         stop("Model doesn't contain penalized predictors.")
-    }
 
-    x <- xt <- validate.newdata(samples, samples$data)
-    yt <- samples$data[[samples$model.terms$outcome]]
-    stanfit <- samples$stanfit
+    x <- xt <- validate.newdata(obj, obj$data)
+    yt <- obj$data[[obj$model.terms$outcome]]
+    is.logistic <- is.logistic(obj)
+    sigma2 <- if (is.logistic) 1 else as.matrix(obj$stanfit, pars="sigma")^2
+    U <- length(obj$betas$unpenalized)
+    K <- length(obj$betas$penalized)
+    P <- U + K
 
-    is.logistic <- is.logistic(samples)
-    sigma2 <- if (is.logistic) 1 else as.matrix(stanfit, pars="sigma")^2
-
-    ## fit of the full model (matrix of dimension N x S)
-    fit <- t(posterior_linpred(samples, transform=TRUE))
-
-    ## U is number of unpenalized variables (always chosen) including intercept
-    P <- length(c(samples$betas$unpenalized, samples$betas$penalized))
-    U <- length(samples$betas$unpenalized)
-    kl.elpd <- NULL
     cat(sprintf("%58s  %8s %11s\n", "Model", "KL", "ELPD"))
     report.iter <- function(msg, kl, elpd)
         cat(sprintf("%58s  %8.5f  %8.5f\n", substr(msg, 1, 55), kl, elpd))
 
-    ## start from the intercept only model
+    ## fitted values for the full model (N x S)
+    fit <- t(posterior_linpred(obj, transform=TRUE))
+
+    ## intercept only model
     sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
-    kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
+    kl.elpd <- c(sub$kl, sub$elpd)
     report.iter("Intercept only", sub$kl, sub$elpd)
 
     ## start from the model having only unpenalized variables
     chosen <- 1:U
-    notchosen <- setdiff(1:P, chosen)
     sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
-    fitp <- sub$fit
     kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
     report.iter("Unpenalized covariates", sub$kl, sub$elpd)
 
     ## add variables one at a time
-    for (k in 1:(P - U)) {
-        sel.idx <- choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
+    for (iter in 1:K) {
+        sel.idx <- choose.next(x, sigma2, fit, sub$fit, chosen, is.logistic)
         chosen <- c(chosen, sel.idx)
 
         ## evaluate current submodel according to projected parameters
         sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
-        fitp <- sub$fit
         kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
         report.iter(colnames(x)[sel.idx], sub$kl, sub$elpd)
 
-        if (length(chosen) - U == max.num.pred)
+        if (iter == max.num.pred)
             break
     }
 
