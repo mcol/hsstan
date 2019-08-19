@@ -48,7 +48,7 @@ test_that("projsel for binomial family",
 {
     num.sel <- 4
     SW({
-        sel.binom <- projsel(hs.binom, max.num.pred=num.sel)
+        sel.binom <- projsel(hs.binom, max.iters=num.sel)
     })
 
     expect_equal(nrow(sel.binom),

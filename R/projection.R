@@ -145,14 +145,14 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' Forward selection minimizing KL-divergence in projection
 #'
 #' @param obj Object produced by \code{\link{hsstan}}.
-#' @param max.num.pred Maximum number of predictors after which the selection
-#'        procedure should stop.
+#' @param max.iters Maximum number of iterations (number of predictors selected)
+#'        after which the selection procedure should stop.
 #' @param out.csv If not \code{NULL}, the name of a CSV file to save the
 #'        output to.
 #'
 #' @importFrom utils write.csv
 #' @export
-projsel <- function(obj, max.num.pred=30, out.csv=NULL) {
+projsel <- function(obj, max.iters=30, out.csv=NULL) {
     validate.hsstan(obj)
     validate.samples(obj)
     if (length(obj$model.terms$penalized) == 0)
@@ -194,7 +194,7 @@ projsel <- function(obj, max.num.pred=30, out.csv=NULL) {
         kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
         report.iter(colnames(x)[sel.idx], sub$kl, sub$elpd)
 
-        if (iter == max.num.pred)
+        if (iter == max.iters)
             break
     }
 
