@@ -71,9 +71,11 @@ test_that("posterior_performance",
     expect_equal(attributes(out)$type,
                  "cross-validated")
     expect_equivalent(out["r2", ],
-                      c(0.00583392, 0.01399066, 0.00000000, 0.04519003))
+                      c(0.00583392, 0.01399066, 0.00000000, 0.04519003),
+                      tolerance=tol)
     expect_equivalent(out["llk", ],
-                      c(-140.11268470, 19.88771380, -196.77037858, -119.35323679))
+                      c(-140.11268470, 19.88771380, -196.77037858, -119.35323679),
+                      tolerance=tol)
 
     out <- posterior_performance(hs.binom, prob=0.89)
     expect_equal(rownames(out),
@@ -83,9 +85,11 @@ test_that("posterior_performance",
     expect_equal(attributes(out)$type,
                  "non cross-validated")
     expect_equivalent(out["auc", ],
-                      c(0.67645760, 0.08549299, 0.54400000, 0.80320000))
+                      c(0.67645760, 0.08549299, 0.54400000, 0.80320000),
+                      tolerance=tol)
     expect_equivalent(out["llk", ],
-                      c(-32.6686907, 3.23637201, -37.14028896, -27.10027209))
+                      c(-32.6686907, 3.23637201, -37.14028896, -27.10027209),
+                      tolerance=tol)
 
     out <- posterior_performance(cv.binom, summary=FALSE)
     expect_equal(nrow(out),
@@ -102,11 +106,13 @@ test_that("loo",
     out <- loo(hs.gauss)
     expect_s3_class(out, "loo")
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-114.3693922, 7.1254201))
+                      c(-114.3693922, 7.1254201),
+                      tolerance=tol)
 
     out <- loo(hs.binom)
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-37.9220431, 8.9499717))
+                      c(-37.9220431, 8.9499717),
+                      tolerance=tol)
 })
 
 test_that("waic",
@@ -114,11 +120,13 @@ test_that("waic",
     out <- waic(hs.gauss)
     expect_s3_class(out, c("waic", "loo"))
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-114.2679527, 7.0239806))
+                      c(-114.2679527, 7.0239806),
+                      tolerance=tol)
 
     out <- waic(hs.binom)
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-37.6503056, 8.6782343))
+                      c(-37.6503056, 8.6782343),
+                      tolerance=tol)
 })
 
 test_that("bayes_R2",
