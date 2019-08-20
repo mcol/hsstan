@@ -1,16 +1,28 @@
 Package: hsstan
 Type: Package
-Title: Regression models with hierarchical shrinkage priors
+Title: Hierarchical Shrinkage Stan Models for Biomarker Selection
 Version: 0.5.0.9000
 Date: 2019-08-11
 Authors@R: c(person("Marco", "Colombo",
-                    email="m.colombo@ed.ac.uk", role=c("aut", "cre")),
+                    email="mar.colombo13@gmail.com", role=c("aut", "cre"),
+                    comment=c(ORCID="0000-0001-6672-0623")),
              person("Paul", "McKeigue",
-                    email="paul.mckeigue@ed.ac.uk", role="aut"),
+                    email="paul.mckeigue@ed.ac.uk", role="aut",
+                    comment=c(ORCID="0000-0002-5217-1034")),
              person("Athina", "Spiliopoulou",
-                    email="A.Spiliopoulou@ed.ac.uk", role="ctb"))
-Description: The package allows to perform Bayesian analyses with hierarchical shrinkage priors for selection of biomarkers.
+                    email="A.Spiliopoulou@ed.ac.uk", role="ctb",
+                    comment=c(ORCID="0000-0002-5929-6585")))
+Description: The 'hsstan' package provides linear and logistic regression
+  models penalized with hierarchical shrinkage priors for selection of
+  biomarkers, which can be fitted using Stan (Carpenter et al. (2017)
+  <doi:10.18637/jss.v076.i01>). It implements the horseshoe and regularized
+  horseshoe priors (Piironen and Vehtari (2017) <doi:10.1214/17-EJS1337SI>),
+  as well as the projection predictive selection approach to recover a sparse
+  set of predictive biomarkers (Piironen, Paasiniemi and Vehtari (2018)
+  <arXiv:1810.02406>).
 License: GPL-3
+URL: https://github.com/mcol/hsstan
+BugReports: https://github.com/mcol/hsstan/issues
 LazyLoad: yes
 Depends:
     R (>= 3.6)
