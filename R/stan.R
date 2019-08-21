@@ -20,13 +20,15 @@
 
 #' Return the posterior means of the regression coefficients
 #'
-#' @param samples An object of class \code{stanfit}.
+#' @param samples An object of class `stanfit`.
 #' @param coeff.names Vector of names for the coefficients.
 #'
 #' @return
-#' A list with two named elements: \var{unpenalized} for the posterior means
-#' of the unpenalized covariates, and \var{penalized} for the posterior means
-#' of the penalized predictors (which can be \code{NULL} for baseline models).
+#' A list with two named elements: `unpenalized` for the posterior means
+#' of the unpenalized covariates, and `penalized` for the posterior means
+#' of the penalized predictors (which can be `NULL` for baseline models).
+#'
+#' @keywords internal
 get.coefficients <- function(samples, coeff.names) {
     beta.u <- colMeans(as.matrix(samples, pars="beta_u"))
     beta.p <- tryCatch(colMeans(as.matrix(samples, pars="beta_p")),
@@ -48,18 +50,18 @@ get.coefficients <- function(samples, coeff.names) {
 #' @param x Data frame containing outcome, covariates and penalized predictors.
 #'        Continuous predictors and outcome variable should be standardized
 #'        before fitting the models as priors assume them to have mean zero and
-#'        have the same scale.
+#'        unit variance.
 #' @param covs.model Formula containing the unpenalized covariates.
 #' @param penalized Names of the variables to be used as penalized predictors.
-#'        If \code{NULL} or an empty vector, a model with only unpenalized
+#'        If `NULL` or an empty vector, a model with only unpenalized
 #'        covariates is fitted.
-#' @param family Type of model fitted: either \code{gaussian()} for linear
-#'        regression (default) or \code{binomial()} for logistic regression.
+#' @param family Type of model fitted: either `gaussian()` for linear regression
+#'        (default) or `binomial()` for logistic regression.
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
-#' @param qr Whether the QR decomposition should be used to decorrelate the
-#'        predictors (\code{TRUE} by default). This is silently set to
-#'        \code{FALSE} if there are more predictors than observations.
+#' @param qr Whether the thin QR decomposition should be used to decorrelate the
+#'        predictors (`TRUE` by default). This is silently set to `FALSE` if
+#'        there are more predictors than observations.
 #' @param adapt.delta Target average proposal acceptance probability for
 #'        adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 #'        it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
@@ -70,32 +72,53 @@ get.coefficients <- function(samples, coeff.names) {
 #'        total number of iterations).
 #' @param scale.u Prior scale (standard deviation) for the unpenalised
 #'        covariates.
-#' @param regularized If \code{TRUE} (default), the regularized horseshoe prior
+#' @param regularized If `TRUE` (default), the regularized horseshoe prior
 #'        is used as opposed to the original horseshoe prior.
 #' @param nu Number of degrees of freedom of the half-Student-t prior on the
-#'        local shrinkage parameters (by default, 1 if \code{regularized=TRUE}
+#'        local shrinkage parameters (by default, 1 if `regularized=TRUE`
 #'        and 3 otherwise).
 #' @param par.ratio Expected ratio of non-zero to zero coefficients (ignored
-#'        if \code{regularized=FALSE}). The scale of the global shrinkage
-#'        parameter corresponds to \code{par.ratio} divided by the square root
-#'        of the number of observations; for linear regression only, it's further
-#'        multiplied by the residual standard deviation \code{sigma}.
+#'        if `regularized=FALSE`). The scale of the global shrinkage parameter
+#'        corresponds to `par.ratio` divided by the square root of the number of
+#'        observations; for linear regression only, it's further multiplied by
+#'        the residual standard deviation `sigma`.
 #' @param global.df Number of degrees of freedom for the global shrinkage
-#'        parameter (ignored if \code{regularized=FALSE}).
+#'        parameter (ignored if `regularized=FALSE`).
 #' @param slab.scale Scale of the regularization parameter (ignored if
-#'        \code{regularized=FALSE}).
+#'        `regularized=FALSE`).
 #' @param slab.df Number of degrees of freedom of the regularization parameter
-#'        (ignored if \code{regularized=FALSE}).
+#'        (ignored if `regularized=FALSE`).
 #' @param keep.hs.pars Whether the parameters for the horseshoe prior should be
-#'        kept in the \code{stanfit} object returned (\code{FALSE} by default).
+#'        kept in the `stanfit` object returned (`FALSE` by default).
 #' @param ... Further arguments passed to \code{\link[rstan]{sampling}},
-#'        such as \code{chains} (4 by default), \code{cores} (the value
-#'        of \code{options("mc.cores")} by default), \code{refresh}
-#'        (\code{iter / 10} by default).
+#'        such as `chains` (4 by default), `cores` (the value of
+#'        `options("mc.cores")` by default), `refresh` (`iter / 10` by default).
+#'
+#' @return
+#' An object of class `hsstan` containing the following fields:
+#' \item{stanfit}{an object of class `stanfit` containing the output
+#'       produced by Stan, including posterior samples and diagnostic summaries.
+#'       It can be manipulated using methods from the **rstan** package.}
+#' \item{betas}{posterior means of the unpenalized and penalized regression
+#'       parameters.}
+#' \item{call}{the matched call.}
+#' \item{data}{the dataset used in fitting the model.}
+#' \item{model.terms}{a list of names for the outcome variable, the unpenalized
+#'       covariates and the penalized predictors.}
+#' \item{family}{the `family` object used.}
+#' \item{qr}{Whether the QR factorization was performed.}
 #'
 #' @seealso
-#' \code{\link{kfold.hsstan}} for cross-validating a fitted object.
-#
+#' [kfold()] for cross-validating a fitted object.
+#'
+#' @examples
+#' data(diabetes)
+#'
+#' # non-default settings for speed of the example
+#' df <- diabetes[1:50, ]
+#' hs.biom <- hsstan(df, Y ~ age + sex, penalized=colnames(df)[5:10],
+#'                   chains=2, iter=400)
+#'
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export
 hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
@@ -201,26 +224,48 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #' Perform K-fold cross-validation using the same settings used when fitting
 #' the model on the whole data.
 #'
-#' @param x An object of class \code{hsstan}.
+#' @param x An object of class `hsstan`.
 #' @param folds Integer vector with one element per observation indicating the
 #'        cross-validation fold in which the observation should be withdrawn.
 #' @param iter Total number of iterations in each chain, including warmup. By
 #'        default this is set to the number of iterations used when fitting
-#'        the \code{hsstan} object.
-#' @param store.fits If \code{TRUE} (default), the \code{fits} field is added
-#'        to the returned object to store the cross-validated \code{hsstan}
-#'        objects and the indices of the omitted observations for each fold, and
-#'        the \code{data} field to hold the complete dataset.
+#'        the `hsstan` object.
+#' @param store.fits Whether the fitted models for each fold should be stored
+#'        in the returned object (`TRUE` by default).
 #' @param cores Number of cores to use for parallelization (the value of
-#'        \code{options("mc.cores")} by default). The cross-validation folds will
+#'        `options("mc.cores")` by default). The cross-validation folds will
 #'        be distributed to the available cores, and the Markov chains for each
 #'        model will be run sequentially.
 #' @param ... Currently ignored.
 #'
 #' @return
-#' An object with classes "kfold" and "loo" that has a similar structure as
-#' the objects returned by \code{\link{loo}} and \code{\link{waic}} and is
-#' compatible with the \code{\link{loo_compare}} function for comparing models.
+#' An object with classes `kfold` and `loo` that has a similar structure as the
+#' objects returned by [loo()] and [waic()] and is compatible with the
+#' \code{\link[loo]{loo_compare}} function for
+#' comparing models. The object contains the following fields:
+#' \item{estimates}{a matrix containing point estimates and standard errors of
+#'       the expected log pointwise predictive density ("elpd_kfold"),
+#'       the effective number of parameters ("p_kfold", always `NA`) and the
+#'       K-fold information criterion "kfoldic" (which is `-2 * elpd_kfold`,
+#'       i.e., converted to the deviance scale).}
+#' \item{pointwise}{a matrix containing the pointwise contributions of
+#'       "elpd_kfold", "p_kfold" and "kfoldic".}
+#' \item{fits}{a matrix with two columns and number of rows equal to the number
+#'       of cross-validation folds. Column `fit` contains the fitted
+#'       `hsstan` objects for each fold, and column `test.idx` contains
+#'       the indices of the withdrawn observations for each fold. This is not
+#'       present if `store.fits=FALSE`.}
+#' \item{data}{the dataset used in fitting the model (before withdrawing
+#'             observations). This is not present if `store.fits=FALSE`.}
+#'
+#' @examples
+#' \dontrun{
+#' data(diabetes)
+#' penalized <- colnames(diabetes)[4:10]
+#' hs.biom <- hsstan(diabetes, Y ~ age + sex, penalized, iter=1000)
+#' folds <- caret::createFolds(diabetes$Y, k=5, list=FALSE)
+#' cv.biom <- kfold(hs.biom, folds=folds)
+#' }
 #'
 #' @importFrom loo kfold
 #' @method kfold hsstan

@@ -22,14 +22,14 @@
 #'
 #' Compute the pointwise log-likelihood.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #' @param newdata Optional data frame to use to evaluate the log-likelihood.
-#'        If \code{NULL} (default), the model matrix is used.
+#'        If `NULL` (default), the model matrix is used.
 #' @param ... Currently ignored.
 #'
 #' @return
-#' A matrix of size \code{S} by \code{N}, where \code{S} is number of draws
-#' from the posterior distribution, and \code{N} is the number of data points.
+#' A matrix of size `S` by `N`, where `S` is number of draws from the posterior
+#' distribution, and `N` is the number of data points.
 #'
 #' @importFrom rstantools log_lik
 #' @importFrom stats rbinom rnorm
@@ -53,11 +53,11 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
 
 #' Posterior uncertainty intervals
 #'
-#' Compute posterior uncertainty intervals for \code{hsstan} objects.
+#' Compute posterior uncertainty intervals for `hsstan` objects.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #' @param pars Names of parameters for which posterior intervals should be
-#'        returned, which can be specified as regular expressions. If \code{NULL}
+#'        returned, which can be specified as regular expressions. If `NULL`
 #'        (default) then this refers to the set of predictors used in the model.
 #' @param prob A value between 0 and 1 indicating the desired probability
 #'        to be covered by the uncertainty intervals (0.95, by default).
@@ -85,19 +85,19 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
 #' Extract the posterior draws of the linear predictor, possibly transformed
 #' by the inverse-link function.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #' @param transform Whether the linear predictor should be transformed using
-#'        the inverse-link function (\code{FALSE} by default).
+#'        the inverse-link function (`FALSE` by default).
 #' @param newdata Optional data frame containing the variables to use to
-#'        predict. If \code{NULL} (default), the model matrix is used. If
+#'        predict. If `NULL` (default), the model matrix is used. If
 #'        specified, its continuous variables should be standardized, since
 #'        the model coefficients are learnt on standardized data.
 #' @param ... Currently ignored.
 #'
 #' @return
-#' A matrix of size \code{S} by \code{N}, where \code{S} is the number of draws
-#' from the posterior distribution of the (transformed) linear predictor, and
-#' \code{N} is the number of data points.
+#' A matrix of size `S` by `N`, where `S` is the number of draws from the
+#' posterior distribution of the (transformed) linear predictor, and `N` is
+#' the number of data points.
 #'
 #' @importFrom rstantools posterior_linpred
 #' @method posterior_linpred hsstan
@@ -120,21 +120,20 @@ posterior_linpred.hsstan <- function(object, transform=FALSE,
 #'
 #' Draw from the posterior predictive distribution of the outcome.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #' @param newdata Optional data frame containing the variables to use to
-#'        predict. If \code{NULL} (default), the model matrix is used. If
+#'        predict. If `NULL` (default), the model matrix is used. If
 #'        specified, its continuous variables should be standardized, since
 #'        the model coefficients are learnt on standardized data.
 #' @param nsamples A positive integer indicating the number of posterior samples
-#'        to use. If \code{NULL} (default) all samples are used.
+#'        to use. If `NULL` (default) all samples are used.
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
 #' @param ... Currently ignored.
 #'
 #' @return
-#' A matrix of size \code{S} by \code{N}, where \code{S} is the number of
-#' simulations from the posterior predictive distribution, and \code{N} is the
-#' number of data points.
+#' A matrix of size `S` by `N`, where `S` is the number of simulations from
+#' the posterior predictive distribution, and `N` is the number of data points.
 #'
 #' @importFrom rstantools posterior_predict
 #' @importFrom stats rbinom rnorm
@@ -172,21 +171,21 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' Compute the log-likelihood and a relevant measure of performance (R-squared
 #' or AUC) from the posterior samples.
 #'
-#' @param obj An object of class \code{hsstan} or \code{kfold}.
+#' @param obj An object of class `hsstan` or `kfold`.
 #' @param prob Width of the posterior interval (0.95, by default). It is
-#'        ignored if \code{summary=FALSE}.
+#'        ignored if `summary=FALSE`.
 #' @param summary Whether a summary of the distribution of the performance
 #'        measure should be returned rather than the pointwise values
-#'        (\code{TRUE} by default).
+#'        (`TRUE` by default).
 #' @param cores Number of cores to use for parallelization (the value of
-#'        \code{options("mc.cores")} by default).
+#'        `options("mc.cores")` by default).
 #'
 #' @return
 #' The mean, standard deviation and posterior interval of the performance
-#' measure (R-squared or AUC) if \code{summary=TRUE}, or a vector of values
+#' measure (R-squared or AUC) if `summary=TRUE`, or a vector of values
 #' of the performance measure with length equal to the size of the posterior
-#' sample if \code{summary=FALSE}. Attribute \code{type} reports whether the
-#' performance measures are cross-validated or not.
+#' sample if `summary=FALSE`. Attribute `type` reports whether the performance
+#' measures are cross-validated or not.
 #'
 #' @export
 posterior_performance <- function(obj, prob=0.95, summary=TRUE,
@@ -242,13 +241,13 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
 #' applicable information criterion (WAIC), also known as the Watanabe-Akaike
 #' information criterion.
 #'
-#' @param x An object of class \code{hsstan}.
+#' @param x An object of class `hsstan`.
 #' @param cores Number of cores used for parallelisation (the value of
-#'        the \code{mc.cores} option by default).
+#'        `options("mc.cores")` by default).
 #' @param ... Currently ignored.
 #'
 #' @return
-#' A \code{loo} object.
+#' A `loo` object.
 #'
 #' @importFrom loo loo
 #' @method loo hsstan
@@ -285,27 +284,28 @@ waic.hsstan <- function(x, cores=getOption("mc.cores"), ...) {
 #' The LOO-adjusted R-squared uses Pareto smoothed importance sampling LOO
 #' residuals and Bayesian bootstrap.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #' @param prob Width of the posterior interval (0.95, by default). It is
-#'        ignored if \code{summary=FALSE}.
+#'        ignored if `summary=FALSE`.
 #' @param summary Whether a summary of the distribution of the R-squared
-#'        should be returned rather than the pointwise values (\code{TRUE} by
+#'        should be returned rather than the pointwise values (`TRUE` by
 #'        default).
 #' @param ... Currently ignored.
 #'
 #' @return
 #' The mean, standard deviation and posterior interval of R-squared if
-#' \code{summary=TRUE}, or a vector of R-squared values with length equal to
-#' the size of the posterior sample if \code{summary=FALSE}.
+#' `summary=TRUE`, or a vector of R-squared values with length equal to
+#' the size of the posterior sample if `summary=FALSE`.
 #'
 #' @references
 #' Andrew Gelman, Ben Goodrich, Jonah Gabry and Aki Vehtari (2019),
-#' R-squared for Bayesian regression models, \emph{The American Statistician},
-#' \url{https://doi.org/10.1080/00031305.2018.1549100}.
+#' R-squared for Bayesian regression models,
+#' _The American Statistician_, 73 (3), 307-309.
+#' \url{https://doi.org/10.1080/00031305.2018.1549100}
 #'
 #' Aki Vehtari, Andrew Gelman, Ben Goodrich and Jonah Gabry (2019),
-#' Bayesian R2 and LOO-R2,
-#' \url{https://avehtari.github.io/bayes_R2/bayes_R2.html}.
+#' Bayesian R2 and LOO-R2.
+#' \url{https://avehtari.github.io/bayes_R2/bayes_R2.html}
 #'
 #' @importFrom rstantools bayes_R2
 #' @method bayes_R2 hsstan

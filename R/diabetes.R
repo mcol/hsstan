@@ -21,7 +21,7 @@
 #' Diabetes data with interaction terms
 #'
 #' The dataset consists of observations on 442 individuals for which a
-#' quantitative measure of diabetes progression is recorded in variable \code{Y}.
+#' quantitative measure of diabetes progression is recorded in variable `Y`.
 #' Predictors include 10 baseline measurements, 45 interactions and 9 quadratic
 #' terms, for a total of 64 variables for each individual. Each variable has
 #' been standardized by subtracting the mean and then dividing it by its
@@ -31,9 +31,11 @@
 #' A data frame with 442 rows and 65 columns (centred and scaled).
 #'
 #' @source
-#' B. Efron, T. Hastie, I. Johnstone and R. Tibshirani, Least angle regression,
-#' \emph{The Annals of Statistics} (2004) 32 (2): 407-499.
+#' B. Efron, T. Hastie, I. Johnstone and R. Tibshirani (2004),
+#' Least angle regression, _The Annals of Statistics_, 32 (2), 407-499.
 #' \url{https://doi.org/10.1214/009053604000000067}
+#'
+#' The original dataset is available from
 #' \url{https://www.stanford.edu/~hastie/Papers/LARS/data64.txt}
 #'
 #' @examples

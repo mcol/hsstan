@@ -25,9 +25,9 @@
 #' @param x Design matrix.
 #' @param fit Matrix of fitted values for the full model.
 #' @param sigma2 Residual variance (1 for logistic regression).
-#' @param indproj Vector of indices of the columns of \var{x} that form the
+#' @param indproj Vector of indices of the columns of `x` that form the
 #'        projection subspace.
-#' @param is.logistic Set to \code{TRUE} for a logistic regression model.
+#' @param is.logistic Set to `TRUE` for a logistic regression model.
 #'
 #' @importFrom stats binomial glm.fit quasibinomial
 #' @keywords internal
@@ -86,9 +86,8 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 #' @param sigma2 Residual variance (1 for logistic regression).
 #' @param fit Matrix of fitted values for the full model.
 #' @param fitp Matrix of fitted values for the projected model.
-#' @param chosen Vector of indices of the columns of \var{x} in the current
-#'        submodel.
-#' @param is.logistic Set to \code{TRUE} for a logistic regression model.
+#' @param chosen Vector of indices of the columns of `x` in the current submodel.
+#' @param is.logistic Set to `TRUE` for a logistic regression model.
 #'
 #' @keywords internal
 choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
@@ -117,11 +116,10 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 #' @param x Design matrix.
 #' @param sigma2 Residual variance (1 for logistic regression).
 #' @param mu Matrix of fitted values for the full model.
-#' @param chosen Vector of indices of the columns of \var{x} in the current
-#'        submodel.
+#' @param chosen Vector of indices of the columns of `x` in the current submodel.
 #' @param xt Design matrix for test data.
 #' @param yt Outcome variable for test data.
-#' @param logistic Set to \code{TRUE} for a logistic regression model.
+#' @param logistic Set to `TRUE` for a logistic regression model.
 #'
 #' @keywords internal
 fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
@@ -144,11 +142,26 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 
 #' Forward selection minimizing KL-divergence in projection
 #'
-#' @param obj Object produced by \code{\link{hsstan}}.
+#' @param obj Object of class `hsstan`.
 #' @param max.iters Maximum number of iterations (number of predictors selected)
 #'        after which the selection procedure should stop.
-#' @param out.csv If not \code{NULL}, the name of a CSV file to save the
+#' @param out.csv If not `NULL`, the name of a CSV file to save the
 #'        output to.
+#'
+#' @return
+#' A data frame of class `projsel` where each row corresponds to a
+#' forward-selected submodel that contains all variables listed up to that row.
+#' The data frame contains the following columns:
+#' \item{var}{names of the variables selected.}
+#' \item{kl}{KL-divergence from the full model to the submodel.}
+#' \item{elpd}{the expected log predictive density of the submodels.}
+#' \item{delta.elpd}{the difference in elpd from the full model.}
+#'
+#' @examples
+#' \dontrun{
+#' # Continued from '?hsstan':
+#' projsel(hs.biom)
+#' }
 #'
 #' @importFrom utils write.csv
 #' @export
@@ -221,20 +234,20 @@ projsel <- function(obj, max.iters=30, out.csv=NULL) {
 #' divergence from the full model to each submodel, scaled in such a way that
 #' the baseline set of covariates are at 0, while the full model is at 1.
 #'
-#' A function of name \code{getfullname} to match variable names to full
+#' A function of name `getfullname` to match variable names to full
 #' names is searched on the current workspace, and if found it is used to
 #' transform the labels before creating the plot.
 #'
-#' @param x A data frame created by \code{\link{projsel}}.
-#' @param title Title of the plot. If \code{NULL}, no title is displayed.
-#' @param max.labels Maximum number of points to be labelled. If \code{NULL},
-#'        all those present in the \code{x} file are displayed.
+#' @param x A data frame created by [projsel()].
+#' @param title Title of the plot. If `NULL`, no title is displayed.
+#' @param max.labels Maximum number of points to be labelled. If `NULL`,
+#'        all those present in the `x` file are displayed.
 #' @param font.size Size of the textual elements (labels and axes).
 #' @param hadj,vadj Horizontal and vertical adjustment for the labels.
 #' @param ... Currently ignored.
 #'
 #' @return
-#' A \pkg{ggplot2} object showing the relative incremental contribution of each
+#' A **ggplot2** object showing the relative incremental contribution of each
 #' predictor starting from the initial set of unpenalized covariates.
 #'
 #' @import ggplot2

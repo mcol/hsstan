@@ -15,6 +15,7 @@
 - Speed up the parallel loops in the projection methods.
 - Evaluate the full model in `projsel()` only if selection stopped early.
 - Rename the `max.num.pred` argument of `projsel()` to `max.iters`.
+- Expand the documentation and add examples.
 
 # hsstan 0.5 (11 August 2019)
 

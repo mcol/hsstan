@@ -20,12 +20,12 @@
 
 #' Validate an hsstan object
 #'
-#' Check that the object has been created by \code{\link{hsstan}}.
+#' Check that the object has been created by [hsstan()].
 #'
 #' @param obj An object to be checked.
 #'
 #' @return
-#' Throws an error if the object is not an \code{hsstan} object.
+#' Throws an error if the object is not an `hsstan` object.
 #'
 #' @noRd
 validate.hsstan <- function(obj) {
@@ -37,9 +37,9 @@ validate.hsstan <- function(obj) {
 #' Validate the posterior samples
 #'
 #' Check that the object contains valid posterior samples in the
-#' \code{stanfit} field.
+#' `stanfit` field.
 #'
-#' @param obj An object of class \code{hsstan}.
+#' @param obj An object of class `hsstan`.
 #'
 #' @return
 #' Throws an error if the object does not contain posterior samples.
@@ -56,9 +56,9 @@ validate.samples <- function(obj) {
 #' Check that the new data contains all variables used in the model and no
 #' missing values, and generate the corresponding model matrix.
 #'
-#' @param obj Object of class \code{hsstan}.
+#' @param obj Object of class `hsstan`.
 #' @param newdata Optional data frame containing the variables used in the
-#'        model. If \code{NULL}, the model matrix used when fitting the model
+#'        model. If `NULL`, the model matrix used when fitting the model
 #'        is returned.
 #'
 #' @return
@@ -227,7 +227,7 @@ validate.family <- function(family, y) {
 
 #' Validate the cross-validation folds
 #'
-#' @param folds Folds to be checked or \code{NULL}.
+#' @param folds Folds to be checked or `NULL`.
 #' @param N Number of observations.
 #'
 #' @return
@@ -293,8 +293,8 @@ validate.probability <- function(prob) {
 #' Get the parameter names corresponding to the regression coefficients or
 #' matching a regular expression.
 #'
-#' @param obj An object of class \code{hsstan}.
-#' @param pars Regular expression to match a parameter name, or \code{NULL}
+#' @param obj An object of class `hsstan`.
+#' @param pars Regular expression to match a parameter name, or `NULL`
 #'        to retrieve the names of all regression coefficients.
 #'
 #' @return
@@ -332,10 +332,10 @@ vector.summary <- function(x, prob) {
 
 #' Check whether the model fitted is a logistic regression model.
 #'
-#' @param obj An object of class \code{hsstan}.
+#' @param obj An object of class `hsstan`.
 #'
 #' @return
-#' \code{TRUE} for logistic regression models, \code{FALSE} otherwise.
+#' `TRUE` for logistic regression models, `FALSE` otherwise.
 #'
 #' @noRd
 is.logistic <- function(obj) {

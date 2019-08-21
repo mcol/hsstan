@@ -20,19 +20,18 @@
 
 #' Summary for the fitted model
 #'
-#' @param object An object of class \code{hsstan}.
-#' @param pars Vector of parameter names to be extracted. If \code{NULL}
+#' @param object An object of class `hsstan`.
+#' @param pars Vector of parameter names to be extracted. If `NULL`
 #'        (default) then this refers to the set of predictors used in the
 #'        model.
 #' @param prob Width of the posterior intervals (0.95, by default).
 #' @param digits Number of decimal places to be reported (2 by default).
 #' @param sort Column name used to sort the results according to the absolute
-#'        value of the column. If \code{NULL} (default) or the column name cannot
+#'        value of the column. If `NULL` (default) or the column name cannot
 #'        be found, no sorting occurs.
 #' @param decreasing Whether the results should be sorted in decreasing order
-#'        when a valid column name is specified in \code{sort} (\code{TRUE} by
-#'        default).
-#' @param max.rows Maximum number of rows to be returned. If \code{NULL}
+#'        when a valid column name is specified in `sort` (`TRUE` by default).
+#' @param max.rows Maximum number of rows to be returned. If `NULL`
 #'        (default) or 0, all results are returned.
 #' @param ... Currently ignored.
 #'
@@ -66,8 +65,8 @@ summary.hsstan <- function(object, pars=NULL, prob=0.95, digits=2,
 
 #' Print a summary for the fitted model
 #'
-#' @param x An object of class \code{hsstan}.
-#' @param ... Further arguments to \code{\link{summary.hsstan}}.
+#' @param x An object of class `hsstan`.
+#' @param ... Further arguments to [summary()].
 #'
 #' @export
 print.hsstan <- function(x, ...) {
@@ -78,9 +77,9 @@ print.hsstan <- function(x, ...) {
 #'
 #' Produce a summary of the posterior samples for the quantities of interest.
 #'
-#' @param x An object containing or representing posterior samples. If \code{x}
-#'        is a matrix, it should have size \code{S} by \code{Q}, where \code{S}
-#'        is the number of posterior samples, and \code{Q} is the number of
+#' @param x An object containing or representing posterior samples. If `x`
+#'        is a matrix, it should have size `S` by `Q`, where `S`
+#'        is the number of posterior samples, and `Q` is the number of
 #'        quantities of interest.
 #' @param prob Width of the posterior intervals (0.95, by default).
 #' @param ... Further arguments passed to or from other methods.
@@ -90,8 +89,8 @@ print.hsstan <- function(x, ...) {
 #' intervals for the given quantities.
 #'
 #' @seealso
-#' \code{\link{summary.hsstan}} to produce summaries of \code{hsstan} objects
-#' that include the number of effective samples and the split-Rhat diagnostic.
+#' [summary()] to produce summaries of `hsstan` objects that include the number
+#' of effective samples and the split-Rhat diagnostic.
 #'
 #' @export
 posterior_summary <- function(x, prob, ...) {
@@ -108,7 +107,7 @@ posterior_summary.default <- function(x, prob=0.95, ...) {
 }
 
 #' @rdname posterior_summary
-#' @param pars Vector of parameter names to be extracted. If \code{NULL}
+#' @param pars Vector of parameter names to be extracted. If `NULL`
 #'        (default) then this refers to the set of predictors used in the
 #'        model.
 #'
@@ -124,13 +123,13 @@ posterior_summary.hsstan <- function(x, prob=0.95, pars=NULL, ...) {
 #' Report statistics on the parameters used in the sampler, the sampler
 #' behaviour and the sampling time.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #'
 #' @return
-#' A matrix with \code{C + 1} rows, where \code{C} is the number of Markov
+#' A matrix with `C + 1` rows, where `C` is the number of Markov
 #' chains, reporting average acceptance probability, average stepsize, number
 #' of divergent transitions, maximum tree depth, total number of gradient
-#' evaluations, warmup and sample times in seconds.
+#' evaluations, warmup and sampling times in seconds.
 #'
 #' @export
 sampler.stats <- function(object) {
@@ -153,7 +152,7 @@ sampler.stats <- function(object) {
 #'
 #' Extracts the number of posterior samples stored in a fitted model.
 #'
-#' @param object An object of class \code{hsstan}.
+#' @param object An object of class `hsstan`.
 #' @param ... Currently ignored.
 #'
 #' @return
