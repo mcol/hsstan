@@ -53,8 +53,8 @@ test_that("model formula",
 
     model <- validate.model(y ~ X1 + X2, c("X3", "X4"))
     expect_type(model, "list")
-    expect_s3_class(model$model,
-                    "formula")
+    expect_named(model,
+                 c("outcome", "unpenalized", "penalized"))
     expect_equal(model$outcome,
                  "y")
     expect_equal(model$unpenalized,

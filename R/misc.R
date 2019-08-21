@@ -116,8 +116,7 @@ validate.model <- function(model, penalized) {
     vars <- rownames(attr(tt, "factors"))
     if (is.null(vars))
         vars <- as.character(model)[2]
-    return(list(model=model, outcome=vars[1],
-                unpenalized=vars[-1], penalized=penalized))
+    return(list(outcome=vars[1], unpenalized=vars[-1], penalized=penalized))
 }
 
 #' Validate the model data
