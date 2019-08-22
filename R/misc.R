@@ -288,6 +288,29 @@ validate.probability <- function(prob) {
         stop("'prob' must be a single value between 0 and 1.\n")
 }
 
+#' Validate arguments passed to rstan
+#'
+#' Ensure that the options to be passed to \code{\link[rstan]{sampling}} are
+#' valid, as to work around rstan issue #681.
+#'
+#' @param ... List of arguments to be checked.
+#'
+#' @return
+#' Throws an error if any argument is not valid for \code{\link[rstan]{sampling}}.
+#'
+#' @noRd
+validate.rstan.args <- function(...) {
+    valid.args <- c("chains", "cores", "pars", "thin", "init", "check_data",
+                    "sample_file", "diagnostic_file", "verbose", "algorithm",
+                    "control", "open_progress", "show_messages", "chain_id",
+                    "init_r", "test_grad", "append_samples", "refresh",
+                    "save_warmup", "enable_random_init")
+    dots <- list(...)
+    for (arg in names(dots))
+        if (!arg %in% valid.args)
+           stop("Argument '", arg, "' not recognized.")
+}
+
 #' Parameter names
 #'
 #' Get the parameter names corresponding to the regression coefficients or

@@ -196,6 +196,12 @@ test_that("validate.probability",
                  "'prob' must be a single value between 0 and 1")
 })
 
+test_that("validate.rstan.args",
+{
+    expect_error(validate.rstan.args(iters=200),
+                 "Argument 'iters' not recognized")
+})
+
 test_that("get.pars",
 {
     expect_error(get.pars(hs.gauss, NA),
