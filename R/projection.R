@@ -154,6 +154,10 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' The data frame contains the following columns:
 #' \item{var}{names of the variables selected.}
 #' \item{kl}{KL-divergence from the full model to the submodel.}
+#' \item{rel.kl.null}{relative explanatory power of predictors starting from the
+#'       intercept-only model.}
+#' \item{rel.kl}{relative explanatory power of predictors starting from the model
+#'       containing unpenalized covariates.}
 #' \item{elpd}{the expected log predictive density of the submodels.}
 #' \item{delta.elpd}{the difference in elpd from the full model.}
 #'
@@ -215,10 +219,14 @@ projsel <- function(obj, max.iters=30, out.csv=NULL) {
     full <- if (length(chosen) == P)
         sub else fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
 
+    kl <- kl.elpd[, 1]
     res <- data.frame(var=c("Intercept only",
                             "Unpenalized covariates",
                             colnames(x)[setdiff(chosen, 1:U)]),
-                      kl=kl.elpd[, 1], elpd=kl.elpd[, 2],
+                      kl=kl,
+                      rel.kl.null=1 - kl / kl[1],
+                      rel.kl=c(NA, 1 - kl[-1] / kl[2]),
+                      elpd=kl.elpd[, 2],
                       delta.elpd=kl.elpd[, 2] - full$elpd,
                       stringsAsFactors=FALSE)
     if (!is.null(out.csv))
