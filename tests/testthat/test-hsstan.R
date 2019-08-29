@@ -48,6 +48,8 @@ test_that("kfold",
     expect_equal(colnames(cv.gauss$pointwise),
                  c("elpd_kfold", "p_kfold", "kfoldic"))
     expect_true(all(is.na(cv.gauss$pointwise[, "p_kfold"])))
+    expect_length(cv.gauss$fits[[1]]$stanfit@stan_args,
+                  2)
 
     expect_named(cv.binom,
                  c("estimates", "pointwise", "fits", "data"))
@@ -55,6 +57,10 @@ test_that("kfold",
         expect_s3_class(cv.binom$fits[[i]],
                         "hsstan")
     expect_silent(validate.samples(cv.binom$fits[[1]]))
+    expect_equal(nrow(cv.binom$fits),
+                 2)
+    expect_length(cv.binom$fits[[1]]$stanfit@stan_args,
+                  1)
     expect_length(cv.binom$fits,
                   max(folds) * 2)
     expect_equal(cv.binom$fits[[max(folds) + 1]],

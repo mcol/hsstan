@@ -37,7 +37,7 @@ SW({
 
 message("Running cross-validated hsstan models...")
 SW({
-    cv.gauss <- kfold(hs.gauss, folds=folds)
+    cv.gauss <- kfold(hs.gauss, folds=folds, chains=2)
     cv.binom <- kfold(hs.binom, folds=folds)
     cv.nofit <- cv.gauss
     cv.nofit$fits <- cv.nofit$data <- NULL
