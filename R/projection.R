@@ -244,16 +244,13 @@ projsel <- function(obj, max.iters=30, out.csv=NULL) {
 #' in such a way that the baseline model (either the null model or the model
 #' containing only unpenalized covariates) is at 0, while the full model is at 1.
 #'
-#' A function of name `getfullname` to match variable names to full
-#' names is searched on the current workspace, and if found it is used to
-#' transform the labels before creating the plot.
-#'
 #' @param x A data frame created by [projsel()].
 #' @param title Title of the plot. If `NULL`, no title is displayed.
 #' @param max.points Maximum number of predictors to be plotted. If `NULL`
 #'        (default) or 0, all points are plotted.
-#' @param max.labels Maximum number of points to be labelled. If `NULL`,
-#'        all those present in the `x` file are displayed.
+#' @param max.labels Maximum number of predictors to be labelled. If `NULL`
+#'        (default), all predictor labels present in `x` are displayed, which
+#'        may result in overprinting.
 #' @param from.covariates Whether the plotting should start from the unpenalized
 #'        covariates (`TRUE` by default). If set to `FALSE`, the plot includes a
 #'        point for the null (intercept-only) model.
@@ -276,16 +273,11 @@ plot.projsel <- function(x, title=NULL, max.points=NULL, max.labels=NULL,
     sel <- x
     if (!is.null(max.points) && max.points > 0)
         sel <- utils::head(sel, n=max.points + 2)
+    if (!is.null(max.labels))
+        sel$var[-c(1:(max.labels + 2))] <- ""
     if (from.covariates)
         sel <- sel[-1, ]
-
-    ## get full variable names if possible
-    labs <- tryCatch(get("getfullname")(sel$var),
-                     error=function(e) sel$var)
-    labs <- gsub(" \\(.*\\)$", "", labs)
-    if (!is.null(max.labels)) {
-        labs[-c(1:(max.labels + 1))] <- ""
-    }
+    labs <- sel$var
 
     ## convert from points to millimetres
     geom.text.size <- font.size * 25.4 / 72
