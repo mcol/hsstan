@@ -250,6 +250,8 @@ projsel <- function(obj, max.iters=30, out.csv=NULL) {
 #'
 #' @param x A data frame created by [projsel()].
 #' @param title Title of the plot. If `NULL`, no title is displayed.
+#' @param max.points Maximum number of predictors to be plotted. If `NULL`
+#'        (default) or 0, all points are plotted.
 #' @param max.labels Maximum number of points to be labelled. If `NULL`,
 #'        all those present in the `x` file are displayed.
 #' @param from.covariates Whether the plotting should start from the unpenalized
@@ -266,11 +268,14 @@ projsel <- function(obj, max.iters=30, out.csv=NULL) {
 #' @import ggplot2
 #' @method plot projsel
 #' @export
-plot.projsel <- function(x, title=NULL, max.labels=NULL, from.covariates=TRUE,
+plot.projsel <- function(x, title=NULL, max.points=NULL, max.labels=NULL,
+                         from.covariates=TRUE,
                          font.size=12, hadj=0.05, vadj=0, ...) {
 
     ## prepare the set of points to plot
     sel <- x
+    if (!is.null(max.points) && max.points > 0)
+        sel <- utils::head(sel, n=max.points + 2)
     if (from.covariates)
         sel <- sel[-1, ]
 

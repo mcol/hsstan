@@ -45,7 +45,7 @@ test_that("projsel for gaussian family",
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
 
-    expect_s3_class(plot(sel.gauss, from.covariates=FALSE),
+    expect_s3_class(plot(sel.gauss, from.covariates=FALSE, max.points=3),
                     "ggplot")
     expect_silent(print(plot(sel.gauss, title="Test", max.labels=3)))
     unlink("Rplots.pdf")

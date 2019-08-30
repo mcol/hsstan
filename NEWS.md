@@ -6,6 +6,8 @@
 - Remove the deprecated `sample.stan()` and `sample.stan.cv()`.
 - Replace `get.cv.performance()` with `posterior_performance()`.
 - Report the intercept-only results from `projsel()`.
+- Add options to `plot.projsel()` for choosing the number of points to plot and
+  whether to show a point for the null model.
 
 ### Smaller Changes and Bug Fixes
 
