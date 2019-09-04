@@ -17,6 +17,7 @@
 - Speed up the parallel loops in the projection methods.
 - Evaluate the full model in `projsel()` only if selection stopped early.
 - Rename the `max.num.pred` argument of `projsel()` to `max.iters`.
+- Validate the options passed to `rstan::sampling()`.
 - Expand the documentation and add examples.
 
 # hsstan 0.5 (11 August 2019)
@@ -95,9 +96,20 @@
 
 ### Notes
 
-- This version was used in Colombo, M., Valo, E., McGurnaghan, S.J. et al.
-  Diabetologia (2019) 62: 1616. https://doi.org/10.1007/s00125-019-4915-0.
+- This version was used in:
+  - [M. Colombo][mcol], E. Valo, S.J. McGurnaghan et al.,
+    Biomarkers associated with progression of renal disease in type 1 diabetes,
+    _Diabetologia_ (2019) 62 (9): 1616-1627.
+    https://doi.org/10.1007/s00125-019-4915-0
+  - [A. Spiliopoulou][athina], [M. Colombo][mcol], D. Plant et al.,
+    Association of response to TNF inhibitors in rheumatoid arthritis with
+    quantitative trait loci for CD40 and CD39,
+    _Annals of the Rheumatic Diseases_ (2019) 78: 1055-1061.
+    https://doi.org/10.1136/annrheumdis-2018-214877
 
 # hsstan 0.1 (14 June 2018)
 
 - First release.
+
+[mcol]:   https://pm2.phs.ed.ac.uk/~mcolombo/
+[athina]: http://www.homepages.ed.ac.uk/aspiliop/
