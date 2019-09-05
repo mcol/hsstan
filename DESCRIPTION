@@ -23,7 +23,8 @@ Description: The 'hsstan' package provides linear and logistic regression
 License: GPL-3
 URL: https://github.com/mcol/hsstan
 BugReports: https://github.com/mcol/hsstan/issues
-LazyLoad: yes
+LazyData: yes
+Biarch: true
 Depends:
     R (>= 3.6)
 Imports:
