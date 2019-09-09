@@ -111,6 +111,11 @@ posterior_summary.default <- function(x, prob=0.95, ...) {
 #'        (default) then this refers to the set of predictors used in the
 #'        model.
 #'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' posterior_summary(hs.biom)
+#'
 #' @export
 posterior_summary.hsstan <- function(x, prob=0.95, pars=NULL, ...) {
     validate.samples(x)
@@ -130,6 +135,11 @@ posterior_summary.hsstan <- function(x, prob=0.95, pars=NULL, ...) {
 #' chains, reporting average acceptance probability, average stepsize, number
 #' of divergent transitions, maximum tree depth, total number of gradient
 #' evaluations, warmup and sampling times in seconds.
+#'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' sampler.stats(hs.biom)
 #'
 #' @export
 sampler.stats <- function(object) {
@@ -158,6 +168,11 @@ sampler.stats <- function(object) {
 #' @return
 #' The total number of posterior samples across the chains after discarding
 #' the warmup iterations.
+#'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' nsamples(hs.biom)
 #'
 #' @importFrom rstantools nsamples
 #' @method nsamples hsstan

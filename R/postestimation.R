@@ -31,6 +31,11 @@
 #' A matrix of size `S` by `N`, where `S` is number of draws from the posterior
 #' distribution, and `N` is the number of data points.
 #'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' log_lik(hs.biom)
+#'
 #' @importFrom rstantools log_lik
 #' @importFrom stats rbinom rnorm
 #' @method log_lik hsstan
@@ -67,6 +72,11 @@ log_lik.hsstan <- function(object, newdata=NULL, ...) {
 #' A matrix with lower and upper interval bounds as columns and as many rows
 #' as selected parameters.
 #'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' posterior_interval(hs.biom)
+#'
 #' @importFrom rstantools posterior_interval
 #' @method posterior_interval hsstan
 #' @aliases posterior_interval
@@ -98,6 +108,11 @@ posterior_interval.hsstan <- function(object, pars=NULL, prob=0.95, ...) {
 #' A matrix of size `S` by `N`, where `S` is the number of draws from the
 #' posterior distribution of the (transformed) linear predictor, and `N` is
 #' the number of data points.
+#'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' posterior_linpred(hs.biom)
 #'
 #' @importFrom rstantools posterior_linpred
 #' @method posterior_linpred hsstan
@@ -134,6 +149,11 @@ posterior_linpred.hsstan <- function(object, transform=FALSE,
 #' @return
 #' A matrix of size `S` by `N`, where `S` is the number of simulations from
 #' the posterior predictive distribution, and `N` is the number of data points.
+#'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' posterior_predict(hs.biom)
 #'
 #' @importFrom rstantools posterior_predict
 #' @importFrom stats rbinom rnorm
@@ -186,6 +206,11 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' of the performance measure with length equal to the size of the posterior
 #' sample if `summary=FALSE`. Attribute `type` reports whether the performance
 #' measures are cross-validated or not.
+#'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' posterior_performance(hs.biom)
 #'
 #' @export
 posterior_performance <- function(obj, prob=0.95, summary=TRUE,
@@ -249,6 +274,12 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
 #' @return
 #' A `loo` object.
 #'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' loo(hs.biom)
+#' waic(hs.biom)
+#'
 #' @importFrom loo loo
 #' @method loo hsstan
 #' @aliases loo
@@ -306,6 +337,12 @@ waic.hsstan <- function(x, cores=getOption("mc.cores"), ...) {
 #' Aki Vehtari, Andrew Gelman, Ben Goodrich and Jonah Gabry (2019),
 #' Bayesian R2 and LOO-R2.
 #' \url{https://avehtari.github.io/bayes_R2/bayes_R2.html}
+#'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' bayes_R2(hs.biom)
+#' loo_R2(hs.biom)
 #'
 #' @importFrom rstantools bayes_R2
 #' @method bayes_R2 hsstan

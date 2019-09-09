@@ -113,11 +113,13 @@ get.coefficients <- function(samples, coeff.names) {
 #'
 #' @examples
 #' data(diabetes)
+#' options(mc.cores=2)
 #'
 #' # non-default settings for speed of the example
 #' df <- diabetes[1:50, ]
 #' hs.biom <- hsstan(df, Y ~ age + sex, penalized=colnames(df)[5:10],
-#'                   chains=2, iter=400)
+#'                   chains=2, iter=300)
+#' summary(hs.biom)
 #'
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export
@@ -262,13 +264,11 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #'             observations). This is not present if `store.fits=FALSE`.}
 #'
 #' @examples
-#' \dontrun{
-#' data(diabetes)
-#' penalized <- colnames(diabetes)[4:10]
-#' hs.biom <- hsstan(diabetes, Y ~ age + sex, penalized, iter=1000)
-#' folds <- caret::createFolds(diabetes$Y, k=5, list=FALSE)
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' # only 2 folds for speed of example
+#' folds <- rep(1:2, length.out=length(df$Y))
 #' cv.biom <- kfold(hs.biom, folds=folds)
-#' }
 #'
 #' @importFrom loo kfold
 #' @method kfold hsstan
