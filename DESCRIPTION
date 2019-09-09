@@ -12,9 +12,9 @@ Authors@R: c(person("Marco", "Colombo",
              person("Athina", "Spiliopoulou",
                     email="A.Spiliopoulou@ed.ac.uk", role="ctb",
                     comment=c(ORCID="0000-0002-5929-6585")))
-Description: The 'hsstan' package provides linear and logistic regression
-  models penalized with hierarchical shrinkage priors for selection of
-  biomarkers, which can be fitted using Stan (Carpenter et al. (2017)
+Description: Linear and logistic regression models penalized with hierarchical
+  shrinkage priors for selection of biomarkers (or more general variable
+  selection), which can be fitted using Stan (Carpenter et al. (2017)
   <doi:10.18637/jss.v076.i01>). It implements the horseshoe and regularized
   horseshoe priors (Piironen and Vehtari (2017) <doi:10.1214/17-EJS1337SI>),
   as well as the projection predictive selection approach to recover a sparse
