@@ -183,9 +183,9 @@ projsel <- function(obj, max.iters=30, out.csv=NULL) {
     K <- length(obj$betas$penalized)
     P <- U + K
 
-    cat(sprintf("%58s  %8s %11s\n", "Model", "KL", "ELPD"))
+    message(sprintf("%58s  %8s %11s", "Model", "KL", "ELPD"))
     report.iter <- function(msg, kl, elpd)
-        cat(sprintf("%58s  %8.5f  %8.5f\n", substr(msg, 1, 55), kl, elpd))
+        message(sprintf("%58s  %8.5f  %8.5f", substr(msg, 1, 55), kl, elpd))
 
     ## fitted values for the full model (N x S)
     fit <- t(posterior_linpred(obj, transform=TRUE))
