@@ -164,6 +164,11 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' @examples
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' # continued from ?hsstan
+#'
+#' # parallelization is not currently supported on Windows
+#' ncores <- ifelse(.Platform$OS.type != "windows", 2, 1)
+#' options(mc.cores=ncores)
+#'
 #' sel <- projsel(hs.biom, max.iters=3)
 #' plot(sel)
 #'

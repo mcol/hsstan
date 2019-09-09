@@ -266,9 +266,13 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #' @examples
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' # continued from ?hsstan
+#'
+#' # parallelization is not currently supported on Windows
+#' ncores <- ifelse(.Platform$OS.type != "windows", 2, 1)
+#'
 #' # only 2 folds for speed of example
 #' folds <- rep(1:2, length.out=length(df$Y))
-#' cv.biom <- kfold(hs.biom, folds=folds)
+#' cv.biom <- kfold(hs.biom, folds=folds, cores=ncores)
 #'
 #' @importFrom loo kfold
 #' @method kfold hsstan

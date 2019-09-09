@@ -210,7 +210,7 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' @examples
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' # continued from ?hsstan
-#' posterior_performance(hs.biom)
+#' posterior_performance(hs.biom, cores=1)
 #'
 #' @export
 posterior_performance <- function(obj, prob=0.95, summary=TRUE,
