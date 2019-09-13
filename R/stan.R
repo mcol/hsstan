@@ -301,14 +301,21 @@ kfold.hsstan <- function(x, folds, chains=1, store.fits=TRUE,
     ## evaluate the models
     message("Fitting ", num.folds, " models using ",
             min(cores, num.folds), " cores")
-    cv <- parallel::mclapply(mc.cores=cores, mc.preschedule=FALSE,
-                             X=1:num.folds, FUN=function(fold) {
+    par.fun <- function(fold) {
         fit <- eval(calls[[fold]])
 
         ## log pointwise predictive densities (pointwise test log-likelihood)
         lppd <- log_lik(fit, newdata=data[which(folds == fold), , drop=FALSE])
         return(list(lppd=lppd, fit=if (store.fits) fit else NULL))
-    })
+    }
+    if (.Platform$OS.type != "windows") {
+        cv <- parallel::mclapply(X=1:num.folds, mc.cores=cores,
+                                 mc.preschedule=FALSE, FUN=par.fun)
+    } else { # windows
+        cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+        on.exit(parallel::stopCluster(cl))
+        cv <- parallel::parLapply(X=1:num.folds, cl=cl, fun=par.fun)
+    }
 
     ## expected log predictive densities
     elpds.unord <- unlist(lapply(cv, function(z) apply(z$lppd, 2, logMeanExp)))

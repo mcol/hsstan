@@ -66,18 +66,13 @@ NULL
   for (m in modules) loadModule(m, what = TRUE)
 } # nocov end
 
-#' @importFrom utils packageVersion
 .onAttach <- function(libname, pkgname) {
 
     ## number of cores used by default for sampling from the chains
-    if (.Platform$OS.type == "windows")
-        options(mc.cores=1) # nocov
-    else if (is.null(options()$mc.cores))
+    if (is.null(options()$mc.cores))
         options(mc.cores=min(ceiling(parallel::detectCores() / 2), 4)) # nocov
 
-    msg <- paste("hsstan", packageVersion("hsstan"))
-    if (.Platform$OS.type != "windows")
-        msg <- paste0(msg, ": using ", options("mc.cores"),
-                      " cores, set 'options(mc.cores)' to change.")
-    packageStartupMessage(msg)
+    packageStartupMessage("hsstan ", utils::packageVersion("hsstan"),
+                          ": using ", options("mc.cores"),
+                          " cores, set 'options(mc.cores)' to change.")
 }

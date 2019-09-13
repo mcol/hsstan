@@ -3,6 +3,7 @@
 ### Major Changes
 
 - Add the `kfold()` and  `posterior_summary()` functions.
+- Implement parallelization on Windows using `parallel::parLapply()`.
 - Remove the deprecated `sample.stan()` and `sample.stan.cv()`.
 - Replace `get.cv.performance()` with `posterior_performance()`.
 - Report the intercept-only results from `projsel()`.

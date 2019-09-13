@@ -247,10 +247,17 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
         mu <- cbind(mu, posterior_linpred(hs, newdata=newdata, transform=TRUE))
         llk <- cbind(llk, log_lik(hs, newdata=newdata))
     }
-    out <- parallel::mclapply(mc.cores=cores, mc.preschedule=TRUE,
-                              X=1:nrow(mu), FUN=function(z) {
-                                  perf.fun(y, mu[z, ])
-                              })
+
+    par.fun <- function(i) perf.fun(y, mu[i, ])
+    if (.Platform$OS.type != "windows") {
+        out <- parallel::mclapply(X=1:nrow(mu), mc.cores=cores,
+                                  mc.preschedule=TRUE, FUN=par.fun)
+    } else { # windows
+        cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+        on.exit(parallel::stopCluster(cl))
+        out <- parallel::parLapply(X=1:num.folds, cl=cl, fun=par.fun)
+    }
+
     out <- cbind(perf=unlist(out), llk=rowSums(llk))
     colnames(out)[1] <- ifelse(logistic, "auc", "r2")
     if (summary)

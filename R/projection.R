@@ -43,11 +43,15 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     if (is.logistic) {
 
         ## compute the projection for each sample
-        wp <- parallel::mclapply(X=1:S, mc.preschedule=TRUE,
-                                 FUN=function(z) {
-                                     glm.fit(xp, fit[, z],
-                                             family=quasibinomial())$coefficients
-                                 })
+        par.fun <- function(s) glm.fit(xp, fit[, s],
+                                       family=quasibinomial())$coefficients
+        if (.Platform$OS.type != "windows") {
+            wp <- parallel::mclapply(X=1:S, mc.preschedule=TRUE, FUN=par.fun)
+        } else { # windows
+            cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+            on.exit(parallel::stopCluster(cl))
+            wp <- parallel::parLapply(X=1:S, cl=cl, fun=par.fun)
+        }
         wp <- matrix(unlist(wp, use.names=FALSE), ncol=S)
 
         ## estimate the KL divergence between full and projected model
@@ -92,12 +96,18 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 #' @keywords internal
 choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
     notchosen <- setdiff(1:ncol(x), chosen)
+    par.fun <- function(idx) {
+        lm_proj(x, fit, sigma2, sort(c(chosen, notchosen[idx])), FALSE)$kl
+    }
     if (!is.logistic) {
-        kl <- parallel::mclapply(X=1:length(notchosen), mc.preschedule=TRUE,
-                                 FUN=function(z) {
-                                     ind <- sort(c(chosen, notchosen[z]))
-                                     lm_proj(x, fit, sigma2, ind, FALSE)$kl
-                                 })
+        if (.Platform$OS.type != "windows") {
+            kl <- parallel::mclapply(X=1:length(notchosen), mc.preschedule=TRUE,
+                                     FUN=par.fun)
+        } else { # windows
+            cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+            on.exit(parallel::stopCluster(cl))
+            kl <- parallel::parLapply(X=1:length(notchosen), cl=cl, fun=par.fun)
+        }
         idx.selected <- which.min(unlist(kl))
         return(notchosen[idx.selected])
     }
@@ -164,10 +174,6 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' @examples
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' # continued from ?hsstan
-#'
-#' # parallelization is not currently supported on Windows
-#' ncores <- ifelse(.Platform$OS.type != "windows", 2, 1)
-#' options(mc.cores=ncores)
 #'
 #' sel <- projsel(hs.biom, max.iters=3)
 #' plot(sel)
