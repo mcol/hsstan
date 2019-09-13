@@ -112,14 +112,15 @@ get.coefficients <- function(samples, coeff.names) {
 #' [kfold()] for cross-validating a fitted object.
 #'
 #' @examples
+#' \dontshow{oldopts <- options(mc.cores=2)}
 #' data(diabetes)
-#' options(mc.cores=2)
 #'
 #' # non-default settings for speed of the example
 #' df <- diabetes[1:50, ]
 #' hs.biom <- hsstan(df, Y ~ age + sex, penalized=colnames(df)[5:10],
 #'                   chains=2, iter=300)
 #' summary(hs.biom)
+#' \dontshow{options(oldopts)}
 #'
 #' @importFrom stats gaussian model.matrix reformulate
 #' @export

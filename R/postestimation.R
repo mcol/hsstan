@@ -283,9 +283,12 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
 #'
 #' @examples
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' \dontshow{oldopts <- options(mc.cores=2)}
 #' # continued from ?hsstan
+#'
 #' loo(hs.biom)
 #' waic(hs.biom)
+#' \dontshow{options(oldopts)}
 #'
 #' @importFrom loo loo
 #' @method loo hsstan
@@ -347,9 +350,12 @@ waic.hsstan <- function(x, cores=getOption("mc.cores"), ...) {
 #'
 #' @examples
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' \dontshow{oldopts <- options(mc.cores=2)}
 #' # continued from ?hsstan
+#'
 #' bayes_R2(hs.biom)
 #' loo_R2(hs.biom)
+#' \dontshow{options(oldopts)}
 #'
 #' @importFrom rstantools bayes_R2
 #' @method bayes_R2 hsstan
