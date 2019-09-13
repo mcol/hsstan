@@ -196,7 +196,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
                                    pars=hs.pars, include=keep.hs.pars,
                                    control=list(adapt_delta=adapt.delta))
         if (is.na(nrow(samples)))
-            return(NULL)
+            stop("rstan::sampling failed, see error message above.", call.=FALSE)
 
         ## assign proper names
         par.idx <- grep("^beta_[up]", names(samples))
