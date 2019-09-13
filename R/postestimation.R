@@ -253,7 +253,7 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
         out <- parallel::mclapply(X=1:nrow(mu), mc.cores=cores,
                                   mc.preschedule=TRUE, FUN=par.fun)
     } else { # windows
-        cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
+        cl <- parallel::makePSOCKcluster(cores)
         on.exit(parallel::stopCluster(cl))
         out <- parallel::parLapply(X=1:num.folds, cl=cl, fun=par.fun)
     }
