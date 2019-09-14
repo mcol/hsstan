@@ -39,6 +39,11 @@
 #' A matrix with summaries from the posterior distribution of the parameters
 #' of interest.
 #'
+#' @examples
+#' \dontshow{utils::example("hsstan", echo=FALSE)}
+#' # continued from ?hsstan
+#' summary(hs.biom)
+#'
 #' @importMethodsFrom rstan summary
 #' @method summary hsstan
 #' @export

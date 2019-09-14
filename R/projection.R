@@ -172,6 +172,7 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' \item{delta.elpd}{the difference in elpd from the full model.}
 #'
 #' @examples
+#' \donttest{
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' \dontshow{oldopts <- options(mc.cores=2)}
 #' # continued from ?hsstan
@@ -179,6 +180,7 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' sel <- projsel(hs.biom, max.iters=3)
 #' plot(sel)
 #' \dontshow{options(oldopts)}
+#' }
 #'
 #' @importFrom utils write.csv
 #' @export
