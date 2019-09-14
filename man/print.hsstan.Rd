@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{An object of class \code{hsstan}.}
 
-\item{...}{Further arguments to \code{\link{summary.hsstan}}.}
+\item{...}{Further arguments to \code{\link[=summary]{summary()}}.}
 }
 \description{
 Print a summary for the fitted model

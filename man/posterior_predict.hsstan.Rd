@@ -25,10 +25,15 @@ generator.}
 \item{...}{Currently ignored.}
 }
 \value{
-A matrix of size \code{S} by \code{N}, where \code{S} is the number of
-simulations from the posterior predictive distribution, and \code{N} is the
-number of data points.
+A matrix of size \code{S} by \code{N}, where \code{S} is the number of simulations from
+the posterior predictive distribution, and \code{N} is the number of data points.
 }
 \description{
 Draw from the posterior predictive distribution of the outcome.
+}
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+posterior_predict(hs.biom)
+
 }

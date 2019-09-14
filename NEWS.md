@@ -1,4 +1,4 @@
-# Current development version
+# hsstan 0.6 (14 September 2019)
 
 ### Major Changes
 

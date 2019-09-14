@@ -35,12 +35,23 @@ samples. For Bayesian R-squared it uses the modelled residual variance
 The LOO-adjusted R-squared uses Pareto smoothed importance sampling LOO
 residuals and Bayesian bootstrap.
 }
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+\dontshow{oldopts <- options(mc.cores=2)}
+# continued from ?hsstan
+
+bayes_R2(hs.biom)
+loo_R2(hs.biom)
+\dontshow{options(oldopts)}
+
+}
 \references{
 Andrew Gelman, Ben Goodrich, Jonah Gabry and Aki Vehtari (2019),
-R-squared for Bayesian regression models, \emph{The American Statistician},
-\url{https://doi.org/10.1080/00031305.2018.1549100}.
+R-squared for Bayesian regression models,
+\emph{The American Statistician}, 73 (3), 307-309.
+\url{https://doi.org/10.1080/00031305.2018.1549100}
 
 Aki Vehtari, Andrew Gelman, Ben Goodrich and Jonah Gabry (2019),
-Bayesian R2 and LOO-R2,
-\url{https://avehtari.github.io/bayes_R2/bayes_R2.html}.
+Bayesian R2 and LOO-R2.
+\url{https://avehtari.github.io/bayes_R2/bayes_R2.html}
 }

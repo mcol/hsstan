@@ -2,20 +2,20 @@
 % Please edit documentation in R/stan.R
 \name{hsstan}
 \alias{hsstan}
-\title{Fit a plain or cross-validated Stan model}
+\title{Hierarchical shrinkage models}
 \usage{
 hsstan(x, covs.model, penalized = NULL, family = gaussian,
-  folds = NULL, iter = ifelse(is.null(folds), 2000, 1000),
-  warmup = iter/2, scale.u = 2, regularized = TRUE,
-  nu = ifelse(regularized, 1, 3), par.ratio = 0.05, global.df = 1,
-  slab.scale = 2, slab.df = 4, qr = TRUE, seed = 123,
-  adapt.delta = NULL, ...)
+  iter = 2000, warmup = floor(iter/2), scale.u = 2,
+  regularized = TRUE, nu = ifelse(regularized, 1, 3),
+  par.ratio = 0.05, global.df = 1, slab.scale = 2, slab.df = 4,
+  qr = TRUE, seed = 123, adapt.delta = NULL, keep.hs.pars = FALSE,
+  ...)
 }
 \arguments{
 \item{x}{Data frame containing outcome, covariates and penalized predictors.
 Continuous predictors and outcome variable should be standardized
 before fitting the models as priors assume them to have mean zero and
-have the same scale.}
+unit variance.}
 
 \item{covs.model}{Formula containing the unpenalized covariates.}
 
@@ -23,15 +23,11 @@ have the same scale.}
 If \code{NULL} or an empty vector, a model with only unpenalized
 covariates is fitted.}
 
-\item{family}{Type of model fitted: either \code{gaussian()} for linear
-regression (default) or \code{binomial()} for logistic regression.}
-
-\item{folds}{Integer vector with one element per observation indicating the
-cross-validation fold in which the observation should be withdrawn.
-If \code{NULL} (default), no cross-validation is performed.}
+\item{family}{Type of model fitted: either \code{gaussian()} for linear regression
+(default) or \code{binomial()} for logistic regression.}
 
 \item{iter}{Total number of iterations in each chain, including warmup
-(by default, 1000 iterations for cross-validation and 2000 otherwise).}
+(2000 by default).}
 
 \item{warmup}{Number of warmup iterations per chain (by default, half the
 total number of iterations).}
@@ -47,10 +43,10 @@ local shrinkage parameters (by default, 1 if \code{regularized=TRUE}
 and 3 otherwise).}
 
 \item{par.ratio}{Expected ratio of non-zero to zero coefficients (ignored
-if \code{regularized=FALSE}). The scale of the global shrinkage
-parameter corresponds to \code{par.ratio} divided by the square root
-of the number of observations; for linear regression only, it's further
-multiplied by the residual standard deviation \code{sigma}.}
+if \code{regularized=FALSE}). The scale of the global shrinkage parameter
+corresponds to \code{par.ratio} divided by the square root of the number of
+observations; for linear regression only, it's further multiplied by
+the residual standard deviation \code{sigma}.}
 
 \item{global.df}{Number of degrees of freedom for the global shrinkage
 parameter (ignored if \code{regularized=FALSE}).}
@@ -61,9 +57,9 @@ parameter (ignored if \code{regularized=FALSE}).}
 \item{slab.df}{Number of degrees of freedom of the regularization parameter
 (ignored if \code{regularized=FALSE}).}
 
-\item{qr}{Whether the QR decomposition should be used to decorrelate the
-predictors (\code{TRUE} by default). This is silently set to
-\code{FALSE} if there are more predictors than observations.}
+\item{qr}{Whether the thin QR decomposition should be used to decorrelate the
+predictors (\code{TRUE} by default). This is silently set to \code{FALSE} if
+there are more predictors than observations.}
 
 \item{seed}{Optional integer defining the seed for the pseudo-random number
 generator.}
@@ -73,12 +69,42 @@ adaptation, a value between 0.8 and 1 (excluded). If unspecified,
 it's set to 0.99 for hierarchical shrinkage models and to 0.95 for
 base models.}
 
+\item{keep.hs.pars}{Whether the parameters for the horseshoe prior should be
+kept in the \code{stanfit} object returned (\code{FALSE} by default).}
+
 \item{...}{Further arguments passed to \code{\link[rstan]{sampling}},
-such as \code{chains} (4 by default), \code{cores} (the value
-of \code{options("mc.cores")} by default), \code{refresh}
-(\code{iter / 10} by default).}
+such as \code{chains} (4 by default), \code{cores} (the value of
+\code{options("mc.cores")} by default), \code{refresh} (\code{iter / 10} by default).}
+}
+\value{
+An object of class \code{hsstan} containing the following fields:
+\item{stanfit}{an object of class \code{stanfit} containing the output
+produced by Stan, including posterior samples and diagnostic summaries.
+It can be manipulated using methods from the \strong{rstan} package.}
+\item{betas}{posterior means of the unpenalized and penalized regression
+parameters.}
+\item{call}{the matched call.}
+\item{data}{the dataset used in fitting the model.}
+\item{model.terms}{a list of names for the outcome variable, the unpenalized
+covariates and the penalized predictors.}
+\item{family}{the \code{family} object used.}
+\item{qr}{Whether the QR factorization was performed.}
 }
 \description{
-Run the No-U-Turn Sampler (NUTS) as implemented in Stan over all the data
-or within the cross-validation folds.
+Run the No-U-Turn Sampler (NUTS) as implemented in Stan to fit a hierarchical
+shrinkage model.
+}
+\examples{
+\dontshow{oldopts <- options(mc.cores=2)}
+data(diabetes)
+
+# non-default settings for speed of the example
+df <- diabetes[1:50, ]
+hs.biom <- hsstan(df, Y ~ age + sex, penalized=colnames(df)[5:10],
+                  chains=2, iter=250)
+\dontshow{options(oldopts)}
+
+}
+\seealso{
+\code{\link[=kfold]{kfold()}} for cross-validating a fitted object.
 }

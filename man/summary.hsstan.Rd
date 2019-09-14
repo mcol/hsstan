@@ -23,8 +23,7 @@ value of the column. If \code{NULL} (default) or the column name cannot
 be found, no sorting occurs.}
 
 \item{decreasing}{Whether the results should be sorted in decreasing order
-when a valid column name is specified in \code{sort} (\code{TRUE} by
-default).}
+when a valid column name is specified in \code{sort} (\code{TRUE} by default).}
 
 \item{max.rows}{Maximum number of rows to be returned. If \code{NULL}
 (default) or 0, all results are returned.}
@@ -37,4 +36,10 @@ of interest.
 }
 \description{
 Summary for the fitted model
+}
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+summary(hs.biom)
+
 }

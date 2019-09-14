@@ -15,8 +15,7 @@ choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
 
 \item{fitp}{Matrix of fitted values for the projected model.}
 
-\item{chosen}{Vector of indices of the columns of \var{x} in the current
-submodel.}
+\item{chosen}{Vector of indices of the columns of \code{x} in the current submodel.}
 
 \item{is.logistic}{Set to \code{TRUE} for a logistic regression model.}
 }

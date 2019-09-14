@@ -22,11 +22,17 @@ the model coefficients are learnt on standardized data.}
 \item{...}{Currently ignored.}
 }
 \value{
-A matrix of size \code{S} by \code{N}, where \code{S} is the number of draws
-from the posterior distribution of the (transformed) linear predictor, and
-\code{N} is the number of data points.
+A matrix of size \code{S} by \code{N}, where \code{S} is the number of draws from the
+posterior distribution of the (transformed) linear predictor, and \code{N} is
+the number of data points.
 }
 \description{
 Extract the posterior draws of the linear predictor, possibly transformed
 by the inverse-link function.
+}
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+posterior_linpred(hs.biom)
+
 }

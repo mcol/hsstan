@@ -19,3 +19,9 @@ the warmup iterations.
 \description{
 Extracts the number of posterior samples stored in a fitted model.
 }
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+nsamples(hs.biom)
+
+}

@@ -7,15 +7,17 @@
 \alias{waic}
 \title{Predictive information criteria for Bayesian models}
 \usage{
-\method{loo}{hsstan}(x, cores = getOption("mc.cores"))
+\method{loo}{hsstan}(x, cores = getOption("mc.cores"), ...)
 
-\method{waic}{hsstan}(x, cores = getOption("mc.cores"))
+\method{waic}{hsstan}(x, cores = getOption("mc.cores"), ...)
 }
 \arguments{
 \item{x}{An object of class \code{hsstan}.}
 
 \item{cores}{Number of cores used for parallelisation (the value of
-the \code{mc.cores} option by default).}
+\code{options("mc.cores")} by default).}
+
+\item{...}{Currently ignored.}
 }
 \value{
 A \code{loo} object.
@@ -25,4 +27,14 @@ Compute an efficient approximate leave-one-out cross-validation
 using Pareto smoothed importance sampling (PSIS-LOO), or the widely
 applicable information criterion (WAIC), also known as the Watanabe-Akaike
 information criterion.
+}
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+\dontshow{oldopts <- options(mc.cores=2)}
+# continued from ?hsstan
+
+loo(hs.biom)
+waic(hs.biom)
+\dontshow{options(oldopts)}
+
 }

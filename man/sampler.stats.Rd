@@ -13,9 +13,15 @@ sampler.stats(object)
 A matrix with \code{C + 1} rows, where \code{C} is the number of Markov
 chains, reporting average acceptance probability, average stepsize, number
 of divergent transitions, maximum tree depth, total number of gradient
-evaluations, warmup and sample times in seconds.
+evaluations, warmup and sampling times in seconds.
 }
 \description{
 Report statistics on the parameters used in the sampler, the sampler
 behaviour and the sampling time.
+}
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+sampler.stats(hs.biom)
+
 }

@@ -13,7 +13,7 @@ lm_proj(x, fit, sigma2, indproj, is.logistic)
 
 \item{sigma2}{Residual variance (1 for logistic regression).}
 
-\item{indproj}{Vector of indices of the columns of \var{x} that form the
+\item{indproj}{Vector of indices of the columns of \code{x} that form the
 projection subspace.}
 
 \item{is.logistic}{Set to \code{TRUE} for a logistic regression model.}

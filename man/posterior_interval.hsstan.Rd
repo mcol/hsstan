@@ -27,3 +27,9 @@ as selected parameters.
 \description{
 Compute posterior uncertainty intervals for \code{hsstan} objects.
 }
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+posterior_interval(hs.biom)
+
+}

@@ -2,31 +2,42 @@
 % Please edit documentation in R/projection.R
 \name{plot.projsel}
 \alias{plot.projsel}
-\title{Plot of the incremental contribution of each predictor}
+\title{Plot of relative explanatory power of predictors}
 \usage{
-\method{plot}{projsel}(x, title = NULL, max.labels = NULL,
-  font.size = 12, hadj = 0.05, vadj = 0.02, ...)
+\method{plot}{projsel}(x, title = NULL, max.points = NULL,
+  max.labels = NULL, from.covariates = TRUE, font.size = 12,
+  hadj = 0.05, vadj = 0, ...)
 }
 \arguments{
-\item{x}{A data frame created by \code{\link{projsel}}.}
+\item{x}{A data frame created by \code{\link[=projsel]{projsel()}}.}
 
 \item{title}{Title of the plot. If \code{NULL}, no title is displayed.}
 
-\item{max.labels}{Maximum number of points to be labelled. If \code{NULL},
-all those present in the \var{sel} file are displayed.}
+\item{max.points}{Maximum number of predictors to be plotted. If \code{NULL}
+(default) or 0, all points are plotted.}
 
-\item{font.size}{Font size used to scale all text in the plot.}
+\item{max.labels}{Maximum number of predictors to be labelled. If \code{NULL}
+(default), all predictor labels present in \code{x} are displayed, which
+may result in overprinting.}
+
+\item{from.covariates}{Whether the plotting should start from the unpenalized
+covariates (\code{TRUE} by default). If set to \code{FALSE}, the plot includes a
+point for the null (intercept-only) model.}
+
+\item{font.size}{Size of the textual elements (labels and axes).}
 
 \item{hadj, vadj}{Horizontal and vertical adjustment for the labels.}
 
-\item{...}{Other options to plot() (currently ignored).}
+\item{...}{Currently ignored.}
 }
 \value{
-A \pkg{ggplot2} object showing the relative incremental contribution of each
+A \strong{ggplot2} object showing the relative incremental contribution of each
 predictor starting from the initial set of unpenalized covariates.
 }
 \description{
-A function of name \code{getfullname} to match variable names to full
-names is searched on the current workspace, and if found it is used to
-transform the labels before creating the plot.
+The function plots the relative explanatory power of each predictor in order
+of selection. The relative explanatory power of predictors is computed
+according to the KL divergence from the full model to each submodel, scaled
+in such a way that the baseline model (either the null model or the model
+containing only unpenalized covariates) is at 0, while the full model is at 1.
 }

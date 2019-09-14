@@ -3,10 +3,41 @@
 \docType{package}
 \name{hsstan-package}
 \alias{hsstan-package}
-\title{The 'hsstan' package.}
+\title{Hierarchical shrinkage Stan models for biomarker selection}
 \description{
-Regression models with hierarchical shrinkage priors
+The \strong{hsstan} package provides linear and logistic regression models
+penalized with hierarchical shrinkage priors for selection of biomarkers.
+Models are fitted with Stan (Carpenter et al. (2017)), which allows to
+perform full Bayesian inference.
+}
+\details{
+The package implements the horseshoe and regularized horseshoe priors
+(Piironen and Vehtari (2017)), and the projection predictive selection
+approach to recover a sparse set of predictive biomarkers (Piironen,
+Paasiniemi and Vehtari (2018)).
+
+The approach is particularly suited to selection from high-dimensional
+panels of biomarkers, such as those that can be measured by MSMS or similar
+technologies (Colombo, Valo, McGurnaghan et al. (2019)).
 }
 \references{
-Stan Development Team (2018). RStan: the R interface to Stan. R package version 2.17.3. http://mc-stan.org
+B. Carpenter et al. (2017),
+Stan: a probabilistic programming language,
+\emph{Journal of Statistical Software}, 76 (1).
+\url{https://doi.org/10.18637/jss.v076.i01}
+
+J. Piironen and A. Vehtari (2017),
+Sparsity information and regularization in the horseshoe and other shrinkage
+priors, \emph{Electronic Journal of Statistics}, 11 (2), 5018-5051.
+\url{https://doi.org/10.1214/17-EJS1337SI}
+
+J. Piironen, M. Paasiniemi and A. Vehtari (2018),
+Projective inference in high-dimensional problems: prediction and feature
+selection, \emph{ArXiv preprint}.
+\url{https://arxiv.org/abs/1810.02406}
+
+M. Colombo, E. Valo, S.J. McGurnaghan et al. (2019),
+Biomarkers associated with progression of renal disease in type 1 diabetes,
+\emph{Diabetologia}, 62 (9), 1616-1627.
+\url{https://doi.org/10.1007/s00125-019-4915-0}
 }

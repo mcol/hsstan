@@ -16,9 +16,15 @@ If \code{NULL} (default), the model matrix is used.}
 \item{...}{Currently ignored.}
 }
 \value{
-A matrix of size \code{S} by \code{N}, where \code{S} is number of draws
-from the posterior distribution, and \code{N} is the number of data points.
+A matrix of size \code{S} by \code{N}, where \code{S} is number of draws from the posterior
+distribution, and \code{N} is the number of data points.
 }
 \description{
 Compute the pointwise log-likelihood.
+}
+\examples{
+\dontshow{utils::example("hsstan", echo=FALSE)}
+# continued from ?hsstan
+log_lik(hs.biom)
+
 }
