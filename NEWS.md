@@ -25,7 +25,7 @@
 
 ### Major Changes
 
-- Update the interface to `hsstan()`.
+- Update the interface of `hsstan()`.
 - Don't standardize the data inside `hsstan()`.
 - Implement the thin QR decomposition and use it by default.
 - Replace uses of `foreach()`/`%dopar%` with `parallel::mclapply()`.

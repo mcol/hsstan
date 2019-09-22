@@ -261,13 +261,12 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #'       the indices of the withdrawn observations for each fold. This is not
 #'       present if `store.fits=FALSE`.}
 #' \item{data}{the dataset used in fitting the model (before withdrawing
-#'             observations). This is not present if `store.fits=FALSE`.}
+#'       observations). This is not present if `store.fits=FALSE`.}
 #'
 #' @examples
 #' \donttest{
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' # continued from ?hsstan
-#'
 #' # only 2 folds for speed of example
 #' folds <- rep(1:2, length.out=length(df$Y))
 #' cv.biom <- kfold(hs.biom, folds=folds, cores=2)

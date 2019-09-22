@@ -176,7 +176,6 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 #' \dontshow{utils::example("hsstan", echo=FALSE)}
 #' \dontshow{oldopts <- options(mc.cores=2)}
 #' # continued from ?hsstan
-#'
 #' sel <- projsel(hs.biom, max.iters=3)
 #' plot(sel)
 #' \dontshow{options(oldopts)}
