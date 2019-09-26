@@ -1,3 +1,11 @@
+# Current development version
+
+### Major Changes
+
+### Smaller Changes and Bug Fixes
+
+- Allow using the iter and warmup options in kfold().
+
 # hsstan 0.6 (14 September 2019)
 
 ### Major Changes

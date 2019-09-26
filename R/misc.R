@@ -304,7 +304,7 @@ validate.rstan.args <- function(...) {
                     "sample_file", "diagnostic_file", "verbose", "algorithm",
                     "control", "open_progress", "show_messages", "chain_id",
                     "init_r", "test_grad", "append_samples", "refresh",
-                    "save_warmup", "enable_random_init")
+                    "save_warmup", "enable_random_init", "iter", "warmup")
     dots <- list(...)
     for (arg in names(dots))
         if (!arg %in% valid.args)
