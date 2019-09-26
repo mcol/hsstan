@@ -2,6 +2,12 @@
 ##
 ## Copyright (c) 2019 Marco Colombo
 ##
+## Parts of the code are based on https://avehtari.github.io/bayes_R2/bayes_R2.html
+## Portions copyright (c) 2019 Aki Vehtari, Andrew Gelman, Ben Goodrich, Jonah Gabry
+##
+## Parts of the code are based on https://github.com/stan-dev/rstanarm
+## Portions copyright (c) 2015, 2016, 2017 Trustees of Columbia University
+##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or

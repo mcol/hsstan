@@ -3,6 +3,7 @@
 ## Copyright (c) 2017-2019 Marco Colombo and Paul McKeigue
 ##
 ## Parts of the code are based on https://github.com/jpiironen/rstan-varsel
+## Portions copyright (c) 2015-2017 Juho Piironen
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
