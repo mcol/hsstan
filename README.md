@@ -1,5 +1,8 @@
 # Hierarchical Shrinkage Stan Models for Biomarker Selection
 
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/hsstan)](https://cran.r-project.org/package=hsstan)
+[![CRAN\_Downloads\_Badge](https://cranlogs.r-pkg.org/badges/hsstan)](https://cran.r-project.org/package=hsstan)
+
 The **hsstan** package provides linear and logistic regression models penalized
 with hierarchical shrinkage priors for selection of biomarkers. Models are
 fitted with [Stan](https://mc-stan.org), which allows to perform full Bayesian
