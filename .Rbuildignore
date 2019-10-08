@@ -4,3 +4,5 @@
 .tar.gz
 LICENSE
 tests
+rcppExports.cpp
+stanExports_*

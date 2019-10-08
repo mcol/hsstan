@@ -5,6 +5,7 @@
 ### Smaller Changes and Bug Fixes
 
 - Allow using the iter and warmup options in kfold().
+- Switch to rstantools 2.0.0.
 
 # hsstan 0.6 (14 September 2019)
 

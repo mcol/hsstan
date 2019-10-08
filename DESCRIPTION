@@ -35,7 +35,7 @@ Imports:
     Rcpp,
     methods,
     rstan (>= 2.18.1),
-    rstantools (>= 1.5.1),
+    rstantools (>= 2.0.0),
     stats,
     utils
 LinkingTo:
