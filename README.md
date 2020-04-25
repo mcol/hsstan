@@ -83,6 +83,12 @@ print(sel.biom, digits=4)
 
 ### References
 
+* [M. Colombo][mcol], S.J. McGurnaghan, L.A.K. Blackbourn et al.,
+  Comparison of serum and urinary biomarker panels with albumin creatinin
+  ratio in the prediction of renal function decline in type 1 diabetes,
+  _Diabetologia_ (2020) 63 (4): 788-798.
+  https://doi.org/10.1007/s00125-019-05081-8
+
 * [M. Colombo][mcol], E. Valo, S.J. McGurnaghan et al.,
   Biomarkers associated with progression of renal disease in type 1 diabetes,
   _Diabetologia_ (2019) 62 (9): 1616-1627.

@@ -30,6 +30,15 @@
 - Validate the options passed to `rstan::sampling()`.
 - Expand the documentation and add examples.
 
+### Notes
+
+- This version was used in:
+  - [M. Colombo][mcol], S.J. McGurnaghan, L.A.K. Blackbourn et al.,
+    Comparison of serum and urinary biomarker panels with albumin creatinin
+    ratio in the prediction of renal function decline in type 1 diabetes,
+    _Diabetologia_ (2020): 63 (4) 788-798.
+    https://doi.org/10.1007/s00125-019-05081-8
+
 # hsstan 0.5 (11 August 2019)
 
 ### Major Changes
