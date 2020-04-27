@@ -106,12 +106,12 @@ test_that("loo",
     out <- loo(hs.gauss)
     expect_s3_class(out, "loo")
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-114.3693922, 7.1254201),
+                      c(-114.370080, 7.126108),
                       tolerance=tol)
 
     out <- loo(hs.binom)
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-37.9220431, 8.9499717),
+                      c(-37.922085, 8.950014),
                       tolerance=tol)
 })
 
