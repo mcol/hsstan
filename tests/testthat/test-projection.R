@@ -1,7 +1,8 @@
 test_that("projsel",
 {
     SW({
-        hs.nopen <- hsstan(df, mod.gauss, iter=50, chains=1, family=gaussian)
+        hs.nopen <- hsstan(df, mod.gauss, iter=50, chains=1, family=gaussian,
+                           refresh=0)
     })
 
     expect_error(projsel(hs.nopen),

@@ -1,5 +1,5 @@
 ## silence output and warnings
-SW <- function(expr) capture.output(suppressMessages(suppressWarnings(expr)))
+SW <- function(expr) suppressMessages(suppressWarnings(expr))
 
 ## dataset
 set.seed(1)
@@ -27,7 +27,8 @@ tol <- 0.000001
 
 ## wrapper to set commonly used options
 hs <- function(model, family, ...)
-    hsstan(df, model, pen, iter=iters, chains=chains, family=family, ...)
+    hsstan(df, model, pen, iter=iters, chains=chains, family=family,
+           refresh=0, ...)
 
 message("Running hsstan models...")
 SW({

@@ -23,7 +23,7 @@ test_that("hsstan doesn't use the QR decomposition if P > N",
 {
     SW({
         hs.noqr <- hsstan(df[1:5, ], mod.gauss, pen, iter=100, qr=TRUE,
-                          keep.hs.pars=TRUE)
+                          keep.hs.pars=TRUE, refresh=0)
     })
     expect_false(hs.noqr$qr)
     expect_match(names(hs.noqr$stanfit),
