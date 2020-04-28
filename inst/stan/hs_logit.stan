@@ -1,7 +1,7 @@
 //
 // Hierarchical shrinkage prior on regression coeffs (logistic regression)
 //
-// This implements the regularized horseshoe prior according to the alternative
+// This implements the regularized horseshoe prior according to the simple
 // parametrization presented in:
 //
 // Piironen, Vehtari (2017), Sparsity information and regularization in the
@@ -55,12 +55,14 @@ parameters {
   // unpenalized regression parameters
   vector[U] beta_u;
 
+  // global shrinkage parameter
+  real<lower=0> tau;
+
+  // local shrinkage parameter
+  vector<lower=0>[P-U] lambda;
+
   // auxiliary variables
   vector[P-U] z;
-  real<lower=0> r1_global;
-  real<lower=0> r2_global;
-  vector<lower=0>[P-U] r1_local;
-  vector<lower=0>[P-U] r2_local;
   real<lower=0> c2;
 }
 
@@ -70,10 +72,9 @@ transformed parameters {
   vector[P-U] beta_p;
 
   if (regularized)
-    beta_p = reg_hs(z, r1_local, r2_local, r1_global, r2_global,
-                    global_scale, slab_scale * c2);
+    beta_p = reg_hs(z, lambda, tau, slab_scale^2 * c2);
   else
-    beta_p = hs(z, r1_local, r2_local, r1_global, r2_global);
+    beta_p = hs(z, lambda, tau);
 }
 
 model {
@@ -83,10 +84,8 @@ model {
 
   // half t-priors for lambdas and tau
   z ~ std_normal();
-  r1_local ~ std_normal();
-  r2_local ~ inv_gamma(0.5 * nu, 0.5 * nu);
-  r1_global ~ std_normal();
-  r2_global ~ inv_gamma(0.5 * global_df, 0.5 * global_df);
+  lambda ~ student_t(nu, 0, 1);
+  tau ~ student_t(global_df, 0, global_scale);
 
   // inverse-gamma prior for c^2
   c2 ~ inv_gamma(0.5 * slab_df, 0.5 * slab_df);

@@ -2,10 +2,16 @@
 
 ### Major Changes
 
+- Use a simpler parametrization of the regularized horseshoe prior.
+
 ### Smaller Changes and Bug Fixes
 
 - Allow using the iter and warmup options in kfold().
 - Switch to rstantools 2.0.0.
+- Fix bug in the use of the `slab.scale` parameter of `hsstan()`, as it was not
+  squared in the computation of the slab component of the regularized horseshoe
+  prior. The default value of 2 in the current version corresponds to using the
+  value 4 in versions 0.6 and earlier.
 
 # hsstan 0.6 (14 September 2019)
 

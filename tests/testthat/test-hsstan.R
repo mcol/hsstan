@@ -9,7 +9,7 @@ test_that("hsstan",
                     "hsstan")
     expect_s4_class(hs.gauss$stanfit,
                     "stanfit")
-    expect_false("r1_local[1]" %in% names(hs.gauss$stanfit))
+    expect_false("lambda[1]" %in% names(hs.gauss$stanfit))
     expect_equal(hs.gauss$family,
                  gaussian())
     expect_equal(names(hs.gauss$betas$unpenalized),
@@ -27,7 +27,9 @@ test_that("hsstan doesn't use the QR decomposition if P > N",
     })
     expect_false(hs.noqr$qr)
     expect_match(names(hs.noqr$stanfit),
-                 "r1_local", all=FALSE)
+                 "lambda", all=FALSE)
+    expect_match(names(hs.noqr$stanfit),
+                 "tau", all=FALSE)
 })
 
 test_that("kfold",

@@ -144,7 +144,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     validate.rstan.args(...)
 
     ## parameter names not to include by default in the stanfit object
-    hs.pars <- c("r1_local", "r2_local", "r1_global", "r2_global", "z", "c2")
+    hs.pars <- c("lambda", "tau", "z", "c2")
     if (keep.hs.pars)
         hs.pars <- NA
 
