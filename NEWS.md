@@ -2,6 +2,8 @@
 
 ### Major Changes
 
+- Speed up all models up to 4-5 times by using Stan's `normal_id_glm()` and
+  `bernoulli_logit_glm()`.
 - Use a simpler parametrization of the regularized horseshoe prior.
 
 ### Smaller Changes and Bug Fixes

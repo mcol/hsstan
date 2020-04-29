@@ -71,10 +71,10 @@ test_that("posterior_performance",
     expect_equal(attributes(out)$type,
                  "cross-validated")
     expect_equivalent(out["r2", ],
-                      c(0.00497231, 0.01238094, 0.00000000, 0.04022560),
+                      c(0.00510281, 0.01116469, 0.00000000, 0.03538096),
                       tolerance=tol)
     expect_equivalent(out["llk", ],
-                      c(-142.41211783, 23.39468621, -202.41609434, -119.25843542),
+                      c(-143.55221422, 19.49048392, -196.56582230, -119.79460177),
                       tolerance=tol)
 
     out <- posterior_performance(hs.binom, prob=0.89)
@@ -85,10 +85,10 @@ test_that("posterior_performance",
     expect_equal(attributes(out)$type,
                  "non cross-validated")
     expect_equivalent(out["auc", ],
-                      c(0.66507840, 0.08794497, 0.54062400, 0.80817600),
+                      c(0.65431360, 0.08558204, 0.53120000, 0.80248800),
                       tolerance=tol)
     expect_equivalent(out["llk", ],
-                      c(-33.1964259, 3.22441630, -37.54544278, -27.68313103),
+                      c(-33.5962871, 3.33461041, -38.59430389, -27.53417861),
                       tolerance=tol)
 
     out <- posterior_performance(cv.binom, summary=FALSE)
@@ -106,12 +106,12 @@ test_that("loo",
     out <- loo(hs.gauss)
     expect_s3_class(out, "loo")
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-114.087049, 7.010475),
+                      c(-113.799317, 6.781937),
                       tolerance=tol)
 
     out <- loo(hs.binom)
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-39.24420, 10.01289),
+                      c(-38.78884, 8.781118),
                       tolerance=tol)
 })
 
@@ -120,12 +120,12 @@ test_that("waic",
     out <- waic(hs.gauss)
     expect_s3_class(out, c("waic", "loo"))
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-113.9345867, 6.8580124),
+                      c(-113.6395805, 6.6222004),
                       tolerance=tol)
 
     out <- waic(hs.binom)
     expect_equivalent(out$estimates[1:2, "Estimate"],
-                      c(-38.7986589, 9.5673524),
+                      c(-38.4728502, 8.4651291),
                       tolerance=tol)
 })
 

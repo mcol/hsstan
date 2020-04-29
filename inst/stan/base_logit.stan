@@ -28,12 +28,9 @@ parameters {
 
 model {
 
-  // linear predictor
-  vector[N] mu = X * beta_u;
-
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, scale_u);
 
   // likelihood
-  y ~ bernoulli_logit(mu);
+  y ~ bernoulli_logit_glm(X, 0, beta_u);
 }

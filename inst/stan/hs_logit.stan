@@ -79,8 +79,8 @@ transformed parameters {
 
 model {
 
-  // linear predictor
-  vector[N] mu = X[, 1:U] * beta_u + X[, (U+1):P] * beta_p;
+  // regression coefficients
+  vector[P] beta = append_row(beta_u, beta_p);
 
   // half t-priors for lambdas and tau
   z ~ std_normal();
@@ -94,5 +94,5 @@ model {
   beta_u ~ normal(0, scale_u);
 
   // likelihood
-  y ~ bernoulli_logit(mu);
+  y ~ bernoulli_logit_glm(X, 0, beta);
 }

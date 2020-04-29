@@ -31,9 +31,6 @@ parameters {
 
 model {
 
-  // linear predictor
-  vector[N] mu = X[, 1:U] * beta_u;
-
   // unpenalized coefficients including intercept
   beta_u ~ normal(0, scale_u);
 
@@ -41,5 +38,5 @@ model {
   sigma ~ inv_gamma(1, 1);
 
   // likelihood
-  y ~ normal(mu, sigma);
+  y ~ normal_id_glm(X, 0, beta_u, sigma);
 }

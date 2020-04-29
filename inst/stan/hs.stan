@@ -82,8 +82,8 @@ transformed parameters {
 
 model {
 
-  // linear predictor
-  vector[N] mu = X[, 1:U] * beta_u + X[, (U+1):P] * beta_p;
+  // regression coefficients
+  vector[P] beta = append_row(beta_u, beta_p);
 
   // half t-priors for lambdas and tau
   z ~ std_normal();
@@ -100,5 +100,5 @@ model {
   sigma ~ inv_gamma(1, 1);
 
   // likelihood
-  y ~ normal(mu, sigma);
+  y ~ normal_id_glm(X, 0, beta, sigma);
 }
