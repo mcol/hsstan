@@ -1,6 +1,5 @@
-*.cc
-*.cpp
-*.h
+rcppExports.cpp
+stanExports_*
 *.o
 *.so
 *.swp
