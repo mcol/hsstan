@@ -1,8 +1,9 @@
 .gitignore
+.Rcheck
 .Rdata
 .Rhistory
 .tar.gz
 LICENSE
+Makevars.win
 tests
-rcppExports.cpp
 stanExports_*

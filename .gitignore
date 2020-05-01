@@ -1,8 +1,8 @@
-rcppExports.cpp
+Makevars.win
 stanExports_*
+*.Rcheck
 *.o
 *.so
 *.swp
 *.tar.gz
 .Rhistory
-src/stan_files/*.hpp
