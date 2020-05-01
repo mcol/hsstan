@@ -5,8 +5,14 @@
 \alias{kfold}
 \title{K-fold cross-validation}
 \usage{
-\method{kfold}{hsstan}(x, folds, chains = 1, store.fits = TRUE,
-  cores = getOption("mc.cores", 1), ...)
+\method{kfold}{hsstan}(
+  x,
+  folds,
+  chains = 1,
+  store.fits = TRUE,
+  cores = getOption("mc.cores", 1),
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{hsstan}.}
@@ -55,7 +61,6 @@ the model on the whole data.
 \donttest{
 \dontshow{utils::example("hsstan", echo=FALSE)}
 # continued from ?hsstan
-
 # only 2 folds for speed of example
 folds <- rep(1:2, length.out=length(df$Y))
 cv.biom <- kfold(hs.biom, folds=folds, cores=2)

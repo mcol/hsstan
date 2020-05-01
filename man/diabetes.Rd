@@ -4,7 +4,9 @@
 \name{diabetes}
 \alias{diabetes}
 \title{Diabetes data with interaction terms}
-\format{A data frame with 442 rows and 65 columns (centred and scaled).}
+\format{
+A data frame with 442 rows and 65 columns (centred and scaled).
+}
 \source{
 B. Efron, T. Hastie, I. Johnstone and R. Tibshirani (2004),
 Least angle regression, \emph{The Annals of Statistics}, 32 (2), 407-499.

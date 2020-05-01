@@ -5,8 +5,7 @@
 \alias{posterior_linpred}
 \title{Posterior distribution of the linear predictor}
 \usage{
-\method{posterior_linpred}{hsstan}(object, transform = FALSE,
-  newdata = NULL, ...)
+\method{posterior_linpred}{hsstan}(object, transform = FALSE, newdata = NULL, ...)
 }
 \arguments{
 \item{object}{An object of class \code{hsstan}.}

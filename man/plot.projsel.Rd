@@ -4,9 +4,17 @@
 \alias{plot.projsel}
 \title{Plot of relative explanatory power of predictors}
 \usage{
-\method{plot}{projsel}(x, title = NULL, max.points = NULL,
-  max.labels = NULL, from.covariates = TRUE, font.size = 12,
-  hadj = 0.05, vadj = 0, ...)
+\method{plot}{projsel}(
+  x,
+  title = NULL,
+  max.points = NULL,
+  max.labels = NULL,
+  from.covariates = TRUE,
+  font.size = 12,
+  hadj = 0.05,
+  vadj = 0,
+  ...
+)
 }
 \arguments{
 \item{x}{A data frame created by \code{\link[=projsel]{projsel()}}.}

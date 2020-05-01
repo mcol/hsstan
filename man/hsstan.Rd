@@ -4,12 +4,26 @@
 \alias{hsstan}
 \title{Hierarchical shrinkage models}
 \usage{
-hsstan(x, covs.model, penalized = NULL, family = gaussian,
-  iter = 2000, warmup = floor(iter/2), scale.u = 2,
-  regularized = TRUE, nu = ifelse(regularized, 1, 3),
-  par.ratio = 0.05, global.df = 1, slab.scale = 2, slab.df = 4,
-  qr = TRUE, seed = 123, adapt.delta = NULL, keep.hs.pars = FALSE,
-  ...)
+hsstan(
+  x,
+  covs.model,
+  penalized = NULL,
+  family = gaussian,
+  iter = 2000,
+  warmup = floor(iter/2),
+  scale.u = 2,
+  regularized = TRUE,
+  nu = ifelse(regularized, 1, 3),
+  par.ratio = 0.05,
+  global.df = 1,
+  slab.scale = 2,
+  slab.df = 4,
+  qr = TRUE,
+  seed = 123,
+  adapt.delta = NULL,
+  keep.hs.pars = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{Data frame containing outcome, covariates and penalized predictors.

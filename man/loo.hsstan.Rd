@@ -32,7 +32,6 @@ information criterion.
 \dontshow{utils::example("hsstan", echo=FALSE)}
 \dontshow{oldopts <- options(mc.cores=2)}
 # continued from ?hsstan
-
 loo(hs.biom)
 waic(hs.biom)
 \dontshow{options(oldopts)}

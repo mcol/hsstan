@@ -5,8 +5,7 @@
 \alias{posterior_interval}
 \title{Posterior uncertainty intervals}
 \usage{
-\method{posterior_interval}{hsstan}(object, pars = NULL, prob = 0.95,
-  ...)
+\method{posterior_interval}{hsstan}(object, pars = NULL, prob = 0.95, ...)
 }
 \arguments{
 \item{object}{An object of class \code{hsstan}.}

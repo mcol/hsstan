@@ -4,8 +4,12 @@
 \alias{posterior_performance}
 \title{Posterior measures of performance}
 \usage{
-posterior_performance(obj, prob = 0.95, summary = TRUE,
-  cores = getOption("mc.cores", 1))
+posterior_performance(
+  obj,
+  prob = 0.95,
+  summary = TRUE,
+  cores = getOption("mc.cores", 1)
+)
 }
 \arguments{
 \item{obj}{An object of class \code{hsstan} or \code{kfold}.}
@@ -32,8 +36,10 @@ Compute the log-likelihood and a relevant measure of performance (R-squared
 or AUC) from the posterior samples.
 }
 \examples{
+\donttest{
 \dontshow{utils::example("hsstan", echo=FALSE)}
 # continued from ?hsstan
 posterior_performance(hs.biom, cores=1)
+}
 
 }

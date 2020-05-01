@@ -4,8 +4,16 @@
 \alias{summary.hsstan}
 \title{Summary for the fitted model}
 \usage{
-\method{summary}{hsstan}(object, pars = NULL, prob = 0.95,
-  digits = 2, sort = NULL, decreasing = TRUE, max.rows = NULL, ...)
+\method{summary}{hsstan}(
+  object,
+  pars = NULL,
+  prob = 0.95,
+  digits = 2,
+  sort = NULL,
+  decreasing = TRUE,
+  max.rows = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class \code{hsstan}.}

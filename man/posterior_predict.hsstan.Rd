@@ -5,8 +5,7 @@
 \alias{posterior_predict}
 \title{Posterior predictive distribution}
 \usage{
-\method{posterior_predict}{hsstan}(object, newdata = NULL,
-  nsamples = NULL, seed = NULL, ...)
+\method{posterior_predict}{hsstan}(object, newdata = NULL, nsamples = NULL, seed = NULL, ...)
 }
 \arguments{
 \item{object}{An object of class \code{hsstan}.}

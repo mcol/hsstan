@@ -39,7 +39,6 @@ residuals and Bayesian bootstrap.
 \dontshow{utils::example("hsstan", echo=FALSE)}
 \dontshow{oldopts <- options(mc.cores=2)}
 # continued from ?hsstan
-
 bayes_R2(hs.biom)
 loo_R2(hs.biom)
 \dontshow{options(oldopts)}
