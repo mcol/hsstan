@@ -48,6 +48,7 @@ Suggests:
     testthat (>= 2.1.0)
 ByteCompile: yes
 NeedsCompilation: yes
+SystemRequirements: GNU make
 Encoding: UTF-8
 RoxygenNote: 7.1.0
 Roxygen: list(markdown=TRUE)
