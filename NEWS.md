@@ -1,3 +1,11 @@
+# Current development version
+
+### Major Changes
+
+### Smaller Changes and Bug Fixes
+
+- Fix parallelised loop boundaries in `posterior_performance()` for Windows.
+
 # hsstan 0.7 (1 May 2020)
 
 ### Major Changes
