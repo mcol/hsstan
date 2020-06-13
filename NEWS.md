@@ -2,6 +2,9 @@
 
 ### Major Changes
 
+- Add the `sub.idx` parameter to `posterior_performance()` to select the
+  observations to be used in the computation of the performance measures.
+
 ### Smaller Changes and Bug Fixes
 
 - Fix parallelised loop boundaries in `posterior_performance()` for Windows.

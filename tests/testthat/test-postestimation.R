@@ -58,6 +58,22 @@ test_that("posterior_performance",
                  "Not an 'hsstan' or 'kfold' object")
     expect_error(posterior_performance(cv.nofit),
                  "No fitted models found, run 'kfold' with store.fits=TRUE")
+    expect_error(posterior_performance(cv.gauss, sub.idx=letters),
+                 "'sub.idx' must be an integer vector")
+    expect_error(posterior_performance(cv.gauss, sub.idx=c(1, 2, 3.2)),
+                 "'sub.idx' must be an integer vector")
+    expect_error(posterior_performance(cv.gauss, sub.idx=matrix(1:9, 3, 3)),
+                 "'sub.idx' must be an integer vector")
+    expect_error(posterior_performance(cv.gauss, sub.idx=1),
+                 "'sub.idx' must contain at least two elements")
+    expect_error(posterior_performance(cv.gauss, sub.idx=c(0, 10)),
+                 "'sub.idx' contains out of bounds indices")
+    expect_error(posterior_performance(cv.gauss, sub.idx=c(1, 5, 1000)),
+                 "'sub.idx' contains out of bounds indices")
+    expect_error(posterior_performance(cv.gauss, sub.idx=c(1, 2, 1, 4)),
+                 "'sub.idx' contains duplicate indices")
+    expect_error(posterior_performance(cv.binom, sub.idx=1:2),
+                 "'sub.idx' must contain both outcome classes")
 
     out <- posterior_performance(cv.gauss)
     expect_is(out,
@@ -76,6 +92,14 @@ test_that("posterior_performance",
     expect_equivalent(out["llk", ],
                       c(-143.55221422, 19.49048392, -196.56582230, -119.79460177),
                       tolerance=tol)
+    expect_equal(out,
+                 posterior_performance(cv.gauss, sub.idx=1:N))
+
+    out <- posterior_performance(cv.gauss, sub.idx=sample(which(df$X1 == "b")))
+    expect_named(attributes(out),
+                 c("dim", "dimnames", "type", "subset"))
+    expect_equal(attributes(out)$subset,
+                 which(df$X1 == "b"))
 
     out <- posterior_performance(hs.binom, prob=0.89)
     expect_equal(rownames(out),

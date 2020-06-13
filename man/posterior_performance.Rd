@@ -7,6 +7,7 @@
 posterior_performance(
   obj,
   prob = 0.95,
+  sub.idx = NULL,
   summary = TRUE,
   cores = getOption("mc.cores", 1)
 )
@@ -16,6 +17,10 @@ posterior_performance(
 
 \item{prob}{Width of the posterior interval (0.95, by default). It is
 ignored if \code{summary=FALSE}.}
+
+\item{sub.idx}{Vector of indices of observations in the dataset to be used
+in computing the performance measures. If \code{NULL} (default), all
+observations in the dataset are used.}
 
 \item{summary}{Whether a summary of the distribution of the performance
 measure should be returned rather than the pointwise values
@@ -29,7 +34,8 @@ The mean, standard deviation and posterior interval of the performance
 measure (R-squared or AUC) if \code{summary=TRUE}, or a vector of values
 of the performance measure with length equal to the size of the posterior
 sample if \code{summary=FALSE}. Attribute \code{type} reports whether the performance
-measures are cross-validated or not.
+measures are cross-validated or not. If \code{sub.idx} is not \code{NULL}, attribute
+\code{subset} reports the index of observations used in the computations.
 }
 \description{
 Compute the log-likelihood and a relevant measure of performance (R-squared

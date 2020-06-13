@@ -200,6 +200,9 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' @param obj An object of class `hsstan` or `kfold`.
 #' @param prob Width of the posterior interval (0.95, by default). It is
 #'        ignored if `summary=FALSE`.
+#' @param sub.idx Vector of indices of observations in the dataset to be used
+#'        in computing the performance measures. If `NULL` (default), all
+#'        observations in the dataset are used.
 #' @param summary Whether a summary of the distribution of the performance
 #'        measure should be returned rather than the pointwise values
 #'        (`TRUE` by default).
@@ -211,7 +214,8 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' measure (R-squared or AUC) if `summary=TRUE`, or a vector of values
 #' of the performance measure with length equal to the size of the posterior
 #' sample if `summary=FALSE`. Attribute `type` reports whether the performance
-#' measures are cross-validated or not.
+#' measures are cross-validated or not. If `sub.idx` is not `NULL`, attribute
+#' `subset` reports the index of observations used in the computations.
 #'
 #' @examples
 #' \donttest{
@@ -221,7 +225,7 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' }
 #'
 #' @export
-posterior_performance <- function(obj, prob=0.95, summary=TRUE,
+posterior_performance <- function(obj, prob=0.95, sub.idx=NULL, summary=TRUE,
                                   cores=getOption("mc.cores", 1)) {
 
     r2 <- function(y.obs, y.pred)
@@ -239,6 +243,23 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
     } else
         stop("Not an 'hsstan' or 'kfold' object.")
 
+    if (is.null(sub.idx)) {
+        sub.idx <- 1:nrow(obj$data)
+        used.subset <- FALSE
+    } else {
+        if (!is.numeric(sub.idx) || any(sub.idx != as.integer(sub.idx)) ||
+            NCOL(sub.idx) > 1)
+            stop("'sub.idx' must be an integer vector.")
+        if (length(sub.idx) < 2)
+            stop("'sub.idx' must contain at least two elements.")
+        if (any(sub.idx > nrow(obj$data) | sub.idx < 1))
+            stop("'sub.idx' contains out of bounds indices.")
+        if (any(duplicated(sub.idx)))
+            stop("'sub.idx' contains duplicate indices.")
+        sub.idx <- sort(sub.idx)
+        used.subset <- length(sub.idx) < nrow(obj$data)
+    }
+
     validate.samples(obj$fits[[1]])
     validate.probability(prob)
     logistic <- is.logistic(obj$fits[[1]])
@@ -249,12 +270,17 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
     y <- mu <- llk <- NULL
     for (fold in 1:num.folds) {
         hs <- obj$fits[[fold]]
-        test.idx <- obj$fits[, "test.idx"][[fold]]
+        test.idx <- intersect(obj$fits[, "test.idx"][[fold]], sub.idx)
+        if (length(test.idx) == 0)
+            next
         newdata <- obj$data[test.idx, ]
         y <- c(y, obj$data[test.idx, hs$model.terms$outcome])
         mu <- cbind(mu, posterior_linpred(hs, newdata=newdata, transform=TRUE))
         llk <- cbind(llk, log_lik(hs, newdata=newdata))
     }
+
+    if (used.subset && logistic && length(unique(y)) != 2)
+        stop("'sub.idx' must contain both outcome classes.")
 
     par.fun <- function(i) perf.fun(y, mu[i, ])
     if (.Platform$OS.type != "windows") {
@@ -271,6 +297,8 @@ posterior_performance <- function(obj, prob=0.95, summary=TRUE,
     if (summary)
         out <- posterior_summary(out, prob)
     attr(out, "type") <- paste0(if(num.folds == 1) "non ", "cross-validated")
+    if (used.subset)
+        attr(out, "subset") <- sub.idx
     return(out)
 }
 
