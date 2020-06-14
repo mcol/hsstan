@@ -144,6 +144,30 @@ test_that("valid family inputs",
                  "gaussian")
 })
 
+test_that("validate.indices",
+{
+    expect_error(validate.indices(c(1:N, NA), N, "test"),
+                 "'test' contains missing values")
+    expect_error(validate.indices(letters, N, "test"),
+                 "'test' must be an integer vector")
+    expect_error(validate.indices(list(1:N), N, "test"),
+                 "'test' must be an integer vector")
+    expect_error(validate.indices(matrix(1:9, 3, 3), N, "test"),
+                 "'test' must be an integer vector")
+    expect_error(validate.indices(c(1:9, 10.5), N, "test"),
+                 "'test' must be an integer vector")
+    expect_error(validate.indices(1, N, "test"),
+                 "'test' must contain at least two elements")
+    expect_error(validate.indices(1:N, 5, "test"),
+                 "'test' contains out of bounds indices")
+    expect_error(validate.indices(0:N, N, "test"),
+                 "'test' contains out of bounds indices")
+    expect_error(validate.indices(rep(2, N), N, "test"),
+                 "'test' contains duplicate indices")
+
+    expect_silent(validate.indices(rep(2, N), N, "test", throw.duplicates=FALSE))
+})
+
 test_that("validate.folds",
 {
     expect_error(validate.folds(c(1:N, NA), N),

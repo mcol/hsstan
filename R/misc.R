@@ -225,6 +225,32 @@ validate.family <- function(family, y) {
     return(family)
 }
 
+#' Validate a vector of indices
+#'
+#' @param x Vector to be checked.
+#' @param N Maximum valid index.
+#' @param name Name of the vector to report in error messages.
+#' @param throw.duplicates Whether the function should throw if the vector
+#'        contains duplicate elements (`TRUE` by default).
+#'
+#' @return
+#' Throws an error if the given vector is not an integer vector or contains
+#' missing, out of bounds or duplicate indices (if `throw.duplicates` is `TRUE`).
+#'
+#' @noRd
+validate.indices <- function(x, N, name, throw.duplicates=TRUE) {
+    if (anyNA(x))
+        stop("'", name, "' contains missing values.")
+    if (!is.numeric(x) || NCOL(x) > 1 || any(x != as.integer(x)))
+        stop("'", name, "' must be an integer vector.")
+    if (length(x) < 2)
+        stop("'", name, "' must contain at least two elements.")
+    if (any(x < 1 | x > N))
+        stop("'", name, "' contains out of bounds indices.")
+    if (throw.duplicates && any(duplicated(x)))
+        stop("'", name, "' contains duplicate indices.")
+}
+
 #' Validate the cross-validation folds
 #'
 #' @param folds Folds to be checked or `NULL`.
@@ -238,10 +264,7 @@ validate.family <- function(family, y) {
 validate.folds <- function(folds, N) {
     if (is.null(folds))
         return(rep(1, N))
-    if (anyNA(folds))
-        stop("'folds' contains missing values.")
-    if (!is.numeric(folds) || any(folds != as.integer(folds)))
-        stop("'folds' must be an integer vector.")
+    validate.indices(folds, N, "folds", throw.duplicates=FALSE)
     if (length(folds) != N)
         stop("'folds' should have length ", N, ".")
     K <- length(unique(folds))

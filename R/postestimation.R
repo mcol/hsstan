@@ -247,15 +247,7 @@ posterior_performance <- function(obj, prob=0.95, sub.idx=NULL, summary=TRUE,
         sub.idx <- 1:nrow(obj$data)
         used.subset <- FALSE
     } else {
-        if (!is.numeric(sub.idx) || any(sub.idx != as.integer(sub.idx)) ||
-            NCOL(sub.idx) > 1)
-            stop("'sub.idx' must be an integer vector.")
-        if (length(sub.idx) < 2)
-            stop("'sub.idx' must contain at least two elements.")
-        if (any(sub.idx > nrow(obj$data) | sub.idx < 1))
-            stop("'sub.idx' contains out of bounds indices.")
-        if (any(duplicated(sub.idx)))
-            stop("'sub.idx' contains duplicate indices.")
+        validate.indices(sub.idx, nrow(obj$data), "sub.idx")
         sub.idx <- sort(sub.idx)
         used.subset <- length(sub.idx) < nrow(obj$data)
     }
