@@ -21,8 +21,10 @@ test_that("projsel for gaussian family",
                  c("var", "kl", "rel.kl.null", "rel.kl", "elpd", "delta.elpd"))
     expect_equal(nrow(sel.gauss),
                  length(pen) + 2)
+    expect_equal(attr(sel.gauss, "start.from"),
+                 hs.gauss$model.terms$unpenalized)
     expect_equal(sel.gauss$var[1:2],
-                 c("Intercept only", "Unpenalized covariates"))
+                 c("Intercept only", "Initial submodel"))
     expect_equal(sel.gauss$var[-c(1:2)],
                  paste0("X", c(9, 4, 8, 5, 6, 7, 10)))
     expect_equal(sel.gauss$kl[2],
@@ -79,6 +81,38 @@ test_that("projsel for binomial family",
     expect_equal(sel.binom$delta.elpd[2],
                  -1.85835465, tolerance=tol)
     expect_true(all(diff(sel.binom$kl) < 0))
+})
+
+test_that("projsel from the intercept-only model",
+{
+    SW({
+        sel.gauss.1 <- projsel(hs.gauss, start.from=character(0))
+        sel.gauss.2 <- projsel(hs.gauss, start.from="X2")
+    })
+
+    expect_equal(sel.gauss.1$var[1:2],
+                 c("Intercept only", "X2"))
+    expect_equal(sel.gauss.2$var[1:2],
+                 c("Intercept only", "Initial submodel"))
+    expect_equivalent(sel.gauss.1[-2, ],
+                      sel.gauss.2[-2, ])
+    expect_equal(nrow(sel.gauss.1),
+                 length(c(hs.gauss$betas$unpenalized, hs.gauss$betas$penalized)))
+    expect_equal(attr(sel.gauss.1, "start.from"),
+                 character(0))
+    expect_equal(attr(sel.gauss.2, "start.from"),
+                 "X2")
+})
+
+test_that("projsel from a non-default starting submodel",
+{
+    SW({
+        sel.gauss <- projsel(hs.gauss, start.from="X1")
+    })
+
+    expect_equal(nrow(sel.gauss),
+                 length(c(grep("X1", names(hs.gauss$beta$unpenalized), inv=TRUE),
+                          hs.gauss$betas$penalized)) + 1)
 })
 
 test_that("projsel for a cross-validated object",

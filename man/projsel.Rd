@@ -4,7 +4,7 @@
 \alias{projsel}
 \title{Forward selection minimizing KL-divergence in projection}
 \usage{
-projsel(obj, max.iters = 30, out.csv = NULL)
+projsel(obj, max.iters = 30, start.from = NULL, out.csv = NULL)
 }
 \arguments{
 \item{obj}{Object of class \code{hsstan}.}
@@ -12,19 +12,24 @@ projsel(obj, max.iters = 30, out.csv = NULL)
 \item{max.iters}{Maximum number of iterations (number of predictors selected)
 after which the selection procedure should stop.}
 
+\item{start.from}{Vector of variable names to be used in the starting
+submodel. If \code{NULL} (default), selection starts from the set of
+unpenalized covariates.}
+
 \item{out.csv}{If not \code{NULL}, the name of a CSV file to save the
 output to.}
 }
 \value{
 A data frame of class \code{projsel} where each row corresponds to a
 forward-selected submodel that contains all variables listed up to that row.
+Attribute \code{start.from} reports the predictors in the initial model.
 The data frame contains the following columns:
 \item{var}{names of the variables selected.}
 \item{kl}{KL-divergence from the full model to the submodel.}
 \item{rel.kl.null}{relative explanatory power of predictors starting from the
 intercept-only model.}
-\item{rel.kl}{relative explanatory power of predictors starting from the model
-containing unpenalized covariates.}
+\item{rel.kl}{relative explanatory power of predictors starting from the
+initial model.}
 \item{elpd}{the expected log predictive density of the submodels.}
 \item{delta.elpd}{the difference in elpd from the full model.}
 }

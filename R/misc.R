@@ -273,6 +273,34 @@ validate.folds <- function(folds, N) {
     folds <- as.integer(folds)
 }
 
+#' Validate start.from
+#'
+#' Check that the predictor names provided is a valid subset of the unpenalized
+#' covariates.
+#'
+#' @param obj An object of class `hsstan`.
+#' @param start.from Vector to be checked.
+#'
+#' @return
+#' A vector of indices corresponding to the names listed in `start.from`.
+#' Throws an error if any of the names mentioned is not valid or does not match
+#' those available in the set of unpenalized covariates.
+#'
+#' @noRd
+validate.start.from <- function(obj, start.from) {
+    unp <- names(obj$betas$unpenalized)
+    if (is.null(start.from))
+        return(seq(length(unp)))
+    if (length(start.from) == 0)
+        return(1)
+    if (anyNA(start.from))
+        stop("'start.from' contains missing values.")
+    if (anyNA(match(start.from, obj$model.terms$unpenalized)))
+        stop("'start.from' contains names that cannot be matched.")
+    chosen <- colnames(model.matrix(reformulate(start.from), obj$data[1, ]))
+    return(which(unp %in% chosen))
+}
+
 #' Validate adapt.delta
 #'
 #' Check that an adaptation acceptance probability is valid.

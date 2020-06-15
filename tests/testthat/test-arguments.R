@@ -194,6 +194,34 @@ test_that("validate.folds",
                 "integer")
 })
 
+test_that("validate.start.from",
+{
+    expect_error(validate.start.from(hs.gauss, c("X1", NA)),
+                 "'start.from' contains missing values")
+    expect_error(validate.start.from(hs.gauss, 1:3),
+                 "contains names that cannot be matched")
+    expect_error(validate.start.from(hs.gauss, "a"),
+                 "contains names that cannot be matched")
+    expect_error(validate.start.from(hs.gauss, "Intercept"),
+                 "contains names that cannot be matched")
+    expect_error(validate.start.from(hs.gauss, "X1b"),
+                 "contains names that cannot be matched")
+    expect_equal(validate.start.from(hs.gauss, character(0)),
+                 1)
+
+    idx <- validate.start.from(hs.gauss, c("X2", "X1"))
+    expect_equal(idx,
+                 validate.start.from(hs.gauss, c("X1", "X2")))
+    expect_equal(idx,
+                 validate.start.from(hs.gauss, c("X2", "X1", "X1", "X2")))
+
+    idx <- validate.start.from(hs.gauss, NULL)
+    expect_equal(idx,
+                 seq_along(hs.gauss$betas$unpenalized))
+    expect_type(idx,
+                "integer")
+})
+
 test_that("validate.adapt.delta",
 {
     expect_error(validate.adapt.delta("a"),
