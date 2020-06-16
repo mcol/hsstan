@@ -34,7 +34,8 @@ unit variance.}
 \item{covs.model}{Formula containing the unpenalized covariates.}
 
 \item{penalized}{Names of the variables to be used as penalized predictors.
-If \code{NULL} or an empty vector, a model with only unpenalized
+Any variable that is already part of the \code{covs.model} formula will be
+penalized. If \code{NULL} or an empty vector, a model with only unpenalized
 covariates is fitted.}
 
 \item{family}{Type of model fitted: either \code{gaussian()} for linear regression

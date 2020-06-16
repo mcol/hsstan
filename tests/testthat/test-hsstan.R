@@ -19,6 +19,19 @@ test_that("hsstan",
     expect_length(hs.gauss$betas, 2)
 })
 
+test_that("hsstan handles penalized predictors appearing in the formula",
+{
+    SW({
+        hs.1 <- hsstan(df, y.gauss ~ X1 + X2 + X3, "X2", iter=250,
+                       keep.hs.pars=TRUE, refresh=0)
+        hs.2 <- hsstan(df, y.gauss ~ X1 + X3, "X2", iter=250,
+                       keep.hs.pars=TRUE, refresh=0)
+    })
+    for (val in c("beta", "data", "model.terms"))
+        expect_equal(hs.1[[val]],
+                     hs.2[[val]])
+})
+
 test_that("hsstan doesn't use the QR decomposition if P > N",
 {
     SW({

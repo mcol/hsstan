@@ -10,6 +10,8 @@
 ### Smaller Changes and Bug Fixes
 
 - Fix parallelised loop boundaries in `posterior_performance()` for Windows.
+- Handle correctly the case in which a variable is mentioned both among the
+  unpenalized covariates and the penalized predictors.
 
 # hsstan 0.7 (1 May 2020)
 

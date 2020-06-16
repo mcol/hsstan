@@ -56,7 +56,8 @@ get.coefficients <- function(samples, coeff.names) {
 #'        unit variance.
 #' @param covs.model Formula containing the unpenalized covariates.
 #' @param penalized Names of the variables to be used as penalized predictors.
-#'        If `NULL` or an empty vector, a model with only unpenalized
+#'        Any variable that is already part of the `covs.model` formula will be
+#'        penalized. If `NULL` or an empty vector, a model with only unpenalized
 #'        covariates is fitted.
 #' @param family Type of model fitted: either `gaussian()` for linear regression
 #'        (default) or `binomial()` for logistic regression.

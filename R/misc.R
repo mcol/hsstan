@@ -113,10 +113,9 @@ validate.model <- function(model, penalized) {
         stop("Interaction terms are not supported.")
     if (length(penalized) > 0 && !is.character(penalized))
         stop("'penalized' must be a character vector.")
-    vars <- rownames(attr(tt, "factors"))
-    if (is.null(vars))
-        vars <- as.character(model)[2]
-    return(list(outcome=vars[1], unpenalized=vars[-1], penalized=penalized))
+    return(list(outcome=as.character(model)[2],
+                unpenalized=setdiff(attr(tt, "term.labels"), penalized),
+                penalized=penalized))
 }
 
 #' Validate the model data
