@@ -68,6 +68,12 @@ test_that("model formula",
     expect_equal(model$penalized,
                  c("X2", "X4"))
 
+    model <- validate.model(y ~ X1 + X2 + X3, c("X2", "X2"))
+    expect_equal(model$unpenalized,
+                 c("X1", "X3"))
+    expect_equal(model$penalized,
+                 "X2")
+
     model <- validate.model(y ~ x1 + x2, c())
     expect_equal(validate.model(y ~ x1 + x2, NULL),
                  model)

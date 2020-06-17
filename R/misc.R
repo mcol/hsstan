@@ -115,7 +115,7 @@ validate.model <- function(model, penalized) {
         stop("'penalized' must be a character vector.")
     return(list(outcome=as.character(model)[2],
                 unpenalized=setdiff(attr(tt, "term.labels"), penalized),
-                penalized=penalized))
+                penalized=unique(penalized)))
 }
 
 #' Validate the model data
