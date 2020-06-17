@@ -171,7 +171,11 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     X <- model.matrix(reformulate(c(unpenalized, penalized)), data=x)
     N <- nrow(X)
     P <- ncol(X)
-    U <- P - length(penalized)
+
+    ## number of penalized and unpenalized columns in the design matrix
+    K <- if (is.null(penalized))
+             0 else ncol(model.matrix(reformulate(penalized), x[1, ])) - 1
+    U <- P - K
 
     ## thin QR decomposition
     if (P > N) qr <- FALSE

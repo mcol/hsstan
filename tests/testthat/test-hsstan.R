@@ -19,6 +19,18 @@ test_that("hsstan",
     expect_length(hs.gauss$betas, 2)
 })
 
+test_that("hsstan handles categorical variables in the penalized predictors",
+{
+    SW({
+        hs.1 <- hsstan(df, y.gauss ~ X2 + X3, "X1", iter=250,
+                       keep.hs.pars=TRUE, refresh=0)
+    })
+    expect_named(hs.1$betas$unpenalized,
+                 c("(Intercept)", "X2", "X3"))
+    expect_named(hs.1$betas$penalized,
+                 c("X1b", "X1c"))
+})
+
 test_that("hsstan handles penalized predictors appearing in the formula",
 {
     SW({
