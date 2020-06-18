@@ -12,9 +12,9 @@ test_that("hsstan",
     expect_false("lambda[1]" %in% names(hs.gauss$stanfit))
     expect_equal(hs.gauss$family,
                  gaussian())
-    expect_equal(names(hs.gauss$betas$unpenalized),
+    expect_named(hs.gauss$betas$unpenalized,
                  c("(Intercept)", "X1b", "X1c", "X2", "X3"))
-    expect_equal(names(hs.gauss$betas$penalized),
+    expect_named(hs.gauss$betas$penalized,
                  hs.gauss$model.terms$penalized)
     expect_length(hs.gauss$betas, 2)
 })

@@ -21,30 +21,6 @@
 ##=============================================================================
 
 
-#' Return the posterior means of the regression coefficients
-#'
-#' @param samples An object of class `stanfit`.
-#' @param coeff.names Vector of names for the coefficients.
-#'
-#' @return
-#' A list with two named elements: `unpenalized` for the posterior means
-#' of the unpenalized covariates, and `penalized` for the posterior means
-#' of the penalized predictors (which can be `NULL` for baseline models).
-#'
-#' @keywords internal
-get.coefficients <- function(samples, coeff.names) {
-    beta.u <- colMeans(as.matrix(samples, pars="beta_u"))
-    beta.p <- tryCatch(colMeans(as.matrix(samples, pars="beta_p")),
-                       error=function(e) return(NULL))
-    stopifnot(length(c(beta.u, beta.p)) == length(coeff.names))
-    u.idx <- 1:length(beta.u)
-    names(beta.u) <- coeff.names[u.idx]
-    if (!is.null(beta.p))
-        names(beta.p) <- coeff.names[-u.idx]
-
-    return(list(unpenalized=beta.u, penalized=beta.p))
-}
-
 #' Hierarchical shrinkage models
 #'
 #' Run the No-U-Turn Sampler (NUTS) as implemented in Stan to fit a hierarchical
@@ -224,7 +200,11 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
             }
         }
 
-        betas <- get.coefficients(samples, colnames(X))
+        ## compute the posterior means of the regression coefficients
+        betas <- list(unpenalized=colMeans(as.matrix(samples, pars="beta_u")),
+                      penalized=tryCatch(colMeans(as.matrix(samples,
+                                                            pars="beta_p")),
+                                         error=function(e) NULL))
         obj <- list(stanfit=samples, betas=betas, call=call,
                     data=x, model.terms=model.terms, family=family, qr=qr)
         class(obj) <- "hsstan"
