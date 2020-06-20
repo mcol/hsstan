@@ -279,3 +279,19 @@ test_that("get.pars",
     expect_equal(get.pars(hs.gauss, c("X[345]", "9$")),
                  c("X3", "X4", "X5", "X9"))
 })
+
+test_that("expand.terms",
+{
+    expect_error(expand.terms(df, ""),
+                 "subscript out of bounds")
+    expect_error(expand.terms(df, "zzz"),
+                 "object 'zzz' not found")
+    expect_equal(expand.terms(df, NULL),
+                 character(0))
+    expect_equal(expand.terms(df, c()),
+                 character(0))
+    expect_equal(expand.terms(df, character(0)),
+                 character(0))
+    expect_equal(expand.terms(df, "X1"),
+                 c("(Intercept)", "X1b", "X1c"))
+})

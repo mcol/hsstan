@@ -298,7 +298,7 @@ validate.start.from <- function(obj, start.from) {
     if (anyNA(var.match))
         stop("'start.from' contains ", collapse(start.from[is.na(var.match)]),
              ", which cannot be matched.")
-    chosen <- colnames(model.matrix(reformulate(start.from), obj$data[1, ]))
+    chosen <- expand.terms(obj$data, start.from)
     return(which(unp %in% chosen))
 }
 
@@ -388,6 +388,22 @@ get.pars <- function(object, pars) {
             stop("No pattern in 'pars' matches parameter names.")
     }
     return(pars)
+}
+
+#' Expand variable names into formula terms
+#'
+#' @param x Data frame containing the variables of interest.
+#' @param variables Vector of variable names.
+#'
+#' @return
+#' A vector of variable names expanded by factor levels and interaction terms.
+#'
+#' @importFrom stats model.matrix reformulate
+#' @noRd
+expand.terms <- function(x, variables) {
+    if (length(variables) == 0)
+        return(character(0))
+    colnames(model.matrix(reformulate(variables), x[1, ]))
 }
 
 #' Summarize a vector
