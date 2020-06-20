@@ -211,13 +211,13 @@ test_that("validate.start.from",
     expect_error(validate.start.from(hs.gauss, c("X1", NA)),
                  "'start.from' contains missing values")
     expect_error(validate.start.from(hs.gauss, 1:3),
-                 "contains names that cannot be matched")
+                 "contains '1', '2', '3', which cannot be matched")
     expect_error(validate.start.from(hs.gauss, "a"),
-                 "contains names that cannot be matched")
+                 "contains 'a', which cannot be matched")
     expect_error(validate.start.from(hs.gauss, "Intercept"),
-                 "contains names that cannot be matched")
+                 "contains 'Intercept', which cannot be matched")
     expect_error(validate.start.from(hs.gauss, "X1b"),
-                 "contains names that cannot be matched")
+                 "contains 'X1b', which cannot be matched")
     expect_equal(validate.start.from(hs.gauss, character(0)),
                  1)
 

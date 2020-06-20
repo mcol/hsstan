@@ -294,8 +294,10 @@ validate.start.from <- function(obj, start.from) {
         return(1)
     if (anyNA(start.from))
         stop("'start.from' contains missing values.")
-    if (anyNA(match(start.from, obj$model.terms$unpenalized)))
-        stop("'start.from' contains names that cannot be matched.")
+    var.match <- match(start.from, obj$model.terms$unpenalized)
+    if (anyNA(var.match))
+        stop("'start.from' contains ", collapse(start.from[is.na(var.match)]),
+             ", which cannot be matched.")
     chosen <- colnames(model.matrix(reformulate(start.from), obj$data[1, ]))
     return(which(unp %in% chosen))
 }
