@@ -233,6 +233,8 @@ test_that("validate.start.from",
     expect_error(validate.start.from(hs.gauss, "X1b"),
                  "contains 'X1b', which cannot be matched")
 
+    expect_equal(validate.start.from(hs.gauss, ""),
+                 list(start.from=character(0), idx=1))
     expect_equal(validate.start.from(hs.gauss, character(0)),
                  list(start.from=character(0), idx=1))
 

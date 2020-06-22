@@ -291,6 +291,7 @@ validate.folds <- function(folds, N) {
 validate.start.from <- function(obj, start.from) {
     unp.terms <- obj$model.terms$unpenalized
     unp.betas <- names(obj$betas$unpenalized)
+    start.from <- setdiff(start.from, "")
     if (is.null(start.from))
         return(list(start.from=unp.terms, idx=seq_along(unp.betas)))
     if (length(start.from) == 0)
