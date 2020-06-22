@@ -218,20 +218,25 @@ test_that("validate.start.from",
                  "contains 'Intercept', which cannot be matched")
     expect_error(validate.start.from(hs.gauss, "X1b"),
                  "contains 'X1b', which cannot be matched")
+
     expect_equal(validate.start.from(hs.gauss, character(0)),
-                 1)
+                 list(start.from=character(0), idx=1))
 
-    idx <- validate.start.from(hs.gauss, c("X2", "X1"))
-    expect_equal(idx,
-                 validate.start.from(hs.gauss, c("X1", "X2")))
-    expect_equal(idx,
-                 validate.start.from(hs.gauss, c("X2", "X1", "X1", "X2")))
-
-    idx <- validate.start.from(hs.gauss, NULL)
-    expect_equal(idx,
+    vsf <- validate.start.from(hs.gauss, NULL)
+    expect_type(vsf,
+                "list")
+    expect_named(vsf,
+                 c("start.from", "idx"))
+    expect_equal(vsf$start.from,
+                 hs.gauss$model.terms$unpenalized)
+    expect_equal(vsf$idx,
                  seq_along(hs.gauss$betas$unpenalized))
-    expect_type(idx,
-                "integer")
+
+    vsf <- validate.start.from(hs.gauss, c("X2", "X1"))
+    expect_equal(vsf,
+                 validate.start.from(hs.gauss, c("X1", "X2")))
+    expect_equal(vsf,
+                 validate.start.from(hs.gauss, c("X2", "X1", "X1", "X2")))
 })
 
 test_that("validate.adapt.delta",

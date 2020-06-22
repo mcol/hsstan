@@ -281,25 +281,28 @@ validate.folds <- function(folds, N) {
 #' @param start.from Vector to be checked.
 #'
 #' @return
-#' A vector of indices corresponding to the names listed in `start.from`.
+#' A list of two elements: the names of the model terms matching `start.from`
+#' and a vector of indices corresponding to the names listed in `start.from`.
 #' Throws an error if any of the names mentioned is not valid or does not match
 #' those available in the set of unpenalized covariates.
 #'
 #' @noRd
 validate.start.from <- function(obj, start.from) {
-    unp <- names(obj$betas$unpenalized)
+    unp.terms <- obj$model.terms$unpenalized
+    unp.betas <- names(obj$betas$unpenalized)
     if (is.null(start.from))
-        return(seq(length(unp)))
+        return(list(start.from=unp.terms, idx=seq_along(unp.betas)))
     if (length(start.from) == 0)
-        return(1)
+        return(list(start.from=character(0), idx=1))
     if (anyNA(start.from))
         stop("'start.from' contains missing values.")
     var.match <- match(start.from, obj$model.terms$unpenalized)
     if (anyNA(var.match))
         stop("'start.from' contains ", collapse(start.from[is.na(var.match)]),
              ", which cannot be matched.")
+    start.from <- unp.terms[unp.terms %in% start.from]
     chosen <- expand.terms(obj$data, start.from)
-    return(which(unp %in% chosen))
+    return(list(start.from=start.from, idx=which(unp.betas %in% chosen)))
 }
 
 #' Validate adapt.delta

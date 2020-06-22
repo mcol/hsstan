@@ -201,8 +201,9 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     sigma2 <- if (is.logistic) 1 else as.matrix(obj$stanfit, pars="sigma")^2
 
     ## set of variables in the initial submodel
-    start.idx <- validate.start.from(obj, start.from)
-    chosen <- start.idx
+    vsf <- validate.start.from(obj, start.from)
+    start.from <- vsf$start.from
+    chosen <- start.idx <- vsf$idx
 
     ## number of model parameters (including intercept)
     P <- sum(sapply(obj$betas, length))
@@ -254,8 +255,7 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
                       elpd=kl.elpd[, 2],
                       delta.elpd=kl.elpd[, 2] - full$elpd,
                       stringsAsFactors=FALSE)
-    attr(res, "start.from") <- if (!is.null(start.from))
-                                   start.from else obj$model.terms$unpenalized
+    attr(res, "start.from") <- start.from
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)
 
