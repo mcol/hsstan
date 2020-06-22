@@ -12,6 +12,9 @@ y.gauss <- rnorm(N, mean=x %*% b, sd=runif(1, 1, 2))
 y.binom <- factor(rbinom(N, 1, binomial()$linkinv(x %*% b)))
 df <- data.frame(x, y.gauss=y.gauss, y.binom=y.binom)
 df[, 1] <- factor(letters[rbinom(N, 2, 0.5) + 1])
+df$X1b_X3 <- df$X3 * (df$X1 == "b")
+df$X1c_X3 <- df$X3 * (df$X1 == "c")
+df$X3_X2 <- df$X3 * df$X2
 
 ## model options
 unp <- paste0("X", 1:U)
@@ -34,6 +37,7 @@ message("Running hsstan models...")
 SW({
     hs.gauss <- hs(mod.gauss, gaussian)
     hs.binom <- hs(mod.binom, binomial)
+    hs.inter <- hs(y.gauss ~ X1 * X3 + X2 * X3, gaussian)
 })
 
 message("Running cross-validated hsstan models...")

@@ -6,6 +6,7 @@
   observations to be used in the computation of the performance measures.
 - Add the `start.from` option to run `projsel()` to start the selection
   procedure from a smaller submodel than the set of unpenalized covariates.
+- Allow interaction terms in the formula for unpenalized covariates.
 
 ### Smaller Changes and Bug Fixes
 

@@ -83,6 +83,15 @@ test_that("projsel for binomial family",
     expect_true(all(diff(sel.binom$kl) < 0))
 })
 
+test_that("projsel for a model with interaction terms",
+{
+    SW({
+        sel.inter <- projsel(hs.inter, start.from="X1:X3")
+    })
+    expect_equal(attr(sel.inter, "start.from"),
+                 c("X1", "X3", "X1:X3"))
+})
+
 test_that("projsel from the intercept-only model",
 {
     SW({

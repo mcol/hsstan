@@ -44,6 +44,28 @@ test_that("hsstan handles penalized predictors appearing in the formula",
                      hs.2[[val]])
 })
 
+test_that("hsstan handles interaction terms correctly",
+{
+    SW({
+        hs.int.2 <- hs(y.gauss ~ X1 + X3 + X2 + X1b_X3 + X1c_X3 + X3_X2, gaussian)
+    })
+    expect_equal(names(hs.inter$betas$unpenalized),
+                 gsub("_", ":", names(hs.int.2$betas$unpenalized)))
+    expect_equivalent(hs.inter$betas$unpenalized,
+                      hs.int.2$betas$unpenalized)
+    expect_equal(hs.inter$betas$penalized,
+                 hs.int.2$betas$penalized)
+})
+
+test_that("hsstan handles interaction term without main effects",
+{
+    SW({
+        hs.int.0 <- hsstan(df, y.gauss ~ X1:X3, iter=200, refresh=0)
+    })
+    expect_named(hs.int.0$betas$unpenalized,
+                 c("(Intercept)", "X1a:X3", "X1b:X3", "X1c:X3"))
+})
+
 test_that("hsstan doesn't use the QR decomposition if P > N",
 {
     SW({

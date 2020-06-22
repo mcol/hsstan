@@ -64,7 +64,6 @@ validate.samples <- function(obj) {
 #' @return
 #' A model matrix corresponding to the variables used in the model.
 #'
-#' @importFrom stats model.matrix reformulate
 #' @noRd
 validate.newdata <- function(obj, newdata) {
 
@@ -82,9 +81,9 @@ validate.newdata <- function(obj, newdata) {
         stop("'newdata' contains missing values.")
 
     ## this adds the intercept column back
-    newdata <- model.matrix(reformulate(vars[-1]), as.data.frame(newdata))
-
-    return(newdata)
+    ordered.model.matrix(as.data.frame(newdata),
+                         obj$model.terms$unpenalized,
+                         obj$model.terms$penalized)
 }
 
 #' Validate a model formula
@@ -109,10 +108,10 @@ validate.model <- function(model, penalized) {
         stop("No outcome variable specified in the model.")
     if (attr(tt, "intercept") == 0)
         stop("Models with no intercept are not supported.")
-    if (any(grepl(":", attr(tt, "term.labels"))))
-        stop("Interaction terms are not supported.")
     if (length(penalized) > 0 && !is.character(penalized))
         stop("'penalized' must be a character vector.")
+    if (any(grepl("[:*]", penalized)))
+        stop("Interaction terms in penalized predictors are not supported.")
     penalized <- setdiff(unique(trimws(penalized)), "")
     return(list(outcome=as.character(model)[2],
                 unpenalized=setdiff(attr(tt, "term.labels"), penalized),
@@ -154,6 +153,8 @@ validate.data <- function(x, model) {
 #'
 #' @noRd
 validate.variables <- function(x, variables) {
+    ## unpack interaction terms
+    variables <- unique(unlist(strsplit(as.character(variables), ":")))
     if (length(variables) == 0)
         stop("No predictors present in the model.")
     var.match <- match(variables, colnames(x))
@@ -302,8 +303,15 @@ validate.start.from <- function(obj, start.from) {
     if (anyNA(var.match))
         stop("'start.from' contains ", collapse(start.from[is.na(var.match)]),
              ", which cannot be matched.")
-    start.from <- unp.terms[unp.terms %in% start.from]
+
+    ## unpack interaction terms so that also main effects are matched
+    start.from <- unp.terms[unp.terms %in%
+                            c(start.from, unlist(strsplit(start.from, ":")))]
     chosen <- expand.terms(obj$data, start.from)
+
+    ## also consider interactions terms in reverse order
+    chosen <- c(chosen, sapply(strsplit(chosen[grep(":", chosen)], ":"),
+                               function(z) c(z, paste(rev(z), collapse=":"))))
     return(list(start.from=start.from, idx=which(unp.betas %in% chosen)))
 }
 
@@ -393,6 +401,29 @@ get.pars <- function(object, pars) {
             stop("No pattern in 'pars' matches parameter names.")
     }
     return(pars)
+}
+
+#' Create a design matrix with all unpenalized predictors first
+#'
+#' This is required as `model.matrix` puts the interaction terms after the
+#' penalized predictors, but the Stan models expects all unpenalized terms to
+#' appear before the penalized ones.
+#'
+#' @param x Data frame containing the variables of interest.
+#' @param unpenalized Vector of variable names for the unpenalized covariates.
+#' @param penalized Vector of variable names for the penalized predictors.
+#'
+#' @return
+#' A design matrix with all unpenalized covariates (including interaction terms)
+#' before the penalized predictors.
+#'
+#' @importFrom stats model.matrix reformulate
+#' @noRd
+ordered.model.matrix <- function(x, unpenalized, penalized) {
+    X <- model.matrix(reformulate(c(unpenalized, penalized)), data=x)
+    if (any(grepl("[:*]", unpenalized)))
+        X <- X[, c(expand.terms(x, unpenalized), expand.terms(x, penalized)[-1])]
+    return(X)
 }
 
 #' Expand variable names into formula terms

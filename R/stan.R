@@ -101,7 +101,7 @@
 #'                   chains=2, iter=250)
 #' \dontshow{options(oldopts)}
 #'
-#' @importFrom stats gaussian model.matrix reformulate
+#' @importFrom stats gaussian
 #' @export
 hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
                    iter=2000, warmup=floor(iter / 2),
@@ -143,8 +143,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     }
 
     ## create the design matrix
-    unpenalized <- model.terms$unpenalized
-    X <- model.matrix(reformulate(c(unpenalized, penalized)), data=x)
+    X <- ordered.model.matrix(x, model.terms$unpenalized, model.terms$penalized)
     N <- nrow(X)
     P <- ncol(X)
 

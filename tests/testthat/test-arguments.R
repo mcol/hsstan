@@ -34,6 +34,10 @@ test_that("newdata",
                  "object 'X1' not found")
     expect_equal(validate.newdata(list(model.terms=mt), x),
                  model.matrix(reformulate(c("X1", "X2")), x))
+
+    mt <- list(outcome="y", unpenalized=c("X1", "X3", "X1:X3"), penalized="X2")
+    expect_equal(colnames(validate.newdata(list(model.terms=mt), x)),
+                 c("(Intercept)", "X1", "X3", "X1:X3", "X2"))
 })
 
 test_that("model formula",
@@ -46,10 +50,12 @@ test_that("model formula",
                  "No outcome variable specified in the model")
     expect_error(validate.model(y ~ 0),
                  "Models with no intercept are not supported")
-    expect_error(validate.model(y ~ X1 * X2),
-                 "Interaction terms are not supported")
     expect_error(validate.model(y ~ X1 + X2, 1:5),
                  "'penalized' must be a character vector")
+    expect_error(validate.model(y ~ X1 * X2, "X2:X3"),
+                 "Interaction terms in penalized predictors are not supported")
+    expect_error(validate.model(y ~ X1 * X2, "X2*X3"),
+                 "Interaction terms in penalized predictors are not supported")
 
     model <- validate.model(y ~ X1 + X2, c("X3", "X4"))
     expect_type(model, "list")
@@ -98,6 +104,23 @@ test_that("model formula",
     expect_type(model$penalized,
                 "character")
     expect_length(model$penalized, 0)
+
+    model <- validate.model(y ~ X1 * X2, " ")
+    expect_equal(model$unpenalized,
+                 c("X1", "X2", "X1:X2"))
+    expect_type(model$penalized,
+                "character")
+    expect_length(model$penalized, 0)
+
+    model <- validate.model(y ~ X1 + X1:X2, c())
+    expect_equal(model$unpenalized,
+                 c("X1", "X1:X2"))
+
+    model <- validate.model(y ~ X1 + X1:X2, "X2")
+    expect_equal(model$unpenalized,
+                 c("X1", "X1:X2"))
+    expect_equal(model$penalized,
+                 "X2")
 })
 
 test_that("model data",
@@ -108,12 +131,24 @@ test_that("model data",
                  "'x' must be a data frame or a matrix")
     expect_equal(validate.data(as.matrix(x), validate.model(y ~ X1, "X3")),
                  x)
+    expect_equal(validate.data(as.matrix(x), validate.model(y ~ X1 * X2, "X3")),
+                 x)
+    expect_error(validate.variables(x, NULL),
+                 "No predictors present in the model")
     expect_error(validate.variables(x, c()),
                  "No predictors present in the model")
+    expect_error(validate.variables(x, ""),
+                 "No predictors present in the model")
+    expect_error(validate.variables(x, c(" ", "")),
+                 "' ' not present in 'x'")
     expect_error(validate.variables(x, c("X1", "zzz")),
+                 "'zzz' not present in 'x'")
+    expect_error(validate.variables(x, "X1:zzz"),
                  "'zzz' not present in 'x'")
     expect_error(validate.variables(x, "X.NA"),
                  "Model variables contain missing values")
+    expect_silent(validate.variables(x, c("X1", "")))
+    expect_silent(validate.variables(x, c("X1:X2", "X2")))
 })
 
 test_that("outcome variable",
@@ -232,6 +267,10 @@ test_that("validate.start.from",
                  "contains 'Intercept', which cannot be matched")
     expect_error(validate.start.from(hs.gauss, "X1b"),
                  "contains 'X1b', which cannot be matched")
+    expect_error(validate.start.from(hs.inter, "X3:X1"),
+                 "contains 'X3:X1', which cannot be matched", fixed=TRUE)
+    expect_error(validate.start.from(hs.inter, "X1*X3"),
+                 "contains 'X1*X3', which cannot be matched", fixed=TRUE)
 
     expect_equal(validate.start.from(hs.gauss, ""),
                  list(start.from=character(0), idx=1))
@@ -253,6 +292,17 @@ test_that("validate.start.from",
                  validate.start.from(hs.gauss, c("X1", "X2")))
     expect_equal(vsf,
                  validate.start.from(hs.gauss, c("X2", "X1", "X1", "X2")))
+
+    vsf <- validate.start.from(hs.inter, c("X1:X3", "X3:X2"))
+    expect_equal(vsf$start.from,
+                 hs.inter$model.terms$unpenalized)
+    expect_equal(vsf$idx,
+                 match(c("(Intercept)", "X1b", "X1c", "X3", "X2",
+                         "X1b:X3", "X1c:X3", "X3:X2"),
+                       names(hs.inter$betas$unpenalized)))
+
+    expect_equal(validate.start.from(hs.inter, c("X1", "X3", "X1:X3")),
+                 validate.start.from(hs.inter, c("X3", "X1", "X1:X3")))
 })
 
 test_that("validate.adapt.delta",
@@ -301,6 +351,23 @@ test_that("get.pars",
                  c("X3", "X4", "X5", "X9"))
 })
 
+test_that("ordered.model.matrix",
+{
+    X <- ordered.model.matrix(df, "X1", "X2")
+    expect_is(X, "matrix")
+    expect_equal(colnames(X),
+                 c("(Intercept)", "X1b", "X1c", "X2"))
+
+    expect_equal(colnames(ordered.model.matrix(df, c("X1", "X1*X2"), "X3"))[-1],
+                 c("X1b", "X1c", "X2", "X1b:X2", "X1c:X2", "X3"))
+    expect_equal(colnames(ordered.model.matrix(df, c("X1:X2", "X1"), "X3"))[-1],
+                 c("X1b", "X1c", "X1a:X2", "X1b:X2", "X1c:X2", "X3"))
+    expect_equal(colnames(ordered.model.matrix(df, c("X2*X3", "X4"), "X1"))[-1],
+                 c("X2", "X3", "X4", "X2:X3", "X1b", "X1c"))
+    expect_equal(colnames(ordered.model.matrix(df, "X1:X2", "X3"))[-1],
+                 c("X1a:X2", "X1b:X2", "X1c:X2", "X3"))
+})
+
 test_that("expand.terms",
 {
     expect_error(expand.terms(df, ""),
@@ -315,4 +382,12 @@ test_that("expand.terms",
                  character(0))
     expect_equal(expand.terms(df, "X1"),
                  c("(Intercept)", "X1b", "X1c"))
+    expect_equal(expand.terms(df, "X1:X2"),
+                 c("(Intercept)", "X1a:X2", "X1b:X2", "X1c:X2"))
+    expect_equal(expand.terms(df, "X2*X3"),
+                 c("(Intercept)", "X2", "X3", "X2:X3"))
+    expect_equal(expand.terms(df, "X3*X2"),
+                 c("(Intercept)", "X3", "X2", "X3:X2"))
+    expect_equal(expand.terms(df, c("X2*X3", "X4")),
+                 c("(Intercept)", "X2", "X3", "X4", "X2:X3"))
 })
