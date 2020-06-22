@@ -73,16 +73,30 @@ test_that("model formula",
                  c("X1", "X3"))
     expect_equal(model$penalized,
                  "X2")
+    expect_equal(model,
+                 validate.model(y ~ X1 + X2 + X3, c(" X2", "X2 ")))
 
     model <- validate.model(y ~ x1 + x2, c())
     expect_equal(validate.model(y ~ x1 + x2, NULL),
                  model)
+    expect_equal(validate.model(y ~ x1 + x2, character(0)),
+                 model)
+    expect_equal(validate.model(y ~ x1 + x2, list()),
+                 model)
+    expect_equal(model,
+                 validate.model(y ~ x1 + x2, " "))
+    expect_type(model$penalized,
+                "character")
     expect_length(model$penalized, 0)
 
     model <- validate.model(y ~ 1, c())
     expect_equal(model$outcome,
                  "y")
+    expect_type(model$unpenalized,
+                "character")
     expect_length(model$unpenalized, 0)
+    expect_type(model$penalized,
+                "character")
     expect_length(model$penalized, 0)
 })
 

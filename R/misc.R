@@ -113,9 +113,10 @@ validate.model <- function(model, penalized) {
         stop("Interaction terms are not supported.")
     if (length(penalized) > 0 && !is.character(penalized))
         stop("'penalized' must be a character vector.")
+    penalized <- setdiff(unique(trimws(penalized)), "")
     return(list(outcome=as.character(model)[2],
                 unpenalized=setdiff(attr(tt, "term.labels"), penalized),
-                penalized=unique(penalized)))
+                penalized=penalized))
 }
 
 #' Validate the model data
