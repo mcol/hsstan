@@ -1,8 +1,8 @@
-Makevars.win
-stanExports_*
 *.Rcheck
 *.o
 *.so
 *.swp
 *.tar.gz
+.RData
 .Rhistory
+src
