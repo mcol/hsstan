@@ -48,7 +48,7 @@
 #' @method summary hsstan
 #' @export
 summary.hsstan <- function(object, pars=NULL, prob=0.95, digits=2,
-                          sort=NULL, decreasing=TRUE, max.rows=NULL, ...) {
+                           sort=NULL, decreasing=TRUE, max.rows=NULL, ...) {
     validate.samples(object)
     validate.probability(prob)
     pars <- get.pars(object, pars)

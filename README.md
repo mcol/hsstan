@@ -11,7 +11,7 @@ inference ([Carpenter et al. (2017)](https://doi.org/10.18637/jss.v076.i01)).
 It implements the horseshoe and regularized horseshoe priors [(Piironen and
 Vehtari (2017)](https://doi.org/10.1214/17-EJS1337SI)), and the projection
 predictive selection approach to recover a sparse set of predictive biomarkers
-([Piironen, Paasiniemi and Vehtari (2018)](https://arxiv.org/abs/1810.02406)).
+([Piironen, Paasiniemi and Vehtari (2020)](https://doi.org/10.1214/20-EJS1711)).
 
 The approach is particularly suited to selection from high-dimensional panels
 of biomarkers, such as those that can be measured by MSMS or similar technologies.

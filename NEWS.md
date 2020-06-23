@@ -2,7 +2,7 @@
 
 ### Major Changes
 
-- Add the `sub.idx` parameter to `posterior_performance()` to select the
+- Add the `sub.idx` option to `posterior_performance()` to select the
   observations to be used in the computation of the performance measures.
 - Add the `start.from` option to run `projsel()` to start the selection
   procedure from a smaller submodel than the set of unpenalized covariates.
@@ -10,7 +10,7 @@
 
 ### Smaller Changes and Bug Fixes
 
-- Fix parallelised loop boundaries in `posterior_performance()` for Windows.
+- Fix parallelized loop boundaries in `posterior_performance()` for Windows.
 - Handle correctly the case in which a variable is mentioned both among the
   unpenalized covariates and the penalized predictors.
 - Fix bug in handling of a factor variable with multiple levels in the set of
@@ -26,8 +26,8 @@
 
 ### Smaller Changes and Bug Fixes
 
-- Allow using the iter and warmup options in kfold().
-- Switch to rstantools 2.0.0.
+- Allow using the `iter` and `warmup` options in `kfold()`.
+- Switch to `rstantools` 2.0.0.
 - Fix bug in the use of the `slab.scale` parameter of `hsstan()`, as it was not
   squared in the computation of the slab component of the regularized horseshoe
   prior. The default value of 2 in the current version corresponds to using the
@@ -118,7 +118,7 @@
 
 - Add option to set the `adapt_delta` parameter and change the default for all
   models from 0.95 to 0.99.
-- Allow to control the prior scale for the unpenalised variables.
+- Allow to control the prior scale for the unpenalized variables.
 
 ### Smaller Changes and Bug Fixes
 

@@ -50,7 +50,7 @@
 #'        (2000 by default).
 #' @param warmup Number of warmup iterations per chain (by default, half the
 #'        total number of iterations).
-#' @param scale.u Prior scale (standard deviation) for the unpenalised
+#' @param scale.u Prior scale (standard deviation) for the unpenalized
 #'        covariates.
 #' @param regularized If `TRUE` (default), the regularized horseshoe prior
 #'        is used as opposed to the original horseshoe prior.

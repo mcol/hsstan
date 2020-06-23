@@ -62,11 +62,10 @@ validate.samples <- function(obj) {
 #'        is returned.
 #'
 #' @return
-#' A model matrix corresponding to the variables used in the model.
+#' A design matrix corresponding to the variables used in the model.
 #'
 #' @noRd
 validate.newdata <- function(obj, newdata) {
-
     if (is.null(newdata))
         newdata <- obj$data
     else if (!inherits(newdata, c("data.frame", "matrix")))
@@ -309,7 +308,7 @@ validate.start.from <- function(obj, start.from) {
                             c(start.from, unlist(strsplit(start.from, ":")))]
     chosen <- expand.terms(obj$data, start.from)
 
-    ## also consider interactions terms in reverse order
+    ## also consider interaction terms in reverse order
     chosen <- c(chosen, sapply(strsplit(chosen[grep(":", chosen)], ":"),
                                function(z) c(z, paste(rev(z), collapse=":"))))
     return(list(start.from=start.from, idx=which(unp.betas %in% chosen)))

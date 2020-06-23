@@ -47,7 +47,7 @@ covariates is fitted.}
 \item{warmup}{Number of warmup iterations per chain (by default, half the
 total number of iterations).}
 
-\item{scale.u}{Prior scale (standard deviation) for the unpenalised
+\item{scale.u}{Prior scale (standard deviation) for the unpenalized
 covariates.}
 
 \item{regularized}{If \code{TRUE} (default), the regularized horseshoe prior

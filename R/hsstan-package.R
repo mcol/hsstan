@@ -50,15 +50,21 @@
 #' priors, _Electronic Journal of Statistics_, 11 (2), 5018-5051.
 #' \url{https://doi.org/10.1214/17-EJS1337SI}
 #'
-#' J. Piironen, M. Paasiniemi and A. Vehtari (2018),
+#' J. Piironen, M. Paasiniemi and A. Vehtari (2020),
 #' Projective inference in high-dimensional problems: prediction and feature
-#' selection, _ArXiv preprint_.
-#' \url{https://arxiv.org/abs/1810.02406}
+#' selection, _Electronic Journal of Statistics_, 14 (1), 2155-2197.
+#' \url{https://doi.org/10.1214/20-EJS1711}
 #'
 #' M. Colombo, E. Valo, S.J. McGurnaghan et al. (2019),
 #' Biomarkers associated with progression of renal disease in type 1 diabetes,
 #' _Diabetologia_, 62 (9), 1616-1627.
 #' \url{https://doi.org/10.1007/s00125-019-4915-0}
+#'
+#' M. Colombo, S.J. McGurnaghan, L.A.K. Blackbourn et al. (2020),
+#' Comparison of serum and urinary biomarker panels with albumin creatinin
+#' ratio in the prediction of renal function decline in type 1 diabetes,
+#' _Diabetologia_, 63 (4), 788-798.
+#' \url{https://doi.org/10.1007/s00125-019-05081-8}
 NULL
 
 .onLoad <- function(libname, pkgname) { # nocov start
