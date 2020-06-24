@@ -483,6 +483,30 @@ collapse <- function(x) {
     paste0("'", x, "'", collapse=", ")
 }
 
+#' Fast computation of correlations
+#'
+#' This provides a loopless version of the computation of the correlation
+#' coefficient between observed and predicted outcomes.
+#'
+#' @param y Vector of observed outcome.
+#' @param x Matrix with as many columns as the number of elements in `y`,
+#'          where each row corresponds to a predicted outcome.
+#'
+#' @return
+#' A vector of correlations with as many elements as the number of rows in `x`.
+#'
+#' @noRd
+fastCor <- function(y, x) {
+    yx <- rbind(y, x)
+    if (.Machine$sizeof.pointer == 8) {
+        yx <- yx - rowMeans(yx)
+        corr <- tcrossprod(yx / sqrt(rowSums(yx^2)))
+    } else {
+        corr <- stats::cor(yx)
+    }
+    return(corr[-1, 1])
+}
+
 #' Log of sum of exponentials
 #'
 #' @noRd

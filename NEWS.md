@@ -11,6 +11,7 @@
 ### Smaller Changes and Bug Fixes
 
 - Fix parallelized loop boundaries in `posterior_performance()` for Windows.
+- Speed up `posterior_performance()` for gaussian models.
 - Handle correctly the case in which a variable is mentioned both among the
   unpenalized covariates and the penalized predictors.
 - Fix bug in handling of a factor variable with multiple levels in the set of

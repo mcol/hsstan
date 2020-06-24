@@ -227,12 +227,6 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
 #' @export
 posterior_performance <- function(obj, prob=0.95, sub.idx=NULL, summary=TRUE,
                                   cores=getOption("mc.cores", 1)) {
-
-    r2 <- function(y.obs, y.pred)
-        max(stats::cor(y.obs, y.pred), 0)^2
-    auc <- function(y.obs, y.pred)
-        as.numeric(pROC::roc(y.obs, y.pred, direction="<", quiet=TRUE)$auc)
-
     if (inherits(obj, "hsstan")) {
         obj <- list(fits=array(list(fit=obj, test.idx=1:nrow(obj$data)), c(1, 2)),
                     data=obj$data)
@@ -255,7 +249,6 @@ posterior_performance <- function(obj, prob=0.95, sub.idx=NULL, summary=TRUE,
     validate.samples(obj$fits[[1]])
     validate.probability(prob)
     logistic <- is.logistic(obj$fits[[1]])
-    perf.fun <- ifelse(logistic, auc, r2)
     num.folds <- nrow(obj$fits)
 
     ## loop over the folds
@@ -274,14 +267,19 @@ posterior_performance <- function(obj, prob=0.95, sub.idx=NULL, summary=TRUE,
     if (used.subset && logistic && length(unique(y)) != 2)
         stop("'sub.idx' must contain both outcome classes.")
 
-    par.fun <- function(i) perf.fun(y, mu[i, ])
-    if (.Platform$OS.type != "windows") {
-        out <- parallel::mclapply(X=1:nrow(mu), mc.cores=cores,
-                                  mc.preschedule=TRUE, FUN=par.fun)
-    } else { # windows
-        cl <- parallel::makePSOCKcluster(cores)
-        on.exit(parallel::stopCluster(cl))
-        out <- parallel::parLapply(X=1:nrow(mu), cl=cl, fun=par.fun)
+    if (logistic) {
+        par.auc <- function(i)
+            as.numeric(pROC::roc(y, mu[i, ], direction="<", quiet=TRUE)$auc)
+        if (.Platform$OS.type != "windows") {
+            out <- parallel::mclapply(X=1:nrow(mu), mc.cores=cores,
+                                      mc.preschedule=TRUE, FUN=par.auc)
+        } else { # windows
+            cl <- parallel::makePSOCKcluster(cores)
+            on.exit(parallel::stopCluster(cl))
+            out <- parallel::parLapply(X=1:nrow(mu), cl=cl, fun=par.auc)
+        }
+    } else {
+        out <- pmax(fastCor(y, mu), 0)^2
     }
 
     out <- cbind(perf=unlist(out), llk=rowSums(llk))
