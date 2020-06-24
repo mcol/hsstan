@@ -134,21 +134,29 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 #'
 #' @keywords internal
 fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
-
     ## projected parameters
     submodel <- lm_proj(x, mu, sigma2, chosen, logistic)
     eta <- xt %*% submodel$w
+    return(c(submodel, elpd=elpd(yt, eta, sigma2, logistic)))
+}
 
-    ## expected log predictive density on test set
+#' Expected log predictive density
+#'
+#' @param yt Outcome variable.
+#' @param eta Matrix of linear predictors, with as many rows as the number of
+#'        observations.
+#' @param sigma2 Residual variance (1 for logistic regression).
+#' @param logistic Set to `TRUE` for a logistic regression model.
+#'
+#' @noRd
+elpd <- function(yt, eta, sigma2, logistic) {
     if (logistic)
         pd <- stats::dbinom(yt, 1, binomial()$linkinv(eta), log=TRUE)
     else
         pd <- t(cbind(sapply(1:nrow(eta),
                              function(z) stats::dnorm(yt[z], eta[z, ],
                                                       sqrt(sigma2), log=TRUE))))
-    elpd <- sum(rowMeans(pd))
-
-    return(list(fit=submodel$fit, kl=submodel$kl, elpd=elpd))
+    sum(rowMeans(pd))
 }
 
 #' Forward selection minimizing KL-divergence in projection
@@ -242,8 +250,8 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     }
 
     ## evaluate the full model if selection stopped before reaching it
-    full <- if (length(chosen) == P)
-        sub else fit.submodel(x, sigma2, fit, 1:P, xt, yt, is.logistic)
+    full.elpd <- if (length(chosen) == P)
+        sub$elpd else elpd(yt, t(posterior_linpred(obj)), sigma2, is.logistic)
 
     kl <- kl.elpd[, 1]
     res <- data.frame(var=c("Intercept only",
@@ -253,7 +261,7 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
                       rel.kl.null=1 - kl / kl[1],
                       rel.kl=c(NA, 1 - kl[-1] / kl[2]),
                       elpd=kl.elpd[, 2],
-                      delta.elpd=kl.elpd[, 2] - full$elpd,
+                      delta.elpd=kl.elpd[, 2] - full.elpd,
                       stringsAsFactors=FALSE)
     attr(res, "start.from") <- start.from
     if (!is.null(out.csv))
