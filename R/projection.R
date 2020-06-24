@@ -137,7 +137,7 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
     ## projected parameters
     submodel <- lm_proj(x, mu, sigma2, chosen, logistic)
     eta <- xt %*% submodel$w
-    return(c(submodel, elpd=elpd(yt, eta, sigma2, logistic)))
+    return(c(submodel, elpd=elpd(yt, eta, submodel$sigma2, logistic)))
 }
 
 #' Expected log predictive density
@@ -152,10 +152,12 @@ fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
 elpd <- function(yt, eta, sigma2, logistic) {
     if (logistic)
         pd <- stats::dbinom(yt, 1, binomial()$linkinv(eta), log=TRUE)
-    else
+    else {
+        sigma <- sqrt(sigma2)
         pd <- t(cbind(sapply(1:nrow(eta),
                              function(z) stats::dnorm(yt[z], eta[z, ],
-                                                      sqrt(sigma2), log=TRUE))))
+                                                      sigma, log=TRUE))))
+    }
     sum(rowMeans(pd))
 }
 

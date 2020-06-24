@@ -39,11 +39,11 @@ test_that("projsel for gaussian family",
     expect_equal(tail(sel.gauss$rel.kl, n=1),
                  1)
     expect_equal(sel.gauss$elpd[2],
-                 -111.525069, tolerance=tol)
+                 -111.412089, tolerance=tol)
     expect_equal(tail(sel.gauss$elpd, n=1),
                  -109.968684, tolerance=tol)
     expect_equal(sel.gauss$delta.elpd[2],
-                 -1.55638578, tolerance=tol)
+                 -1.44340522, tolerance=tol)
     expect_true(all(diff(sel.gauss$kl) < 0))
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
