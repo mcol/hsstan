@@ -4,6 +4,7 @@
 .Rhistory
 .tar.gz
 LICENSE
-Makevars.win
-tests
+Makevars*
+Rcppexports.*
 stanExports_*
+tests

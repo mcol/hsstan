@@ -1,3 +1,6 @@
+Makevars*
+RcppExports.*
+stanExports_*
 *.Rcheck
 *.o
 *.so
@@ -5,4 +8,3 @@
 *.tar.gz
 .RData
 .Rhistory
-src

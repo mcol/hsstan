@@ -38,7 +38,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     S <- ncol(fit)
 
     ## pick the Q columns of x that form the projection subspace
-    xp <- x[, indproj] # matrix of dimension N x Q
+    xp <- x[, indproj, drop=FALSE] # matrix of dimension N x Q
 
     ## logistic regression model
     if (is.logistic) {
@@ -56,7 +56,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
         wp <- matrix(unlist(wp, use.names=FALSE), ncol=S)
 
         ## estimate the KL divergence between full and projected model
-        fitp <- binomial()$linkinv(xp %*% wp)
+        fitp <- binomial()$linkinv(multiplyAB(xp, wp))
         kl <- 0.5 * mean(colMeans(binomial()$dev.resids(fit, fitp, 1)))
         sigma2p <- 1
     }
@@ -64,10 +64,10 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
     ## linear regression model
     else {
         ## solve the projection equations
-        wp <- solve(crossprod(xp, xp), crossprod(xp, fit)) # Q x S matrix
+        wp <- solve(crossprod(xp, xp), multiplyAtB(xp, fit)) # Q x S matrix
 
         ## fit of the projected model
-        fitp <- xp %*% wp
+        fitp <- multiplyAB(xp, wp)
 
         ## estimate the KL divergence between full and projected model
         sigma2p <- sigma2 + colMeans((fit - fitp)^2)
@@ -114,10 +114,10 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
     }
 
     ## score test
-    dinv.link <- t(fitp * (1 - fitp))
-    yminusexp <- t(fit - fitp)
-    U <- colMeans(yminusexp %*% x[, notchosen] / sigma2)
-    V <- colMeans(dinv.link %*% x[, notchosen]^2 / sigma2)
+    yminusexp <- fit - fitp
+    dinv.link <- fitp * (1 - fitp)
+    U <- colMeans(multiplyAtB(yminusexp, x[, notchosen]))
+    V <- colMeans(multiplyAtB(dinv.link, x[, notchosen]^2))
     idx.selected <- which.max(U^2 / V)
     return(notchosen[idx.selected])
 }
@@ -136,7 +136,7 @@ choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
 fit.submodel <- function(x, sigma2, mu, chosen, xt, yt, logistic) {
     ## projected parameters
     submodel <- lm_proj(x, mu, sigma2, chosen, logistic)
-    eta <- xt %*% submodel$w
+    eta <- multiplyAB(xt, submodel$w)
     return(c(submodel, elpd=elpd(yt, eta, submodel$sigma2, logistic)))
 }
 

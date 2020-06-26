@@ -7,6 +7,9 @@
 - Add the `start.from` option to run `projsel()` to start the selection
   procedure from a smaller submodel than the set of unpenalized covariates.
 - Allow interaction terms in the formula for unpenalized covariates.
+- Speed up matrix multiplications in `posterior_linpred()` and `projsel()`:
+  this also benefits all other functions that use `posterior_linpred()`, such
+  as `log_lik()`, `posterior_predict()`, `posterior_performance()` and others.
 
 ### Smaller Changes and Bug Fixes
 

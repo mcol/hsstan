@@ -131,7 +131,7 @@ posterior_linpred.hsstan <- function(object, transform=FALSE,
     newdata <- validate.newdata(object, newdata)
     pars <- grep("^beta_", object$stanfit@model_pars, value=TRUE)
     post.matrix <- as.matrix(object$stanfit, pars=pars)
-    linear.predictor <- tcrossprod(post.matrix, newdata)
+    linear.predictor <- multiplyABt(post.matrix, newdata)
     if (!transform)
         return(linear.predictor)
     return(object$family$linkinv(linear.predictor))

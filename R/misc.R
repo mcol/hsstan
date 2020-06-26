@@ -500,7 +500,8 @@ fastCor <- function(y, x) {
     yx <- rbind(y, x)
     if (.Machine$sizeof.pointer == 8) {
         yx <- yx - rowMeans(yx)
-        corr <- tcrossprod(yx / sqrt(rowSums(yx^2)))
+        yx <- yx / sqrt(rowSums(yx^2))
+        corr <- tcrossprod(yx, yx)
     } else {
         corr <- stats::cor(yx)
     }
