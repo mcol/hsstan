@@ -5,7 +5,7 @@
 - Add the `sub.idx` option to `posterior_performance()` to select the
   observations to be used in the computation of the performance measures.
 - Add the `start.from` option to run `projsel()` to start the selection
-  procedure from a smaller submodel than the set of unpenalized covariates.
+  procedure from a submodel different from the set of unpenalized covariates.
 - Allow interaction terms in the formula for unpenalized covariates.
 - Speed up matrix multiplications in `posterior_linpred()` and `projsel()`:
   this also benefits all other functions that use `posterior_linpred()`, such

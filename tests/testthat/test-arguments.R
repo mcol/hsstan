@@ -301,6 +301,14 @@ test_that("validate.start.from",
                          "X1b:X3", "X1c:X3", "X3:X2"),
                        names(hs.inter$betas$unpenalized)))
 
+    vsf <- validate.start.from(hs.inter, c("X2", "X9"))
+    expect_equal(vsf$start.from,
+                 c("X2", "X9"))
+    expect_equal(vsf$idx,
+                 match(c("(Intercept)", "X2", "X9"),
+                       c(names(hs.inter$betas$unpenalized),
+                               names(hs.inter$betas$penalized))))
+
     expect_equal(validate.start.from(hs.inter, c("X1", "X3", "X1:X3")),
                  validate.start.from(hs.inter, c("X3", "X1", "X1:X3")))
 })

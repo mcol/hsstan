@@ -284,13 +284,15 @@ validate.folds <- function(folds, N) {
 #' @return
 #' A list of two elements: the names of the model terms matching `start.from`
 #' and a vector of indices corresponding to the names listed in `start.from`.
-#' Throws an error if any of the names mentioned is not valid or does not match
-#' those available in the set of unpenalized covariates.
+#' Throws an error if any of the names mentioned does not match those available
+#' in the model terms.
 #'
 #' @noRd
 validate.start.from <- function(obj, start.from) {
     unp.terms <- obj$model.terms$unpenalized
     unp.betas <- names(obj$betas$unpenalized)
+    mod.terms <- c(unp.terms, obj$model.terms$penalized)
+    mod.betas <- c(unp.betas, names(obj$betas$penalized))
     start.from <- setdiff(start.from, "")
     if (is.null(start.from))
         return(list(start.from=unp.terms, idx=seq_along(unp.betas)))
@@ -298,20 +300,20 @@ validate.start.from <- function(obj, start.from) {
         return(list(start.from=character(0), idx=1))
     if (anyNA(start.from))
         stop("'start.from' contains missing values.")
-    var.match <- match(start.from, obj$model.terms$unpenalized)
+    var.match <- match(start.from, mod.terms)
     if (anyNA(var.match))
         stop("'start.from' contains ", collapse(start.from[is.na(var.match)]),
              ", which cannot be matched.")
 
     ## unpack interaction terms so that also main effects are matched
-    start.from <- unp.terms[unp.terms %in%
+    start.from <- mod.terms[mod.terms %in%
                             c(start.from, unlist(strsplit(start.from, ":")))]
     chosen <- expand.terms(obj$data, start.from)
 
     ## also consider interaction terms in reverse order
     chosen <- c(chosen, sapply(strsplit(chosen[grep(":", chosen)], ":"),
                                function(z) c(z, paste(rev(z), collapse=":"))))
-    return(list(start.from=start.from, idx=which(unp.betas %in% chosen)))
+    return(list(start.from=start.from, idx=which(mod.betas %in% chosen)))
 }
 
 #' Validate adapt.delta
