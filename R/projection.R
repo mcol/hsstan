@@ -241,7 +241,7 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     }
 
     ## add variables one at a time
-    for (iter in 1:K) {
+    for (iter in seq_len(K)) {
         sel.idx <- choose.next(x, sigma2, fit, sub$fit, chosen, is.logistic)
         chosen <- c(chosen, sel.idx)
 
@@ -261,10 +261,10 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
                             colnames(x)[setdiff(chosen, start.idx)]),
                       kl=kl,
                       rel.kl.null=1 - kl / kl[1],
-                      rel.kl=c(NA, 1 - kl[-1] / kl[2]),
+                      rel.kl=c(NA, 1 - if (length(kl) > 2) kl[-1] / kl[2] else 1),
                       elpd=kl.elpd[, 2],
                       delta.elpd=kl.elpd[, 2] - full.elpd,
-                      stringsAsFactors=FALSE)
+                      stringsAsFactors=FALSE, row.names=NULL)
     attr(res, "start.from") <- start.from
     if (!is.null(out.csv))
         write.csv(file=out.csv, res, row.names=FALSE)

@@ -124,6 +124,26 @@ test_that("projsel from a non-default starting submodel",
                           hs.gauss$betas$penalized)) + 1)
 })
 
+test_that("projsel from a submodel that includes all variables",
+{
+    SW({
+        sel.gauss <- projsel(hs.gauss, start.from=paste0("X", 1:P))
+    })
+
+    expect_equal(sel.gauss$var,
+                 c("Intercept only", "Initial submodel"))
+    expect_equal(sel.gauss$rel.kl.null,
+                 c(0, 1))
+    expect_equal(sel.gauss$rel.kl,
+                 c(NA, 0))
+    expect_equal(sel.gauss$delta.elpd[2],
+                 0)
+    expect_equal(attr(sel.gauss, "row.names"),
+                 1:2)
+    expect_equal(attr(sel.gauss, "start.from"),
+                 paste0("X", 1:P))
+})
+
 test_that("projsel for a cross-validated object",
 {
     SW({
