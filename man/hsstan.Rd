@@ -103,7 +103,7 @@ parameters.}
 \item{model.terms}{a list of names for the outcome variable, the unpenalized
 covariates and the penalized predictors.}
 \item{family}{the \code{family} object used.}
-\item{qr}{Whether the QR factorization was performed.}
+\item{hsstan.settings}{the optional settings used in the model.}
 }
 \description{
 Run the No-U-Turn Sampler (NUTS) as implemented in Stan to fit a hierarchical

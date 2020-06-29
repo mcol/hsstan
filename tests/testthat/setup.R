@@ -35,6 +35,7 @@ hs <- function(model, family, ...)
 
 message("Running hsstan models...")
 SW({
+    hs.base <- hsstan(df, mod.gauss, iter=iters, chains=chains, refresh=0)
     hs.gauss <- hs(mod.gauss, gaussian)
     hs.binom <- hs(mod.binom, binomial)
     hs.inter <- hs(y.gauss ~ X1 * X3 + X2 * X3, gaussian)

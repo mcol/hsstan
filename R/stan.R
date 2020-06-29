@@ -86,7 +86,7 @@
 #' \item{model.terms}{a list of names for the outcome variable, the unpenalized
 #'       covariates and the penalized predictors.}
 #' \item{family}{the `family` object used.}
-#' \item{qr}{Whether the QR factorization was performed.}
+#' \item{hsstan.settings}{the optional settings used in the model.}
 #'
 #' @seealso
 #' [kfold()] for cross-validating a fitted object.
@@ -198,13 +198,20 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
             }
         }
 
+        ## store the hierarchical shrinkage settings
+        opts <- list(adapt.delta=adapt.delta, qr=qr, seed=seed, scale.u=scale.u)
+        if (K > 0)
+            opts <- c(opts, regularized=regularized, nu=nu, par.ratio=par.ratio,
+                      global.scale=global.scale, global.df=global.df,
+                      slab.scale=slab.scale, slab.df=slab.df)
+
         ## compute the posterior means of the regression coefficients
         betas <- list(unpenalized=colMeans(as.matrix(samples, pars="beta_u")),
                       penalized=tryCatch(colMeans(as.matrix(samples,
                                                             pars="beta_p")),
                                          error=function(e) NULL))
-        obj <- list(stanfit=samples, betas=betas, call=call,
-                    data=x, model.terms=model.terms, family=family, qr=qr)
+        obj <- list(stanfit=samples, betas=betas, call=call, data=x,
+                    model.terms=model.terms, family=family, hsstan.settings=opts)
         class(obj) <- "hsstan"
     }
 

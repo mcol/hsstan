@@ -9,6 +9,9 @@ test_that("hsstan",
                     "hsstan")
     expect_s4_class(hs.gauss$stanfit,
                     "stanfit")
+    expect_named(hs.gauss,
+                 c("stanfit", "betas", "call", "data", "model.terms", "family",
+                   "hsstan.settings"))
     expect_false("lambda[1]" %in% names(hs.gauss$stanfit))
     expect_equal(hs.gauss$family,
                  gaussian())
@@ -17,6 +20,25 @@ test_that("hsstan",
     expect_named(hs.gauss$betas$penalized,
                  hs.gauss$model.terms$penalized)
     expect_length(hs.gauss$betas, 2)
+    expect_named(hs.gauss$hsstan.settings,
+                 c("adapt.delta", "qr", "seed", "scale.u", "regularized", "nu",
+                   "par.ratio", "global.scale", "global.df", "slab.scale",
+                   "slab.df"))
+    expect_equal(hs.gauss$hsstan.settings$global.scale,
+                 0.007071068)
+    expect_equal(hs.gauss$hsstan.settings$adapt.delta,
+                 0.99)
+})
+
+test_that("hsstan with no penalized predictors",
+{
+    expect_null(hs.base$betas$penalized)
+    expect_length(hs.base$penalized,
+                  0)
+    expect_named(hs.base$hsstan.settings,
+                 c("adapt.delta", "qr", "seed", "scale.u"))
+    expect_equal(hs.base$hsstan.settings$adapt.delta,
+                 0.95)
 })
 
 test_that("hsstan handles categorical variables in the penalized predictors",
@@ -72,7 +94,7 @@ test_that("hsstan doesn't use the QR decomposition if P > N",
         hs.noqr <- hsstan(df[1:5, ], mod.gauss, pen, iter=100, qr=TRUE,
                           keep.hs.pars=TRUE, refresh=0)
     })
-    expect_false(hs.noqr$qr)
+    expect_false(hs.noqr$hsstan.settings$qr)
     expect_match(names(hs.noqr$stanfit),
                  "lambda", all=FALSE)
     expect_match(names(hs.noqr$stanfit),
