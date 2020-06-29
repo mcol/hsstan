@@ -22,7 +22,7 @@ of biomarkers, such as those that can be measured by MSMS or similar technologie
 library(hsstan)
 data(diabetes)
 
-## allow using as many cores as cross-validation folds
+## if possible, allow using as many cores as cross-validation folds
 options(mc.cores=10)
 
 ## baseline model with only clinical covariates
@@ -32,19 +32,60 @@ hs.base <- hsstan(diabetes, Y ~ age + sex)
 hs.biom <- hsstan(diabetes, Y ~ age + sex, penalized=colnames(diabetes)[3:10])
 print(hs.biom)
 #              mean   sd  2.5% 97.5% n_eff Rhat
-# (Intercept)  0.00 0.03 -0.07  0.06  5535    1
-# age          0.00 0.04 -0.07  0.08  5618    1
-# sex         -0.15 0.04 -0.22 -0.08  5161    1
-# bmi          0.33 0.04  0.25  0.41  4230    1
-# map          0.20 0.04  0.12  0.27  3725    1
-# tc          -0.45 0.26 -0.95  0.05  3283    1
-# ldl          0.28 0.21 -0.13  0.69  3283    1
-# hdl          0.01 0.13 -0.23  0.27  3532    1
-# tch          0.07 0.08 -0.06  0.25  4062    1
-# ltg          0.43 0.11  0.22  0.65  3377    1
-# glu          0.02 0.03 -0.03  0.10  3313    1
+# (Intercept)  0.00 0.03 -0.07  0.07  4483    1
+# age          0.00 0.04 -0.07  0.08  4706    1
+# sex         -0.15 0.04 -0.22 -0.08  5148    1
+# bmi          0.33 0.04  0.25  0.41  4228    1
+# map          0.20 0.04  0.12  0.28  3571    1
+# tc          -0.45 0.25 -0.94  0.04  3713    1
+# ldl          0.28 0.20 -0.12  0.68  3674    1
+# hdl          0.01 0.12 -0.23  0.25  3761    1
+# tch          0.07 0.08 -0.06  0.25  4358    1
+# ltg          0.43 0.11  0.22  0.64  3690    1
+# glu          0.02 0.03 -0.03  0.10  3034    1
 
-## run cross-validation
+## behaviour of the sampler
+sampler.stats(hs.base)
+#         accept.stat stepsize divergences treedepth gradients warmup sample
+# chain:1      0.9497   0.5723           0         3      6320   0.09   0.08
+# chain:2      0.9357   0.6480           0         3      5938   0.09   0.08
+# chain:3      0.9455   0.6014           0         3      6112   0.09   0.08
+# chain:4      0.9488   0.5932           0         3      6238   0.09   0.08
+# all          0.9449   0.6037           0         3     24608   0.36   0.32
+
+sampler.stats(hs.biom)
+#         accept.stat stepsize divergences treedepth gradients warmup sample
+# chain:1      0.9821   0.0191           0         8    233656   5.04   4.28
+# chain:2      0.9891   0.0158           1         8    255994   5.88   4.72
+# chain:3      0.9908   0.0143           0         9    274328   5.77   5.14
+# chain:4      0.9933   0.0121           0         9    344984   5.98   6.70
+# all          0.9888   0.0153           1         9   1108962  22.67  20.84
+
+## approximate leave-one-out cross-validation with Pareto smoothed
+## importance sampling
+loo(hs.base)
+# Computed from 4000 by 442 log-likelihood matrix
+#          Estimate   SE
+# elpd_loo   -622.4 11.4
+# p_loo         3.4  0.2
+# looic      1244.9 22.7
+# ------
+# Monte Carlo SE of elpd_loo is 0.0.
+#
+# All Pareto k estimates are good (k < 0.5).
+
+loo(hs.biom)
+# Computed from 4000 by 442 log-likelihood matrix
+#          Estimate   SE
+# elpd_loo   -476.5 13.7
+# p_loo         9.8  0.7
+# looic       953.0 27.5
+# ------
+# Monte Carlo SE of elpd_loo is 0.1.
+#
+# All Pareto k estimates are good (k < 0.5).
+
+## run 10-folds cross-validation
 set.seed(1)
 folds <- caret::createFolds(diabetes$Y, k=10, list=FALSE)
 cv.base <- kfold(hs.base, folds=folds)
@@ -61,24 +102,24 @@ round(posterior_performance(cv.base), 2)
 round(posterior_performance(cv.biom), 2)
 #        mean   sd    2.5%   97.5%
 # r2     0.48 0.01    0.47    0.50
-# llk -483.18 3.75 -490.51 -476.24
+# llk -482.86 3.76 -490.45 -476.56
 # attr(,"type")
 # [1] "cross-validated"
 
 ## projection predictive selection
 sel.biom <- projsel(hs.biom)
 print(sel.biom, digits=4)
-#                       var       kl rel.kl.null rel.kl   elpd delta.elpd
-# 1          Intercept only 0.352649     0.00000     NA -697.4 -225.90205
-# 2  Unpenalized covariates 0.333616     0.05397 0.0000 -682.6 -211.09068
-# 3                     bmi 0.139287     0.60503 0.5825 -542.5  -70.98338
-# 4                     ltg 0.058546     0.83398 0.8245 -493.5  -21.99851
-# 5                     map 0.035878     0.89826 0.8925 -482.9  -11.42176
-# 6                     hdl 0.010386     0.97055 0.9689 -473.8   -2.37619
-# 7                      tc 0.005371     0.98477 0.9839 -472.2   -0.69300
-# 8                     ldl 0.002491     0.99294 0.9925 -471.9   -0.38562
-# 9                     tch 0.001153     0.99673 0.9965 -471.5   -0.07225
-# 10                    glu 0.000000     1.00000 1.0000 -471.5    0.00000
+#                 var       kl rel.kl.null rel.kl   elpd delta.elpd
+# 1    Intercept only 0.352283     0.00000     NA -627.3 -155.84260
+# 2  Initial submodel 0.333156     0.05429 0.0000 -619.8 -148.39729
+# 3               bmi 0.138629     0.60648 0.5839 -533.1  -61.69199
+# 4               ltg 0.058441     0.83411 0.8246 -492.5  -21.09681
+# 5               map 0.035970     0.89789 0.8920 -482.7  -11.25515
+# 6               hdl 0.010304     0.97075 0.9691 -473.9   -2.41192
+# 7                tc 0.005292     0.98498 0.9841 -472.2   -0.72490
+# 8               ldl 0.002444     0.99306 0.9927 -471.8   -0.38292
+# 9               tch 0.001105     0.99686 0.9967 -471.5   -0.07819
+# 10              glu 0.000000     1.00000 1.0000 -471.4    0.00000
 ```
 
 ### References

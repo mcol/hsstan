@@ -63,14 +63,15 @@
 #'        observations; for linear regression only, it's further multiplied by
 #'        the residual standard deviation `sigma`.
 #' @param global.df Number of degrees of freedom for the global shrinkage
-#'        parameter (ignored if `regularized=FALSE`).
+#'        parameter (ignored if `regularized=FALSE`). Larger values induce more
+#'        shrinkage.
 #' @param slab.scale Scale of the regularization parameter (ignored if
 #'        `regularized=FALSE`).
 #' @param slab.df Number of degrees of freedom of the regularization parameter
 #'        (ignored if `regularized=FALSE`).
 #' @param keep.hs.pars Whether the parameters for the horseshoe prior should be
 #'        kept in the `stanfit` object returned (`FALSE` by default).
-#' @param ... Further arguments passed to \code{\link[rstan]{sampling}},
+#' @param ... Further arguments passed to [rstan::sampling()],
 #'        such as `chains` (4 by default), `cores` (the value of
 #'        `options("mc.cores")` by default), `refresh` (`iter / 10` by default).
 #'
@@ -234,7 +235,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 #'        `options("mc.cores")` by default). The cross-validation folds will
 #'        be distributed to the available cores, and the Markov chains for each
 #'        model will be run sequentially.
-#' @param ... Further arguments passed to \code{\link[rstan]{sampling}}.
+#' @param ... Further arguments passed to [rstan::sampling()].
 #'
 #' @return
 #' An object with classes `kfold` and `loo` that has a similar structure as the

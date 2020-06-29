@@ -27,11 +27,12 @@
 #' The package implements the horseshoe and regularized horseshoe priors
 #' (Piironen and Vehtari (2017)), and the projection predictive selection
 #' approach to recover a sparse set of predictive biomarkers (Piironen,
-#' Paasiniemi and Vehtari (2018)).
+#' Paasiniemi and Vehtari (2020)).
 #'
 #' The approach is particularly suited to selection from high-dimensional
 #' panels of biomarkers, such as those that can be measured by MSMS or similar
-#' technologies (Colombo, Valo, McGurnaghan et al. (2019)).
+#' technologies (Colombo, Valo, McGurnaghan et al. (2019), Colombo, McGurnaghan,
+#' Blackbourn et al. (2020)).
 #'
 #' @docType package
 #' @name hsstan-package

@@ -31,7 +31,7 @@ in the returned object (\code{TRUE} by default).}
 be distributed to the available cores, and the Markov chains for each
 model will be run sequentially.}
 
-\item{...}{Further arguments passed to \code{\link[rstan]{sampling}}.}
+\item{...}{Further arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}}.}
 }
 \value{
 An object with classes \code{kfold} and \code{loo} that has a similar structure as the

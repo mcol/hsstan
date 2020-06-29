@@ -64,7 +64,8 @@ observations; for linear regression only, it's further multiplied by
 the residual standard deviation \code{sigma}.}
 
 \item{global.df}{Number of degrees of freedom for the global shrinkage
-parameter (ignored if \code{regularized=FALSE}).}
+parameter (ignored if \code{regularized=FALSE}). Larger values induce more
+shrinkage.}
 
 \item{slab.scale}{Scale of the regularization parameter (ignored if
 \code{regularized=FALSE}).}
@@ -87,7 +88,7 @@ base models.}
 \item{keep.hs.pars}{Whether the parameters for the horseshoe prior should be
 kept in the \code{stanfit} object returned (\code{FALSE} by default).}
 
-\item{...}{Further arguments passed to \code{\link[rstan]{sampling}},
+\item{...}{Further arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}},
 such as \code{chains} (4 by default), \code{cores} (the value of
 \code{options("mc.cores")} by default), \code{refresh} (\code{iter / 10} by default).}
 }

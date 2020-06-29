@@ -43,6 +43,7 @@
 
 ### Major Changes
 
+- First version to be available on CRAN.
 - Add the `kfold()` and  `posterior_summary()` functions.
 - Implement parallelization on Windows using `parallel::parLapply()`.
 - Remove the deprecated `sample.stan()` and `sample.stan.cv()`.
