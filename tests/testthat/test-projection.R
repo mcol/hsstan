@@ -1,12 +1,21 @@
-test_that("projsel",
+test_that("projsel for a model with no penalized predictors",
 {
     SW({
-        hs.nopen <- hsstan(df, mod.gauss, iter=50, chains=1, family=gaussian,
-                           refresh=0)
+        sel.base.1 <- projsel(hs.base)
+        sel.base.2 <- projsel(hs.base, start.from="X2")
     })
 
-    expect_error(projsel(hs.nopen),
-                 "Model doesn't contain penalized predictors")
+    expect_equal(nrow(sel.base.1),
+                 length(hs.base$betas$unpenalized))
+    expect_equal(attr(sel.base.1, "start.from"),
+                 character(0))
+
+    expect_equal(nrow(sel.base.2),
+                 length(hs.base$betas$unpenalized))
+    expect_equal(sel.base.2$var[2],
+                 "Initial submodel")
+    expect_equal(attr(sel.base.2, "start.from"),
+                 "X2")
 })
 
 test_that("projsel for gaussian family",

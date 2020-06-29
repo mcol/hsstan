@@ -275,8 +275,8 @@ validate.folds <- function(folds, N) {
 
 #' Validate start.from
 #'
-#' Check that the predictor names provided is a valid subset of the unpenalized
-#' covariates.
+#' Check that the predictor names provided is a valid subset of the variables
+#' used in the model.
 #'
 #' @param obj An object of class `hsstan`.
 #' @param start.from Vector to be checked.
@@ -294,8 +294,12 @@ validate.start.from <- function(obj, start.from) {
     mod.terms <- c(unp.terms, obj$model.terms$penalized)
     mod.betas <- c(unp.betas, names(obj$betas$penalized))
     start.from <- setdiff(start.from, "")
-    if (is.null(start.from))
-        return(list(start.from=unp.terms, idx=seq_along(unp.betas)))
+    if (is.null(start.from)) {
+        if (length(obj$model.terms$penalized) > 0)
+            return(list(start.from=unp.terms, idx=seq_along(unp.betas)))
+        else
+            return(list(start.from=character(0), idx=1))
+    }
     if (length(start.from) == 0)
         return(list(start.from=character(0), idx=1))
     if (anyNA(start.from))

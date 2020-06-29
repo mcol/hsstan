@@ -14,7 +14,8 @@ after which the selection procedure should stop.}
 
 \item{start.from}{Vector of variable names to be used in the starting
 submodel. If \code{NULL} (default), selection starts from the set of
-unpenalized covariates.}
+unpenalized covariates if the model contains penalized predictors,
+otherwise selection starts from the intercept-only model.}
 
 \item{out.csv}{If not \code{NULL}, the name of a CSV file to save the
 output to.}

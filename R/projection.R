@@ -168,7 +168,8 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #'        after which the selection procedure should stop.
 #' @param start.from Vector of variable names to be used in the starting
 #'        submodel. If `NULL` (default), selection starts from the set of
-#'        unpenalized covariates.
+#'        unpenalized covariates if the model contains penalized predictors,
+#'        otherwise selection starts from the intercept-only model.
 #' @param out.csv If not `NULL`, the name of a CSV file to save the
 #'        output to.
 #'
@@ -202,8 +203,6 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
                     out.csv=NULL) {
     validate.hsstan(obj)
     validate.samples(obj)
-    if (length(obj$model.terms$penalized) == 0)
-        stop("Model doesn't contain penalized predictors.")
 
     x <- xt <- validate.newdata(obj, obj$data)
     yt <- obj$data[[obj$model.terms$outcome]]

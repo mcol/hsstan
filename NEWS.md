@@ -20,6 +20,7 @@
 - Fix bug in handling of a factor variable with multiple levels in the set of
   penalized predictors.
 - Use the correct sigma term in the computation of the elpd for gaussian models.
+- Allow running `projsel()` on models with no penalized predictors.
 
 # hsstan 0.7 (1 May 2020)
 

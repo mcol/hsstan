@@ -277,11 +277,17 @@ test_that("validate.start.from",
     expect_equal(validate.start.from(hs.gauss, character(0)),
                  list(start.from=character(0), idx=1))
 
-    vsf <- validate.start.from(hs.gauss, NULL)
+    vsf <- validate.start.from(hs.base, NULL)
     expect_type(vsf,
                 "list")
     expect_named(vsf,
                  c("start.from", "idx"))
+    expect_equal(vsf$start.from,
+                 character(0))
+    expect_equal(vsf$idx,
+                 1)
+
+    vsf <- validate.start.from(hs.gauss, NULL)
     expect_equal(vsf$start.from,
                  hs.gauss$model.terms$unpenalized)
     expect_equal(vsf$idx,
