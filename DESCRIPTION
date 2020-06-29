@@ -1,7 +1,7 @@
 Package: hsstan
 Type: Package
 Title: Hierarchical Shrinkage Stan Models for Biomarker Selection
-Version: 0.8
+Version: 0.8.0.9000
 Date: 2020-06-29
 Authors@R: c(person("Marco", "Colombo",
                     email="mar.colombo13@gmail.com", role=c("aut", "cre"),

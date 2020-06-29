@@ -1,3 +1,9 @@
+# Current development version
+
+### Major Changes
+
+### Smaller Changes and Bug Fixes
+
 # hsstan 0.8 (29 June 2020)
 
 ### Major Changes
