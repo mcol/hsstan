@@ -183,7 +183,7 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #' \item{rel.kl.null}{relative explanatory power of predictors starting from the
 #'       intercept-only model.}
 #' \item{rel.kl}{relative explanatory power of predictors starting from the
-#'       initial model.}
+#'       initial submodel.}
 #' \item{elpd}{the expected log predictive density of the submodels.}
 #' \item{delta.elpd}{the difference in elpd from the full model.}
 #'
@@ -229,7 +229,7 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
 
     ## intercept only model
     sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
-    kl.elpd <- c(sub$kl, sub$elpd)
+    kl.elpd <- cbind(sub$kl, sub$elpd)
     report.iter("Intercept only", sub$kl, sub$elpd)
 
     ## initial submodel with the set of chosen covariates
@@ -255,12 +255,16 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
         sub$elpd else elpd(yt, t(posterior_linpred(obj)), sigma2, is.logistic)
 
     kl <- kl.elpd[, 1]
+    rel.kl <- c(NA, if (length(kl) > 1) 1 - kl[-1] / kl[2])
+    if (length(rel.kl) == 2 && is.nan(rel.kl[2]))
+        rel.kl[2] <- 1
+
     res <- data.frame(var=c("Intercept only",
                             if (length(start.idx) > 1) "Initial submodel",
                             colnames(x)[setdiff(chosen, start.idx)]),
                       kl=kl,
                       rel.kl.null=1 - kl / kl[1],
-                      rel.kl=c(NA, 1 - if (length(kl) > 2) kl[-1] / kl[2] else 1),
+                      rel.kl=rel.kl,
                       elpd=kl.elpd[, 2],
                       delta.elpd=kl.elpd[, 2] - full.elpd,
                       stringsAsFactors=FALSE, row.names=NULL)

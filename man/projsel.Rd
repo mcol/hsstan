@@ -30,7 +30,7 @@ The data frame contains the following columns:
 \item{rel.kl.null}{relative explanatory power of predictors starting from the
 intercept-only model.}
 \item{rel.kl}{relative explanatory power of predictors starting from the
-initial model.}
+initial submodel.}
 \item{elpd}{the expected log predictive density of the submodels.}
 \item{delta.elpd}{the difference in elpd from the full model.}
 }

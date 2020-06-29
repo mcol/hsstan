@@ -1,9 +1,26 @@
 test_that("projsel for a model with no penalized predictors",
 {
     SW({
+        sel.base.00 <- projsel(hs.base, max.iters=0)
+        sel.base.02 <- projsel(hs.base, max.iters=0, start.from="X2")
         sel.base.1 <- projsel(hs.base)
         sel.base.2 <- projsel(hs.base, start.from="X2")
     })
+
+    expect_equal(nrow(sel.base.00),
+                 1)
+    expect_true(is.na(sel.base.00$rel.kl))
+    expect_equal(sel.base.00$rel.kl.null,
+                 0)
+
+    expect_equal(nrow(sel.base.02),
+                 2)
+    expect_equal(sel.base.02$rel.kl[2],
+                 0)
+    expect_equal(sel.base.02$rel.kl.null[1],
+                 0)
+    expect_equal(sel.base.02$rel.kl.null[2],
+                 0.36789295, tolerance=tol)
 
     expect_equal(nrow(sel.base.1),
                  length(hs.base$betas$unpenalized))
@@ -45,6 +62,8 @@ test_that("projsel for gaussian family",
     expect_equal(tail(sel.gauss$rel.kl.null, n=1),
                  1)
     expect_true(is.na(sel.gauss$rel.kl[1]))
+    expect_equal(sel.gauss$rel.kl[2],
+                 0)
     expect_equal(tail(sel.gauss$rel.kl, n=1),
                  1)
     expect_equal(sel.gauss$elpd[2],
@@ -80,9 +99,11 @@ test_that("projsel for binomial family",
                  0.00658264, tolerance=tol)
     expect_equal(sel.binom$rel.kl.null[1],
                  0)
-    expect_true(tail(sel.binom$rel.kl.null, n=1) < 1)
     expect_true(is.na(sel.binom$rel.kl[1]))
-    expect_true(tail(sel.binom$rel.kl, n=1) < 1)
+    expect_lt(tail(sel.binom$rel.kl, n=1),
+              1)
+    expect_lt(tail(sel.binom$rel.kl.null, n=1),
+              1)
     expect_equal(sel.binom$elpd[2],
                  -35.4546417, tolerance=tol)
     expect_equal(tail(sel.binom$elpd, n=1),
@@ -144,7 +165,7 @@ test_that("projsel from a submodel that includes all variables",
     expect_equal(sel.gauss$rel.kl.null,
                  c(0, 1))
     expect_equal(sel.gauss$rel.kl,
-                 c(NA, 0))
+                 c(NA, 1))
     expect_equal(sel.gauss$delta.elpd[2],
                  0)
     expect_equal(attr(sel.gauss, "row.names"),
