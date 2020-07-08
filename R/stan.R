@@ -104,23 +104,48 @@
 #'
 #' @importFrom stats gaussian
 #' @export
-hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
+hsstan <- function(x, covs.model,  
+                   penalized=NULL, family=gaussian,
                    iter=2000, warmup=floor(iter / 2),
                    scale.u=2, regularized=TRUE, nu=ifelse(regularized, 1, 3),
                    par.ratio=0.05, global.df=1, slab.scale=2, slab.df=4,
                    qr=TRUE, seed=123, adapt.delta=NULL,
                    keep.hs.pars=FALSE, ...) {
-
+     
+    if(family=="cox") cox <- TRUE
+    
     model.terms <- validate.model(covs.model, penalized)
     x <- validate.data(x, model.terms)
     y <- x[[model.terms$outcome]]
-    family <- validate.family(family, y)
+    if(!cox) {
+        family <- validate.family(family, y)
+    }
     regularized <- as.integer(regularized)
 
-    ## stop if options to be passed to rstan::sampling are not valid, as
-    ## to work around rstan issue #681
-    validate.rstan.args(...)
-
+    if(!cox) {
+        ## stop if options to be passed to rstan::sampling are not valid, as
+        ## to work around rstan issue #681
+        validate.rstan.args(...)
+    } else {
+        ## recode stratum as an integer, sort by stratum, generate starts, stops, S
+        x$stratum <- as.integer(as.factor(x$stratum))
+        x <- x[order(x$stratum), ]
+        starts <- 1 + c(0, which(diff(x$stratum) > 0))
+        stops <- c(starts[-1] - 1, nrow(x))
+        S <- length(starts)
+        
+        ## recode outcome as categoric
+        y <- x[[model.terms$outcome]] # redefine after sorting x
+        ycat <- integer(S)
+        for(s in 1:S) {
+            yind <- y[starts[s]:stops[s]]
+            y.gt0 <- which(yind > 0)
+            if(length(y.gt0) != 1)
+                stop("stratum ", s, " has ", length(y.gt0),  " observations with y > 0")
+            ycat[s] <- which(yind > 0)
+        }
+    }
+    
     ## parameter names not to include by default in the stanfit object
     hs.pars <- c("lambda", "tau", "z", "c2")
     if (keep.hs.pars)
@@ -133,9 +158,14 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
         call[[nm]] <- args[[nm]]
 
     ## choose the model to be fitted
-    model <- ifelse(length(penalized) == 0, "base", "hs")
-    if (family$family == "binomial") model <- paste0(model, "_logit")
-
+    ## model is a string
+    if(!cox) {
+        model <- ifelse(length(penalized) == 0, "base", "hs")
+        if (family$family == "binomial") model <- paste0(model, "_logit")
+    } else {
+        model <- "hs_clogit"
+    }
+        
     ## set or check adapt.delta
     if (is.null(adapt.delta)) {
         adapt.delta <- ifelse(grepl("hs", model), 0.99, 0.95)
@@ -145,13 +175,17 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 
     ## create the design matrix
     X <- ordered.model.matrix(x, model.terms$unpenalized, model.terms$penalized)
+    if(cox) {
+        X <- X[, -1] # drop first column containing 1s
+    }
+    
     N <- nrow(X)
     P <- ncol(X)
 
     ## number of penalized and unpenalized columns in the design matrix
     K <- length(expand.terms(x, model.terms$penalized)[-1])
     U <- P - K
-
+    
     ## thin QR decomposition
     if (P > N) qr <- FALSE
     if (qr) {
@@ -162,19 +196,25 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     }
 
     ## global scale for regularized horseshoe prior
-    global.scale <- if (regularized) par.ratio / sqrt(N) else 1
-
+    if(!cox) {
+        global.scale <- if (regularized) par.ratio / sqrt(N) else 1
+    } else {
+        global.scale <- par.ratio / sqrt(S)
+    }
+        
     ## core block
     {
         ## parameters not used by a model are ignored
         data.input <- list(X=if (qr) Q.qr else X, y=y, N=N,
+                           ycat=ycat, S=S, starts=starts, stops=stops, # extra data for clogit
                            P=P, U=U, scale_u=scale.u,
                            regularized=regularized, nu=nu,
                            global_scale=global.scale, global_df=global.df,
                            slab_scale=slab.scale, slab_df=slab.df)
 
         ## run the stan model
-        samples <- rstan::sampling(stanmodels[[model]], data=data.input,
+        samples <- rstan::sampling(object=stanmodels[[model]],
+                                   data=data.input,
                                    iter=iter, warmup=warmup, seed=seed, ...,
                                    pars=hs.pars, include=keep.hs.pars,
                                    control=list(adapt_delta=adapt.delta))

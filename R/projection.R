@@ -42,7 +42,6 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 
     ## logistic regression model
     if (is.logistic) {
-
         ## compute the projection for each sample
         par.fun <- function(s) glm.fit(xp, fit[, s],
                                        family=quasibinomial())$coefficients
@@ -205,8 +204,14 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     validate.samples(obj)
 
     x <- xt <- validate.newdata(obj, obj$data)
+    if(obj$family$family == "cox") {
+        x <- x[, -1] # drop intercept column
+    }
+   
     yt <- obj$data[[obj$model.terms$outcome]]
     is.logistic <- is.logistic(obj)
+    if(obj$family$family == "cox") # set 
+        is.logistic <- TRUE
     sigma2 <- if (is.logistic) 1 else as.matrix(obj$stanfit, pars="sigma")^2
 
     ## set of variables in the initial submodel
@@ -227,13 +232,19 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     ## fitted values for the full model (N x S)
     fit <- t(posterior_linpred(obj, transform=TRUE))
 
-    ## intercept only model
-    sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
-    kl.elpd <- cbind(sub$kl, sub$elpd)
-    report.iter("Intercept only", sub$kl, sub$elpd)
+ 
+    if(obj$family$family != "cox") { 
+        ## intercept only model
+        sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
+        kl.elpd <- cbind(sub$kl, sub$elpd)
+        report.iter("Intercept only", sub$kl, sub$elpd)
+    } else {
+        kl.elpd <- NULL
+    }
 
     ## initial submodel with the set of chosen covariates
-    if (length(start.idx) > 1) {
+    if (start.idx > 1) {
+    #if (length(start.idx) > 1) {
         sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
         kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
         report.iter("Initial submodel", sub$kl, sub$elpd)
@@ -244,6 +255,7 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
         sel.idx <- choose.next(x, sigma2, fit, sub$fit, chosen, is.logistic)
         chosen <- c(chosen, sel.idx)
 
+   
         ## evaluate current submodel according to projected parameters
         sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
         kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))

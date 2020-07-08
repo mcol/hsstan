@@ -205,23 +205,23 @@ validate.family <- function(family, y) {
     if (is.character(family))
         tryCatch(
             family <- get(family, mode="function", envir=parent.frame(2)),
-                          error=function(e)
-                              stop("'", family, "' is not a valid family.")
+            error=function(e)
+                stop("'", family, "' is not a valid family.")
         )
     if (is.function(family))
         family <- family()
     if (!is(family, "family"))
         stop("Argument of 'family' is not a valid family.")
-    if (!family$family %in% c("gaussian", "binomial"))
-        stop("Only 'gaussian' and 'binomial' are supported families.")
-
-    if (family$family == "binomial") {
+    if (!family$family %in% c("gaussian", "binomial", "clogit", "cox"))
+        stop("Only 'gaussian', 'binomial', 'clogit' and 'cox' are supported families.")
+    
+    if (family$family == "binomial" | family$family == "cox") {
         if (length(table(y)) != 2)
-            stop("Outcome variable must contain two classes with family=binomial.")
+            stop("Outcome variable must contain two classes with family binomial or cox).")
         if (!is.factor(y) && any(y < 0 | y > 1))
-            stop("Outcome variable must contain 0-1 values with family=binomial.")
+            stop("Outcome variable must contain 0-1 values with family=binomial or cox")
     }
-
+    
     return(family)
 }
 
