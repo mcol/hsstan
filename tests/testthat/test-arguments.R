@@ -174,7 +174,7 @@ test_that("family is valid",
     expect_error(validate.family(x),
                  "Argument of 'family' is not a valid family")
     expect_error(validate.family(poisson),
-                 "Only 'gaussian' and 'binomial' are supported families")
+                 "Only 'gaussian', 'binomial' and 'clogit' are supported families")
     expect_error(validate.family(binomial()),
                  "is missing, with no default")
 })
@@ -187,6 +187,13 @@ test_that("invalid family inputs",
                  "must contain 0-1 values")
     expect_error(validate.family(binomial(), y.binom - 1),
                  "must contain 0-1 values")
+
+    expect_error(validate.family(clogit(), y.gauss),
+                 "must contain two classes")
+    expect_error(validate.family(clogit(), y.binom + 1),
+                 "must contain 0-1 values")
+    expect_error(validate.family(clogit(), y.binom - 1),
+                 "must contain 0-1 values")
 })
 
 test_that("valid family inputs",
@@ -197,6 +204,10 @@ test_that("valid family inputs",
                  "binomial")
     expect_equal(validate.family("binomial", y.factr)$family,
                  "binomial")
+    expect_equal(validate.family("clogit", y.binom)$family,
+                 "clogit")
+    expect_equal(validate.family("clogit", y.factr)$family,
+                 "clogit")
     expect_equal(validate.family("gaussian")$family,
                  "gaussian")
     expect_equal(validate.family(gaussian())$family,

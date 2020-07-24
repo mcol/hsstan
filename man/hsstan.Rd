@@ -39,7 +39,8 @@ penalized. If \code{NULL} or an empty vector, a model with only unpenalized
 covariates is fitted.}
 
 \item{family}{Type of model fitted: either \code{gaussian()} for linear regression
-(default) or \code{binomial()} for logistic regression.}
+(default), \code{binomial()} for logistic regression, or \code{clogit()} for
+conditional logistic regression.}
 
 \item{iter}{Total number of iterations in each chain, including warmup
 (2000 by default).}

@@ -36,7 +36,8 @@
 #'        penalized. If `NULL` or an empty vector, a model with only unpenalized
 #'        covariates is fitted.
 #' @param family Type of model fitted: either `gaussian()` for linear regression
-#'        (default) or `binomial()` for logistic regression.
+#'        (default), `binomial()` for logistic regression, or `clogit()` for
+#'        conditional logistic regression.
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
 #' @param qr Whether the thin QR decomposition should be used to decorrelate the
@@ -121,6 +122,26 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     ## to work around rstan issue #681
     validate.rstan.args(...)
 
+    if (family$family == "clogit") {
+        ## recode stratum as an integer, sort by stratum, generate starts, stops, S
+        x$stratum <- as.integer(as.factor(x$stratum))
+        x <- x[order(x$stratum), ]
+        starts <- 1 + c(0, which(diff(x$stratum) > 0))
+        stops <- c(starts[-1] - 1, nrow(x))
+        S <- length(starts)
+
+        ## recode outcome as categoric
+        y <- x[[model.terms$outcome]] # redefine after sorting x
+        ycat <- integer(S)
+        for(s in 1:S) {
+            yind <- y[starts[s]:stops[s]]
+            y.gt0 <- which(yind > 0)
+            if(length(y.gt0) != 1)
+                stop("stratum ", s, " has ", length(y.gt0),  " observations with y > 0")
+            ycat[s] <- which(yind > 0)
+        }
+    }
+
     ## parameter names not to include by default in the stanfit object
     hs.pars <- c("lambda", "tau", "z", "c2")
     if (keep.hs.pars)
@@ -135,6 +156,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     ## choose the model to be fitted
     model <- ifelse(length(penalized) == 0, "base", "hs")
     if (family$family == "binomial") model <- paste0(model, "_logit")
+    else if (family$family == "clogit") model <- paste0(model, "_clogit")
 
     ## set or check adapt.delta
     if (is.null(adapt.delta)) {
@@ -145,6 +167,10 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 
     ## create the design matrix
     X <- ordered.model.matrix(x, model.terms$unpenalized, model.terms$penalized)
+    if (family$family == "clogit") {
+        X <- X[, -1] # drop first column containing 1s
+    }
+
     N <- nrow(X)
     P <- ncol(X)
 
@@ -163,6 +189,9 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
 
     ## global scale for regularized horseshoe prior
     global.scale <- if (regularized) par.ratio / sqrt(N) else 1
+    if (family$family == "clogit") {
+        global.scale <- par.ratio / sqrt(S)
+    }
 
     ## core block
     {
@@ -173,8 +202,13 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
                            global_scale=global.scale, global_df=global.df,
                            slab_scale=slab.scale, slab_df=slab.df)
 
+        ## extra data for clogit
+        if (family$family == "clogit")
+            data.input <- c(data.input,
+                            ycat=ycat, S=S, starts=starts, stops=stops)
+
         ## run the stan model
-        samples <- rstan::sampling(stanmodels[[model]], data=data.input,
+        samples <- rstan::sampling(object=stanmodels[[model]], data=data.input,
                                    iter=iter, warmup=warmup, seed=seed, ...,
                                    pars=hs.pars, include=keep.hs.pars,
                                    control=list(adapt_delta=adapt.delta))

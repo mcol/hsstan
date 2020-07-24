@@ -42,18 +42,26 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 
     ## logistic regression model
     if (is.logistic) {
-
-        ## compute the projection for each sample
-        par.fun <- function(s) glm.fit(xp, fit[, s],
-                                       family=quasibinomial())$coefficients
+         ## compute the projection for each sample
+        par.fun <- function(s) {
+            qb <- glm.fit(xp, fit[, s], family=quasibinomial())$coefficients
+            gc() # fixes an apparent memory leak
+            return(qb)
+        }
         if (.Platform$OS.type != "windows") {
             wp <- parallel::mclapply(X=1:S, mc.preschedule=TRUE, FUN=par.fun)
+
+            #wp <- vector("list", length = S) 
+            #for(s in 1:S) {
+            #    wp[[s]] <- par.fun(s)
+            #}
+          
         } else { # windows
             cl <- parallel::makePSOCKcluster(getOption("mc.cores", 1))
             on.exit(parallel::stopCluster(cl))
             wp <- parallel::parLapply(X=1:S, cl=cl, fun=par.fun)
         }
-        wp <- matrix(unlist(wp, use.names=FALSE), ncol=S)
+        wp <- matrix(unlist(wp, use.names=FALSE), ncol=S) # P x S matrix 
 
         ## estimate the KL divergence between full and projected model
         fitp <- binomial()$linkinv(multiplyAB(xp, wp))
@@ -76,7 +84,7 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 
     ## reshape wp so that it has same dimension (P x S) as t(x), and zeros for
     ## those variables that are not included in the projected model
-    wp.all <- matrix(0, P, S)
+    wp.all <- matrix(data=0, nrow=P, ncol=S)
     wp.all[indproj, ] <- wp
     return(list(w=wp.all, sigma2=sigma2p, fit=fitp, kl=kl))
 }
@@ -170,6 +178,7 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #'        submodel. If `NULL` (default), selection starts from the set of
 #'        unpenalized covariates if the model contains penalized predictors,
 #'        otherwise selection starts from the intercept-only model.
+#' @param num.samples Number of posterior samples to be used in projection.
 #' @param out.csv If not `NULL`, the name of a CSV file to save the
 #'        output to.
 #'
@@ -200,13 +209,21 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #' @importFrom utils write.csv
 #' @export
 projsel <- function(obj, max.iters=30, start.from=NULL,
-                    out.csv=NULL) {
+                    num.samples=NULL, out.csv=NULL) {
     validate.hsstan(obj)
     validate.samples(obj)
 
     x <- xt <- validate.newdata(obj, obj$data)
+    if (obj$family$family == "clogit") {
+        ## first col is stratum, which should be dropped
+        ## there is no intercept column in data
+        x <- x[, -1] # drop intercept column
+    }
+
     yt <- obj$data[[obj$model.terms$outcome]]
     is.logistic <- is.logistic(obj)
+    if(obj$family$family == "clogit")
+        is.logistic <- TRUE
     sigma2 <- if (is.logistic) 1 else as.matrix(obj$stanfit, pars="sigma")^2
 
     ## set of variables in the initial submodel
@@ -226,14 +243,25 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
 
     ## fitted values for the full model (N x S)
     fit <- t(posterior_linpred(obj, transform=TRUE))
+    
+    if (!is.null(num.samples)) {
+        fit <- fit[, 1:num.samples]
+        if (obj$family$family == "gaussian") {
+            sigma2 <- sigma2[1:num.samples, ]
+        }
+    }
 
-    ## intercept only model
-    sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
-    kl.elpd <- cbind(sub$kl, sub$elpd)
-    report.iter("Intercept only", sub$kl, sub$elpd)
+    if (obj$family$family != "clogit") {
+        ## intercept only model
+        sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)
+        kl.elpd <- cbind(sub$kl, sub$elpd)
+        report.iter("Intercept only", sub$kl, sub$elpd)
+    } else {
+        kl.elpd <- NULL
+    }
 
     ## initial submodel with the set of chosen covariates
-    if (length(start.idx) > 1) {
+    if (length(start.idx) > 1 || obj$family$family == "clogit") {
         sub <- fit.submodel(x, sigma2, fit, chosen, xt, yt, is.logistic)
         kl.elpd <- rbind(kl.elpd, c(sub$kl, sub$elpd))
         report.iter("Initial submodel", sub$kl, sub$elpd)
@@ -259,9 +287,12 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     if (length(rel.kl) == 2 && is.nan(rel.kl[2]))
         rel.kl[2] <- 1
 
-    res <- data.frame(var=c("Intercept only",
-                            if (length(start.idx) > 1) "Initial submodel",
-                            colnames(x)[setdiff(chosen, start.idx)]),
+    var.names <- c(if(length(start.idx) > 1) "Initial submodel",
+                   colnames(x)[setdiff(chosen, start.idx)])
+    if(obj$family$family != "clogit") {
+        var.names <- c("Intercept only", var.names)
+    }
+    res <- data.frame(var=var.names,
                       kl=kl,
                       rel.kl.null=1 - kl / kl[1],
                       rel.kl=rel.kl,

@@ -212,14 +212,16 @@ validate.family <- function(family, y) {
         family <- family()
     if (!is(family, "family"))
         stop("Argument of 'family' is not a valid family.")
-    if (!family$family %in% c("gaussian", "binomial"))
-        stop("Only 'gaussian' and 'binomial' are supported families.")
+    if (!family$family %in% c("gaussian", "binomial", "clogit"))
+        stop("Only 'gaussian', 'binomial' and 'clogit' are supported families.")
 
-    if (family$family == "binomial") {
+    if (family$family == "binomial" || family$family == "clogit") {
         if (length(table(y)) != 2)
-            stop("Outcome variable must contain two classes with family=binomial.")
+            stop("Outcome variable must contain two classes ",
+                 "if family is 'binomial' or 'clogit'.")
         if (!is.factor(y) && any(y < 0 | y > 1))
-            stop("Outcome variable must contain 0-1 values with family=binomial.")
+            stop("Outcome variable must contain 0-1 values ",
+                 "if family is 'binomial' or 'clogit'.")
     }
 
     return(family)
@@ -460,6 +462,24 @@ vector.summary <- function(x, prob) {
     lower <- (1 - prob) / 2
     upper <- 1 - lower
     c(mean=mean(x), sd=stats::sd(x), stats::quantile(x, c(lower, upper)))
+}
+
+#' Family object for conditional logistic models
+#'
+#' @param link Specification for the model link function.
+#'
+#' @return
+#' An object of class `family`.
+#'
+#' @importFrom stats make.link
+#' @noRd
+clogit <- function(link="logit") {
+    if (link != "logit")
+        stop("Only link 'logit' is available for the clogit family.")
+
+    clogit <- binomial()
+    clogit$family <- "clogit"
+    return(clogit)
 }
 
 #' Check whether the model fitted is a logistic regression model.
