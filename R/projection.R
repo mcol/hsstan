@@ -178,6 +178,7 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #'        submodel. If `NULL` (default), selection starts from the set of
 #'        unpenalized covariates if the model contains penalized predictors,
 #'        otherwise selection starts from the intercept-only model.
+#' @param num.samples Number of posterior samples to be used in projection.
 #' @param out.csv If not `NULL`, the name of a CSV file to save the
 #'        output to.
 #'
@@ -208,7 +209,7 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #' @importFrom utils write.csv
 #' @export
 projsel <- function(obj, max.iters=30, start.from=NULL,
-                    out.csv=NULL) {
+                    num.samples=NULL, out.csv=NULL) {
     validate.hsstan(obj)
     validate.samples(obj)
 
@@ -243,6 +244,13 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
     ## fitted values for the full model (N x S)
     fit <- t(posterior_linpred(obj, transform=TRUE))
     
+    if (!is.null(num.samples)) {
+        fit <- fit[, 1:num.samples]
+        if (obj$family$family == "gaussian") {
+            sigma2 <- sigma2[1:num.samples, ]
+        }
+    }
+
     if (obj$family$family != "clogit") {
         ## intercept only model
         sub <- fit.submodel(x, sigma2, fit, 1, xt, yt, is.logistic)

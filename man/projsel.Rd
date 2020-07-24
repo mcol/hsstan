@@ -4,7 +4,13 @@
 \alias{projsel}
 \title{Forward selection minimizing KL-divergence in projection}
 \usage{
-projsel(obj, max.iters = 30, start.from = NULL, out.csv = NULL)
+projsel(
+  obj,
+  max.iters = 30,
+  start.from = NULL,
+  num.samples = NULL,
+  out.csv = NULL
+)
 }
 \arguments{
 \item{obj}{Object of class \code{hsstan}.}
@@ -16,6 +22,8 @@ after which the selection procedure should stop.}
 submodel. If \code{NULL} (default), selection starts from the set of
 unpenalized covariates if the model contains penalized predictors,
 otherwise selection starts from the intercept-only model.}
+
+\item{num.samples}{Number of posterior samples to be used in projection.}
 
 \item{out.csv}{If not \code{NULL}, the name of a CSV file to save the
 output to.}
