@@ -36,7 +36,8 @@
 #'        penalized. If `NULL` or an empty vector, a model with only unpenalized
 #'        covariates is fitted.
 #' @param family Type of model fitted: either `gaussian()` for linear regression
-#'        (default) or `binomial()` for logistic regression.
+#'        (default), `binomial()` for logistic regression, or `clogit()` for
+#'        conditional logistic regression.
 #' @param seed Optional integer defining the seed for the pseudo-random number
 #'        generator.
 #' @param qr Whether the thin QR decomposition should be used to decorrelate the
