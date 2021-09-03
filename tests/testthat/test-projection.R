@@ -20,7 +20,7 @@ test_that("projsel for a model with no penalized predictors",
     expect_equal(sel.base.02$rel.kl.null[1],
                  0)
     expect_equal(sel.base.02$rel.kl.null[2],
-                 0.36789295, tolerance=tol)
+                 0.38193515, tolerance=tol)
 
     expect_equal(nrow(sel.base.1),
                  length(hs.base$betas$unpenalized))
@@ -52,9 +52,9 @@ test_that("projsel for gaussian family",
     expect_equal(sel.gauss$var[1:2],
                  c("Intercept only", "Initial submodel"))
     expect_equal(sel.gauss$var[-c(1:2)],
-                 paste0("X", c(9, 4, 8, 5, 6, 7, 10)))
+                 paste0("X", c(9, 4, 8, 7, 5, 6, 10)))
     expect_equal(sel.gauss$kl[2],
-                 0.02600856, tolerance=tol)
+                 0.02948656, tolerance=tol)
     expect_equal(tail(sel.gauss$kl, n=1),
                  0)
     expect_equal(sel.gauss$rel.kl.null[1],
@@ -67,11 +67,11 @@ test_that("projsel for gaussian family",
     expect_equal(tail(sel.gauss$rel.kl, n=1),
                  1)
     expect_equal(sel.gauss$elpd[2],
-                 -111.412089, tolerance=tol)
+                 -111.370949, tolerance=tol)
     expect_equal(tail(sel.gauss$elpd, n=1),
-                 -109.968684, tolerance=tol)
+                 -109.695740, tolerance=tol)
     expect_equal(sel.gauss$delta.elpd[2],
-                 -1.44340522, tolerance=tol)
+                 -1.67520810, tolerance=tol)
     expect_true(all(diff(sel.gauss$kl) < 0))
     expect_true(file.exists("out.csv"))
     unlink("out.csv")
@@ -92,11 +92,11 @@ test_that("projsel for binomial family",
     expect_equal(nrow(sel.binom),
                  num.sel + 2)
     expect_equal(sel.binom$var[-c(1:2)],
-                 paste0("X", c(6, 9, 5, 4)))
+                 paste0("X", c(6, 9, 5, 8)))
     expect_equal(sel.binom$kl[2],
-                 0.03884795, tolerance=tol)
+                 0.03245156, tolerance=tol)
     expect_equal(tail(sel.binom$kl, n=1),
-                 0.00658264, tolerance=tol)
+                 0.00478297, tolerance=tol)
     expect_equal(sel.binom$rel.kl.null[1],
                  0)
     expect_true(is.na(sel.binom$rel.kl[1]))
@@ -105,11 +105,11 @@ test_that("projsel for binomial family",
     expect_lt(tail(sel.binom$rel.kl.null, n=1),
               1)
     expect_equal(sel.binom$elpd[2],
-                 -35.4546417, tolerance=tol)
+                 -35.3793754, tolerance=tol)
     expect_equal(tail(sel.binom$elpd, n=1),
-                 -33.8244249, tolerance=tol)
+                 -34.0411588, tolerance=tol)
     expect_equal(sel.binom$delta.elpd[2],
-                 -1.85835465, tolerance=tol)
+                 -1.39197661, tolerance=tol)
     expect_true(all(diff(sel.binom$kl) < 0))
 })
 

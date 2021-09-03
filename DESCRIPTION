@@ -42,7 +42,7 @@ LinkingTo:
     BH (>= 1.66.0.1),
     Rcpp (>= 0.12.15),
     RcppEigen (>= 0.3.3.4.0),
-    StanHeaders (>= 2.17.2),
+    StanHeaders (>= 2.21.0),
     rstan (>= 2.18.1)
 Suggests:
     testthat (>= 2.1.0)
