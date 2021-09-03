@@ -320,6 +320,32 @@ validate.start.from <- function(obj, start.from) {
     return(list(start.from=start.from, idx=which(mod.betas %in% chosen)))
 }
 
+#' Validate a positive or non-negative scalar value
+#'
+#' @param x Value to validate.
+#' @param name Variable name to report in case of error.
+#' @param int Whether the value has to be an integer (`FALSE` by default).
+#'
+#' @return
+#' Throws an error if the given value is not a positive or non-negative
+#' scalar (or integer scalar).
+#'
+#' @noRd
+validate.positive.scalar <- function(x, name, int=FALSE) {
+    if (!is.numeric(x) || length(x) != 1 || is.na(x) || x <= 0 ||
+        (int && x != as.integer(x)))
+        stop(sprintf("'%s' must be a positive %s.", name,
+                     ifelse(int, "integer", "scalar")), call.=FALSE)
+}
+
+#' @noRd
+validate.nonnegative.scalar <- function(x, name, int=FALSE) {
+    if (!is.numeric(x) || length(x) != 1 || is.na(x) || x < 0 ||
+        (int && x != as.integer(x)))
+        stop(sprintf("'%s' must be a non-negative %s.", name,
+                     ifelse(int, "integer", "scalar")), call.=FALSE)
+}
+
 #' Validate adapt.delta
 #'
 #' Check that an adaptation acceptance probability is valid.

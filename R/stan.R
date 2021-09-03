@@ -116,6 +116,10 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
     y <- x[[model.terms$outcome]]
     family <- validate.family(family, y)
     regularized <- as.integer(regularized)
+    validate.positive.scalar(iter, "iter", int=TRUE)
+    validate.positive.scalar(warmup, "warmup", int=TRUE)
+    if (iter <= warmup)
+        stop("'warmup' must be smaller than 'iter'.", call.=FALSE)
 
     ## stop if options to be passed to rstan::sampling are not valid, as
     ## to work around rstan issue #681
@@ -277,6 +281,7 @@ kfold.hsstan <- function(x, folds, chains=1, store.fits=TRUE,
     N <- nrow(data)
     folds <- validate.folds(folds, N)
     num.folds <- max(folds)
+    validate.positive.scalar(chains, "chains", int=TRUE)
     validate.rstan.args(...)
 
     ## collect the list of calls to be evaluated in parallel

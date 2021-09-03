@@ -1,10 +1,5 @@
 test_that("hsstan",
 {
-    expect_error(hsstan(df, mod.gauss, adapt.delta=1),
-                 "'adapt.delta' must be less than 1")
-    expect_error(hsstan(df, mod.gauss, chains=0),
-                 "rstan::sampling failed")
-
     expect_s3_class(hs.gauss,
                     "hsstan")
     expect_s4_class(hs.gauss$stanfit,
@@ -141,4 +136,34 @@ test_that("kfold with store.fits=FALSE",
 {
     expect_named(cv.nofit,
                  c("estimates", "pointwise"))
+})
+
+test_that("hsstan with invalid inputs",
+{
+    expect_error(hsstan(df, mod.gauss, adapt.delta=1),
+                 "'adapt.delta' must be less than 1")
+
+    expect_error(hsstan(df, mod.gauss, iter=0),
+                 "'iter' must be a positive integer")
+    expect_error(hsstan(df, mod.gauss, iter=-1),
+                 "'iter' must be a positive integer")
+
+    expect_error(hsstan(df, mod.gauss, warmup=0),
+                 "'warmup' must be a positive integer")
+    expect_error(hsstan(df, mod.gauss, warmup=-1),
+                 "'warmup' must be a positive integer")
+
+    expect_error(hsstan(df, mod.gauss, iter=1000, warmup=1000),
+                 "'warmup' must be smaller than 'iter'")
+
+    expect_error(hsstan(df, mod.gauss, chains=0),
+                 "rstan::sampling failed")
+})
+
+test_that("kfold with invalid inputs",
+{
+    expect_error(kfold(hs.gauss, folds, chains=0),
+                 "'chains' must be a positive integer")
+    expect_error(kfold(hs.gauss, folds, chains=4.4),
+                 "'chains' must be a positive integer")
 })

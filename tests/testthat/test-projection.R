@@ -184,3 +184,13 @@ test_that("projsel for a cross-validated object",
                  sum(colMeans(log_lik(cv.gauss$fits[[1]],
                                       newdata=df[folds == 2, ]))))
 })
+
+test_that("projsel with invalid inputs",
+{
+    expect_error(projsel(hs.gauss, max.iters=-1),
+                 "must be a non-negative integer")
+    expect_error(projsel(hs.gauss, max.iters=2.3),
+                 "must be a non-negative integer")
+    expect_error(projsel(hs.gauss, max.iters=iris),
+                 "must be a non-negative integer")
+})

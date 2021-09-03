@@ -46,6 +46,10 @@ test_that("posterior_predict",
 {
     expect_error(posterior_predict(hs.gauss, nsamples=0),
                  "'nsamples' must be a positive integer")
+    expect_error(posterior_predict(hs.gauss, nsamples=-1),
+                 "'nsamples' must be a positive integer")
+    expect_error(posterior_predict(hs.gauss, nsamples=1.5),
+                 "'nsamples' must be a positive integer")
     expect_equal(posterior_predict(hs.gauss, seed=1),
                  posterior_predict(hs.gauss, seed=1, newdata=df))
     expect_equal(posterior_predict(hs.binom, seed=1),

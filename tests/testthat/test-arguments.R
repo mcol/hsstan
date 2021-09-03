@@ -319,6 +319,44 @@ test_that("validate.start.from",
                  validate.start.from(hs.inter, c("X3", "X1", "X1:X3")))
 })
 
+test_that("validate.positive.scalar",
+{
+    expect_silent(validate.positive.scalar(1.3, "var"))
+    expect_silent(validate.positive.scalar(1, "var", int=TRUE))
+
+    expect_error(validate.positive.scalar("a", "var"),
+                 "must be a positive scalar")
+    expect_error(validate.positive.scalar(iris, "var"),
+                 "must be a positive scalar")
+    expect_error(validate.positive.scalar(1:2, "var"),
+                 "must be a positive scalar")
+    expect_error(validate.positive.scalar(0, "var"),
+                 "must be a positive scalar")
+    expect_error(validate.positive.scalar(-1, "var"),
+                 "must be a positive scalar")
+    expect_error(validate.positive.scalar(1.5, "var", int=TRUE),
+                 "must be a positive integer")
+})
+
+test_that("validate.nonnegative.scalar",
+{
+    expect_silent(validate.nonnegative.scalar(1.3, "var"))
+    expect_silent(validate.nonnegative.scalar(1, "var", int=TRUE))
+    expect_silent(validate.nonnegative.scalar(0, "var"))
+    expect_silent(validate.nonnegative.scalar(0, "var", int=TRUE))
+
+    expect_error(validate.nonnegative.scalar("a", "var"),
+                 "must be a non-negative scalar")
+    expect_error(validate.nonnegative.scalar(iris, "var"),
+                 "must be a non-negative scalar")
+    expect_error(validate.nonnegative.scalar(1:2, "var"),
+                 "must be a non-negative scalar")
+    expect_error(validate.nonnegative.scalar(-1, "var"),
+                 "must be a non-negative scalar")
+    expect_error(validate.nonnegative.scalar(1.5, "var", int=TRUE),
+                 "must be a non-negative integer")
+})
+
 test_that("validate.adapt.delta",
 {
     expect_error(validate.adapt.delta("a"),

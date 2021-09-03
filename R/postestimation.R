@@ -170,6 +170,8 @@ posterior_linpred.hsstan <- function(object, transform=FALSE,
 posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
                                      seed=NULL, ...) {
     validate.samples(object)
+    if (!is.null(nsamples))
+        validate.positive.scalar(nsamples, "nsamples", int=TRUE)
 
     ## extract a random subset of the posterior samples
     if (!is.null(seed))
@@ -177,8 +179,6 @@ posterior_predict.hsstan <- function(object, newdata=NULL, nsamples=NULL,
     num.samples <- nsamples(object)
     samp <- sample(num.samples, min(num.samples, nsamples))
     nsamples <- length(samp)
-    if (nsamples == 0)
-        stop("'nsamples' must be a positive integer.")
 
     ## generate the posterior predictions
     mu <- posterior_linpred(object, newdata, transform=TRUE)[samp, , drop=FALSE]

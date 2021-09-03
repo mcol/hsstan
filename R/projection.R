@@ -203,6 +203,7 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
                     out.csv=NULL) {
     validate.hsstan(obj)
     validate.samples(obj)
+    validate.nonnegative.scalar(max.iters, "max.iters", int=TRUE)
 
     x <- xt <- validate.newdata(obj, obj$data)
     yt <- obj$data[[obj$model.terms$outcome]]
