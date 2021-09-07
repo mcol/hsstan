@@ -174,6 +174,18 @@ test_that("projsel from a submodel that includes all variables",
                  paste0("X", 1:P))
 })
 
+test_that("projsel for a model with few observations",
+{
+    SW({
+        hs.small <- hsstan(df[1:5, ], y.gauss ~ X2 + X3, pen,
+                           iter=iters,  chains=chains, refresh=0)
+        expect_message(sel <- projsel(hs.small),
+                      "Fully saturated model reached")
+    })
+    expect_equal(tail(sel$kl, 1),
+                 0)
+})
+
 test_that("projsel for a cross-validated object",
 {
     SW({
