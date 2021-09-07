@@ -333,7 +333,7 @@ validate.start.from <- function(obj, start.from) {
 #' @noRd
 validate.positive.scalar <- function(x, name, int=FALSE) {
     if (!is.numeric(x) || length(x) != 1 || is.na(x) || x <= 0 ||
-        (int && x != as.integer(x)))
+        (int && (x > .Machine$integer.max || x != as.integer(x))))
         stop(sprintf("'%s' must be a positive %s.", name,
                      ifelse(int, "integer", "scalar")), call.=FALSE)
 }
@@ -341,7 +341,7 @@ validate.positive.scalar <- function(x, name, int=FALSE) {
 #' @noRd
 validate.nonnegative.scalar <- function(x, name, int=FALSE) {
     if (!is.numeric(x) || length(x) != 1 || is.na(x) || x < 0 ||
-        (int && x != as.integer(x)))
+        (int && (x > .Machine$integer.max || x != as.integer(x))))
         stop(sprintf("'%s' must be a non-negative %s.", name,
                      ifelse(int, "integer", "scalar")), call.=FALSE)
 }

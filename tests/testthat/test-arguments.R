@@ -323,6 +323,7 @@ test_that("validate.positive.scalar",
 {
     expect_silent(validate.positive.scalar(1.3, "var"))
     expect_silent(validate.positive.scalar(1, "var", int=TRUE))
+    expect_silent(validate.positive.scalar(10000000000, "var"))
 
     expect_error(validate.positive.scalar("a", "var"),
                  "must be a positive scalar")
@@ -336,6 +337,8 @@ test_that("validate.positive.scalar",
                  "must be a positive scalar")
     expect_error(validate.positive.scalar(1.5, "var", int=TRUE),
                  "must be a positive integer")
+    expect_error(validate.positive.scalar(10000000000, "var", int=TRUE),
+                 "must be a positive integer")
 })
 
 test_that("validate.nonnegative.scalar",
@@ -344,6 +347,7 @@ test_that("validate.nonnegative.scalar",
     expect_silent(validate.nonnegative.scalar(1, "var", int=TRUE))
     expect_silent(validate.nonnegative.scalar(0, "var"))
     expect_silent(validate.nonnegative.scalar(0, "var", int=TRUE))
+    expect_silent(validate.nonnegative.scalar(10000000000, "var"))
 
     expect_error(validate.nonnegative.scalar("a", "var"),
                  "must be a non-negative scalar")
@@ -354,6 +358,8 @@ test_that("validate.nonnegative.scalar",
     expect_error(validate.nonnegative.scalar(-1, "var"),
                  "must be a non-negative scalar")
     expect_error(validate.nonnegative.scalar(1.5, "var", int=TRUE),
+                 "must be a non-negative integer")
+    expect_error(validate.nonnegative.scalar(10000000000, "var", int=TRUE),
                  "must be a non-negative integer")
 })
 
