@@ -11,6 +11,8 @@
   [rstantools issue #77](https://github.com/stan-dev/rstantools/issues/77)
   to make the base models run again correctly with the compilation changes
   introduced in `rstan` 2.21.
+- Add `RcppParallel` to Imports and LinkingTo, as future versions of
+  `rstan` require to link to the Intel TBB library.
 
 # hsstan 0.8 (29 June 2020)
 

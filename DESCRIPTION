@@ -33,6 +33,7 @@ Imports:
     parallel,
     pROC,
     Rcpp,
+    RcppParallel (>= 5.0.1),
     methods,
     rstan (>= 2.18.1),
     rstantools (>= 2.0.0),
@@ -42,6 +43,7 @@ LinkingTo:
     BH (>= 1.66.0.1),
     Rcpp (>= 0.12.15),
     RcppEigen (>= 0.3.3.4.0),
+    RcppParallel (>= 5.0.1),
     StanHeaders (>= 2.21.0),
     rstan (>= 2.18.1)
 Suggests:
