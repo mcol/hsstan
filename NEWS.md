@@ -7,6 +7,10 @@
 - Fix bug in `projsel()` if the number of observations in the dataset is
   smaller than both the number of available predictors and the maximum
   number of iterations in the selection procedure.
+- Add workaround for
+  [rstantools issue #77](https://github.com/stan-dev/rstantools/issues/77)
+  to make the base models run again correctly with the compilation changes
+  introduced in `rstan` 2.21.
 
 # hsstan 0.8 (29 June 2020)
 

@@ -137,7 +137,7 @@ hsstan <- function(x, covs.model, penalized=NULL, family=gaussian,
         call[[nm]] <- args[[nm]]
 
     ## choose the model to be fitted
-    model <- ifelse(length(penalized) == 0, "base", "hs")
+    model <- ifelse(length(penalized) == 0, "base0", "hs")
     if (family$family == "binomial") model <- paste0(model, "_logit")
 
     ## set or check adapt.delta
