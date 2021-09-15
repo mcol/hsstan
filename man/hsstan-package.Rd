@@ -25,26 +25,32 @@ Blackbourn et al. (2020)).
 B. Carpenter et al. (2017),
 Stan: a probabilistic programming language,
 \emph{Journal of Statistical Software}, 76 (1).
-\url{https://doi.org/10.18637/jss.v076.i01}
+\doi{10.18637/jss.v076.i01}
 
 J. Piironen and A. Vehtari (2017),
 Sparsity information and regularization in the horseshoe and other shrinkage
 priors, \emph{Electronic Journal of Statistics}, 11 (2), 5018-5051.
-\url{https://doi.org/10.1214/17-EJS1337SI}
+\doi{10.1214/17-EJS1337SI}
 
 J. Piironen, M. Paasiniemi and A. Vehtari (2020),
 Projective inference in high-dimensional problems: prediction and feature
 selection, \emph{Electronic Journal of Statistics}, 14 (1), 2155-2197.
-\url{https://doi.org/10.1214/20-EJS1711}
+\doi{10.1214/20-EJS1711}
 
 M. Colombo, E. Valo, S.J. McGurnaghan et al. (2019),
 Biomarkers associated with progression of renal disease in type 1 diabetes,
 \emph{Diabetologia}, 62 (9), 1616-1627.
-\url{https://doi.org/10.1007/s00125-019-4915-0}
+\doi{10.1007/s00125-019-4915-0}
 
 M. Colombo, S.J. McGurnaghan, L.A.K. Blackbourn et al. (2020),
 Comparison of serum and urinary biomarker panels with albumin creatinin
 ratio in the prediction of renal function decline in type 1 diabetes,
 \emph{Diabetologia}, 63 (4), 788-798.
-\url{https://doi.org/10.1007/s00125-019-05081-8}
+\doi{10.1007/s00125-019-05081-8}
+
+M. Colombo, A. Asadi Shehni, I. Thoma et al. (2021),
+Quantitative levels of serum N-glycans in type 1 diabetes and their
+association with kidney disease,
+\emph{Glycobiology}, 31 (5), 613-623.
+\doi{10.1093/glycob/cwaa106}
 }

@@ -33,10 +33,10 @@
 #' @source
 #' B. Efron, T. Hastie, I. Johnstone and R. Tibshirani (2004),
 #' Least angle regression, _The Annals of Statistics_, 32 (2), 407-499.
-#' \url{https://doi.org/10.1214/009053604000000067}
+#' \doi{10.1214/009053604000000067}
 #'
 #' The original dataset is available from
-#' \url{https://www.stanford.edu/~hastie/Papers/LARS/data64.txt}
+#' \url{https://web.stanford.edu/~hastie/Papers/LARS/data64.txt}
 #'
 #' @examples
 #' data(diabetes, package="hsstan")

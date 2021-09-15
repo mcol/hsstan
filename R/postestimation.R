@@ -367,7 +367,7 @@ waic.hsstan <- function(x, cores=getOption("mc.cores"), ...) {
 #' Andrew Gelman, Ben Goodrich, Jonah Gabry and Aki Vehtari (2019),
 #' R-squared for Bayesian regression models,
 #' _The American Statistician_, 73 (3), 307-309.
-#' \url{https://doi.org/10.1080/00031305.2018.1549100}
+#' \doi{10.1080/00031305.2018.1549100}
 #'
 #' Aki Vehtari, Andrew Gelman, Ben Goodrich and Jonah Gabry (2019),
 #' Bayesian R2 and LOO-R2.
