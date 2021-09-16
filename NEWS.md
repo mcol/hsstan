@@ -1,6 +1,4 @@
-# Current development version
-
-### Major Changes
+# hsstan 0.8.1 (16 September 2021)
 
 ### Smaller Changes and Bug Fixes
 
