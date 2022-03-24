@@ -4,6 +4,8 @@
 
 ### Smaller Changes and Bug Fixes
 
+- Add an option to `projsel()` to switch off the use of a score test for
+  logistic regression.
 
 # hsstan 0.8.1 (16 September 2021)
 

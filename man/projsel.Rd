@@ -4,7 +4,13 @@
 \alias{projsel}
 \title{Forward selection minimizing KL-divergence in projection}
 \usage{
-projsel(obj, max.iters = 30, start.from = NULL, out.csv = NULL)
+projsel(
+  obj,
+  max.iters = 30,
+  start.from = NULL,
+  scoretest.logistic = TRUE,
+  out.csv = NULL
+)
 }
 \arguments{
 \item{obj}{Object of class \code{hsstan}.}
@@ -16,6 +22,13 @@ after which the selection procedure should stop.}
 submodel. If \code{NULL} (default), selection starts from the set of
 unpenalized covariates if the model contains penalized predictors,
 otherwise selection starts from the intercept-only model.}
+
+\item{scoretest.logistic}{Whether a score test should be used when choosing
+the next predictor to enter a submodel. This applies only to
+logistic regression models, as in that case there is no closed-form
+solution. This is \code{TRUE} by default as it's much faster, but it may
+cause some non-monotonicity in the performance of the projected
+selection.}
 
 \item{out.csv}{If not \code{NULL}, the name of a CSV file to save the
 output to.}

@@ -4,7 +4,7 @@
 \alias{choose.next}
 \title{Next variable to enter the current submodel}
 \usage{
-choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
+choose.next(x, sigma2, fit, fitp, chosen, is.logistic, scoretest.logistic)
 }
 \arguments{
 \item{x}{Design matrix.}
@@ -18,6 +18,9 @@ choose.next(x, sigma2, fit, fitp, chosen, is.logistic)
 \item{chosen}{Vector of indices of the columns of \code{x} in the current submodel.}
 
 \item{is.logistic}{Set to \code{TRUE} for a logistic regression model.}
+
+\item{scoretest.logistic}{Whether a score test should be used for logistic
+regression models.}
 }
 \description{
 Return the index of the variable that should be added to the current model

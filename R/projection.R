@@ -1,6 +1,6 @@
 ##=============================================================================
 ##
-## Copyright (c) 2017-2021 Marco Colombo and Paul McKeigue
+## Copyright (c) 2017-2022 Marco Colombo and Paul McKeigue
 ##
 ## Parts of the code are based on https://github.com/jpiironen/rstan-varsel
 ## Portions copyright (c) 2015-2017 Juho Piironen
@@ -93,14 +93,17 @@ lm_proj <- function(x, fit, sigma2, indproj, is.logistic) {
 #' @param fitp Matrix of fitted values for the projected model.
 #' @param chosen Vector of indices of the columns of `x` in the current submodel.
 #' @param is.logistic Set to `TRUE` for a logistic regression model.
+#' @param scoretest.logistic Whether a score test should be used for logistic
+#'        regression models.
 #'
 #' @keywords internal
-choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic) {
+choose.next <- function(x, sigma2, fit, fitp, chosen, is.logistic,
+                        scoretest.logistic) {
     notchosen <- setdiff(1:ncol(x), chosen)
     par.fun <- function(idx) {
         lm_proj(x, fit, sigma2, sort(c(chosen, notchosen[idx])), FALSE)$kl
     }
-    if (!is.logistic) {
+    if (!(is.logistic && scoretest.logistic)) {
         if (.Platform$OS.type != "windows") {
             kl <- parallel::mclapply(X=1:length(notchosen), mc.preschedule=TRUE,
                                      FUN=par.fun)
@@ -170,6 +173,12 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #'        submodel. If `NULL` (default), selection starts from the set of
 #'        unpenalized covariates if the model contains penalized predictors,
 #'        otherwise selection starts from the intercept-only model.
+#' @param scoretest.logistic Whether a score test should be used when choosing
+#'        the next predictor to enter a submodel. This applies only to
+#'        logistic regression models, as in that case there is no closed-form
+#'        solution. This is `TRUE` by default as it's much faster, but it may
+#'        cause some non-monotonicity in the performance of the projected
+#'        selection.
 #' @param out.csv If not `NULL`, the name of a CSV file to save the
 #'        output to.
 #'
@@ -200,6 +209,7 @@ elpd <- function(yt, eta, sigma2, logistic) {
 #' @importFrom utils write.csv
 #' @export
 projsel <- function(obj, max.iters=30, start.from=NULL,
+                    scoretest.logistic=TRUE,
                     out.csv=NULL) {
     validate.hsstan(obj)
     validate.samples(obj)
@@ -242,7 +252,8 @@ projsel <- function(obj, max.iters=30, start.from=NULL,
 
     ## add variables one at a time
     for (iter in seq_len(K)) {
-        sel.idx <- choose.next(x, sigma2, fit, sub$fit, chosen, is.logistic)
+        sel.idx <- choose.next(x, sigma2, fit, sub$fit, chosen,
+                               is.logistic, scoretest.logistic)
         chosen <- c(chosen, sel.idx)
 
         ## evaluate current submodel according to projected parameters
