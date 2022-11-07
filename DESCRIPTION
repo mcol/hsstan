@@ -33,7 +33,6 @@ Imports:
     parallel,
     pROC,
     Rcpp,
-    RcppParallel (>= 5.0.1),
     methods,
     rstan (>= 2.18.1),
     rstantools (>= 2.0.0),
@@ -52,5 +51,5 @@ ByteCompile: yes
 NeedsCompilation: yes
 SystemRequirements: GNU make
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Roxygen: list(markdown=TRUE)
