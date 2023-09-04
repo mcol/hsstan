@@ -26,7 +26,7 @@ data {
   matrix[N, P] X;
 
   // binary response variable
-  int<lower=0, upper=1> y[N];
+  array[N] int<lower=0, upper=1> y;
 
   // prior standard deviation for the unpenalised variables
   real<lower=0> scale_u;
