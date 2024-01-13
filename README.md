@@ -138,4 +138,4 @@ print(sel.biom, digits=4)
   Biomarkers associated with progression of renal disease in type 1 diabetes,
   [_Diabetologia_ (2019) 62 (9): 1616-1627](https://doi.org/10.1007/s00125-019-4915-0).
 
-[mcol]: https://pm2.phs.ed.ac.uk/~mcolombo/
+[mcol]: https://github.com/mcol

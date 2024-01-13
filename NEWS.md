@@ -192,5 +192,5 @@
 
 - First release.
 
-[mcol]:   https://pm2.phs.ed.ac.uk/~mcolombo/
-[athina]: http://www.homepages.ed.ac.uk/aspiliop/
+[mcol]:   https://github.com/mcol
+[athina]: https://precmed.cphs.mvm.ed.ac.uk/athina/
