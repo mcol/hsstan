@@ -4,6 +4,8 @@
 
 ### Smaller Changes and Bug Fixes
 
+- Update deprecated syntax for future rstan compatibility (thanks to
+  Andrew Johnson for the patch).
 
 # hsstan 0.8.1 (16 September 2021)
 
